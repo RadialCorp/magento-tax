@@ -1,0 +1,14 @@
+{
+    "name": "radial/test-fraud-risk",
+    "require": {
+        "radial/magento-fraud-risk": "@dev",
+        "magento-hackathon/magento-composer-installer": "^3"
+    },
+    "require-dev": {
+        "ecomdev/ecomdev_phpunit": "dev-dev#9742b6a as 0.3.x-dev",
+        "mikey179/vfsStream": "~1.5"
+    },
+    "extra": {
+        "magento-root-dir": "."
+    }
+}

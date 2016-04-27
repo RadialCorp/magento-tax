@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ruleset name="Mage1 Psr2">
+    <description>PSR2 standards modified so they can be used in Magento 1.</description>
+    <rule ref="PSR2">
+        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
+        <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps"/>
+    </rule>
+    <exclude-pattern>*/braintree.js</exclude-pattern>
+</ruleset>

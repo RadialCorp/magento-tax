@@ -1,0 +1,16 @@
+machine:
+    php:
+        version: 5.4.37
+dependencies:
+    cache_directories:
+        - ../.composer
+    pre:
+        - sed -i 's/^;//' ~/.phpenv/versions/$(phpenv global)/etc/conf.d/xdebug.ini
+        - echo "memory_limit = 1G" > ~/.phpenv/versions/$(phpenv global)/etc/conf.d/memory.ini
+        - circle-ci/magento-install
+        - mkdir ../build && rsync -a ../magento/ ../build
+    override:
+        - circle-ci/setup
+test:
+    override:
+        - cd ../build && phpunit --coverage-html "$CIRCLE_ARTIFACTS/phpunit/coverage/" --log-junit "$CIRCLE_TEST_REPORTS/phpunit/magento-tax.xml"

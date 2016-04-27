@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2013-2014 eBay Enterprise, Inc.
+
+NOTICE OF LICENSE
+
+This source file is subject to the Open Software License (OSL 3.0)
+that is bundled with this package in the file LICENSE.md.
+It is also available through the world-wide-web at this URL:
+http://opensource.org/licenses/osl-3.0.php
+
+@copyright   Copyright (c) 2013-2014 eBay Enterprise, Inc. (http://www.ebayenterprise.com/)
+@license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+-->
+<phpunit
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true"
+    stopOnError="false"
+    stopOnFailure="false"
+    stopOnIncomplete="false"
+    stopOnSkipped="false"
+    strict="true"
+    verbose="true"
+    timeoutForSmallTests="10"
+    bootstrap="app/code/community/EcomDev/PHPUnit/bootstrap.php">
+    <listeners>
+        <listener file="app/code/community/EcomDev/PHPUnit/Test/Listener.php" class="EcomDev_PHPUnit_Test_Listener"/>
+    </listeners>
+    <testsuite name="Magento Test Suite">
+        <file>app/code/community/EcomDev/PHPUnit/Test/Suite.php</file>
+    </testsuite>
+    <groups>
+        <include>
+            <group>EbayEnterprise_Tax</group>
+        </include>
+    </groups>
+    <filter>
+        <whitelist>
+            <!-- Report coverage only for this extension. -->
+            <directory suffix=".php">app/code/community/EbayEnterprise/Tax</directory>
+            <exclude>
+                <directory suffix=".php">app/code/community/EbayEnterprise/*/Test</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>

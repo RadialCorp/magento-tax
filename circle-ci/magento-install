@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+if [[ -f ../magento/app/etc/local.xml ]]; then
+    echo 'Magento 1.9.2.1 appears already to be installed.'
+    exit 0
+fi
+
+echo 'Installing Magento 1.9.2.1'
+mkdir -p ../magento
+cd ../magento
+curl -LSs 'https://github.com/OpenMage/magento-mirror/archive/1.9.2.1.tar.gz' | tar --strip-components=1 -xzf-
+php install.php \
+    --admin_email admin@example.com \
+    --admin_firstname ad \
+    --admin_lastname min \
+    --admin_password testing123 \
+    --admin_username admin \
+    --db_host 127.0.0.1 \
+    --db_name circle_test \
+    --db_pass '' \
+    --db_user ubuntu \
+    --default_currency USD \
+    --license_agreement_accepted yes \
+    --locale en_US \
+    --secure_base_url 'http://example.com/' \
+    --skip_url_validation yes \
+    --timezone America/New_York \
+    --url 'http://example.com/' \
+    --use_rewrites yes \
+    --use_secure no \
+    --use_secure_admin no
+
