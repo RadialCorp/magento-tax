@@ -2,3 +2,4 @@
 src/app/code/community/EbayEnterprise/* app/code/community/EbayEnterprise/
 src/app/etc/*.xml.sample app/etc/
 src/app/etc/modules/*.xml app/etc/modules/
+src/app/locale/en_US/EbayEnterprise_Tax.csv app/locale/en_US/EbayEnterprise_Tax.csv
