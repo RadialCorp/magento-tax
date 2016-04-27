@@ -1,7 +1,7 @@
 {
-    "name": "radial/test-fraud-risk",
+    "name": "radial/test-tax",
     "require": {
-        "radial/magento-fraud-risk": "@dev",
+        "radial/magento-tax": "@dev",
         "magento-hackathon/magento-composer-installer": "^3"
     },
     "require-dev": {
