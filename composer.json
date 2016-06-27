@@ -13,7 +13,7 @@
     "require": {
         "php": ">=5.4.0",
         "ext-bcmath": "*",
-        "radial/magento-core" : "^1.0"
+        "radial/magento-core" : "~2.0.0"
     },
     "require-dev": {
         "ecomdev/ecomdev_phpunit": ">=0.3",
