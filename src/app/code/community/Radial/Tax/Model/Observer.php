@@ -19,11 +19,11 @@ class Radial_Tax_Model_Observer
     protected static $lockRecollectTotals = false;
     /** @var Radial_Tax_Model_Collector */
     protected $taxCollector;
-    /** @var Radial_Eb2cCore_Model_Session */
+    /** @var Radial_Core_Model_Session */
     protected $coreSession;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $logContext;
 
     /**
@@ -49,15 +49,15 @@ class Radial_Tax_Model_Observer
      *
      * @param Radial_Tax_Model_Collector
      * @param Radial_Tax_Model_Session
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @return array
      */
     protected function checkTypes(
         Radial_Tax_Model_Collector $taxCollector,
-        Radial_Eb2cCore_Model_Session $coreSession = null,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext
+        Radial_Core_Model_Session $coreSession = null,
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext
     ) {
         return func_get_args();
     }
@@ -81,12 +81,12 @@ class Radial_Tax_Model_Observer
      * will not be set during construction to minimize the risk of initializing
      * the session instance before the user session has been started.
      *
-     * @return Radial_Eb2cCore_Model_Session
+     * @return Radial_Core_Model_Session
      */
     protected function getCoreSession()
     {
         if (!$this->coreSession) {
-            $this->coreSession = Mage::getSingleton('eb2ccore/session');
+            $this->coreSession = Mage::getSingleton('radial_core/session');
         }
         return $this->coreSession;
     }
@@ -202,7 +202,7 @@ class Radial_Tax_Model_Observer
     /**
      * Recollect quote totals to update amounts based on newly received tax
      * data. This collect totals call is expected to happen recursively within
-     * collect totals. The flags in eb2ccore/session are expected to prevent
+     * collect totals. The flags in radial_core/session are expected to prevent
      * going beyond a single recursive call to collect totals. As an additional
      * precaution, a lock is also used to prevent unexpected recursion.
      *

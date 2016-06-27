@@ -24,8 +24,8 @@ The tax service also requires the shipping origin to properly estimate taxes. To
 
 ### Magento Modules
 
-- Radial_Eb2cCore
-- Radial_MageLog
+- Radial_Core
+- EbayEnterprise_MageLog
 - Mage_Catalog
 - Mage_Customer
 - Mage_Sales

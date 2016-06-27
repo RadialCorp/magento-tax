@@ -24,7 +24,7 @@ use eBayEnterprise\RetailOrderManagement\Payload\Exception\InvalidPayload;
  * longer exists, but instead test SDK related method on
  * Radial_Tax_Helper_Data
  */
-class Radial_Tax_Test_Helper_SdkTest extends Radial_Eb2cCore_Test_Base
+class Radial_Tax_Test_Helper_SdkTest extends Radial_Core_Test_Base
 {
     /** @var eBayEnterprise\RetailOrderManagement\Api\IBidirectionalApi */
     protected $_api;
@@ -34,11 +34,11 @@ class Radial_Tax_Test_Helper_SdkTest extends Radial_Eb2cCore_Test_Base
     protected $_completeRequestBody;
     /** @var eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxDutyFeeQuoteReply */
     protected $_responseBody;
-    /** @var Radial_Eb2cCore_Helper_Data */
+    /** @var Radial_Core_Helper_Data */
     protected $_coreHelper;
     /** @var Radial_Tax_Helper_Data */
     protected $_taxHelper;
-    /** @var Radial_Eb2cCore_Model_Config_Registry */
+    /** @var Radial_Core_Model_Config_Registry */
     protected $_taxConfig;
     /** @var string Name of the API service for taxes. Mocked config value. */
     protected $_apiService = 'taxes';
@@ -80,7 +80,7 @@ class Radial_Tax_Test_Helper_SdkTest extends Radial_Eb2cCore_Test_Base
             'eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxDutyFeeQuoteReply'
         );
 
-        $this->_coreHelper = $this->getHelperMock('radial_eb2ccore', ['getSdkApi']);
+        $this->_coreHelper = $this->getHelperMock('radial_radial_core', ['getSdkApi']);
 
         $this->_taxConfig = $this->buildCoreConfigRegistry([
             'apiService' => $this->_apiService,

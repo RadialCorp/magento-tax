@@ -24,9 +24,9 @@ class Radial_Tax_Model_Response_Parser_Quote extends Radial_Tax_Model_Response_P
     protected $_quote;
     /** @var Radial_Tax_Helper_Factory */
     protected $_taxFactory;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $_logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
 
     /**
@@ -35,8 +35,8 @@ class Radial_Tax_Model_Response_Parser_Quote extends Radial_Tax_Model_Response_P
      *                         - quote => Mage_Sales_Model_Quote
      *                         May contain key/value for:
      *                         - tax_factory => Radial_Tax_Helper_Factory
-     *                         - logger => Radial_MageLog_Helper_Data
-     *                         - log_context => Radial_MageLog_Helper_Context
+     *                         - logger => EbayEnterprise_MageLog_Helper_Data
+     *                         - log_context => EbayEnterprise_MageLog_Helper_Context
      */
     public function __construct(array $args)
     {
@@ -61,16 +61,16 @@ class Radial_Tax_Model_Response_Parser_Quote extends Radial_Tax_Model_Response_P
      * @param Mage_Sales_Model_Quote
      * @param ITaxDutyFeeQuoteReply
      * @param Radial_Tax_Helper_Factory
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @return array
      */
     protected function _checkTypes(
         Mage_Sales_Model_Quote $quote,
         ITaxDutyFeeQuoteReply $taxResponse,
         Radial_Tax_Helper_Factory $taxFactory,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext
     ) {
         return [$quote, $taxResponse, $taxFactory, $logger, $logContext];
     }

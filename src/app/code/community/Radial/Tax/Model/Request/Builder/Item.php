@@ -33,13 +33,13 @@ class Radial_Tax_Model_Request_Builder_Item
     protected $_taxHelper;
     /** @var Radial_Tax_Helper_Payload */
     protected $_payloadHelper;
-    /** @var Radial_Eb2cCore_Model_Config_Registry */
+    /** @var Radial_Core_Model_Config_Registry */
     protected $_taxConfig;
-    /** @var Radial_Eb2cCore_Helper_Discount */
+    /** @var Radial_Core_Helper_Discount */
     protected $_discountHelper;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $_logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
 
     /**
@@ -50,10 +50,10 @@ class Radial_Tax_Model_Request_Builder_Item
      *                         May contain key/value for:
      *                         - tax_helper => Radial_Tax_Helper_Data
      *                         - payload_helper => Radial_Tax_Helper_Payload
-     *                         - tax_config => Radial_Eb2cCore_Model_Config_Registry
-     *                         - discount_helper => Radial_Eb2cCore_Helper_Discount
-     *                         - logger => Radial_MageLog_Helper_Data
-     *                         - log_context => Radial_MageLog_Helper_Context
+     *                         - tax_config => Radial_Core_Model_Config_Registry
+     *                         - discount_helper => Radial_Core_Helper_Discount
+     *                         - logger => EbayEnterprise_MageLog_Helper_Data
+     *                         - log_context => EbayEnterprise_MageLog_Helper_Context
      */
     public function __construct(array $args)
     {
@@ -74,7 +74,7 @@ class Radial_Tax_Model_Request_Builder_Item
             $this->_nullCoalesce($args, 'tax_helper', Mage::helper('radial_tax')),
             $this->_nullCoalesce($args, 'payload_helper', Mage::helper('radial_tax/payload')),
             $this->_nullCoalesce($args, 'tax_config', Mage::helper('radial_tax')->getConfigModel()),
-            $this->_nullCoalesce($args, 'discount_helper', Mage::helper('eb2ccore/discount')),
+            $this->_nullCoalesce($args, 'discount_helper', Mage::helper('radial_core/discount')),
             $this->_nullCoalesce($args, 'logger', Mage::helper('ebayenterprise_magelog')),
             $this->_nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context'))
         );
@@ -91,10 +91,10 @@ class Radial_Tax_Model_Request_Builder_Item
      * @param Mage_Sales_Model_Quote_Item_Abstract
      * @param Radial_Tax_Helper_Data
      * @param Radial_Tax_Helper_Payload
-     * @param Radial_Eb2cCore_Model_Config_Registry
-     * @param Radial_Eb2cCore_Helper_Discount
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param Radial_Core_Model_Config_Registry
+     * @param Radial_Core_Helper_Discount
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @return array
      */
     protected function _checkTypes(
@@ -103,10 +103,10 @@ class Radial_Tax_Model_Request_Builder_Item
         Mage_Sales_Model_Quote_Item_Abstract $item,
         Radial_Tax_Helper_Data $taxHelper,
         Radial_Tax_Helper_Payload $payloadHelper,
-        Radial_Eb2cCore_Model_Config_Registry $taxConfig,
-        Radial_Eb2cCore_Helper_Discount $discountHelper,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext
+        Radial_Core_Model_Config_Registry $taxConfig,
+        Radial_Core_Helper_Discount $discountHelper,
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext
     ) {
         return [
             $orderItemIterable,
@@ -280,7 +280,7 @@ class Radial_Tax_Model_Request_Builder_Item
     /**
      * Add discounts for shipping discount amount.
      *
-     * Does not use the eb2ccore/discount helper as shipping discount
+     * Does not use the radial_core/discount helper as shipping discount
      * data may not have been collected to be used by the helper - both
      * use the same event so order between the two cannot be guarantted
      * without introducing a hard dependency. In this case, however,

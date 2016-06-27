@@ -19,25 +19,25 @@ use eBayEnterprise\RetailOrderManagement\Api\Exception\UnsupportedOperation;
 use eBayEnterprise\RetailOrderManagement\Api\IBidirectionalApi;
 use eBayEnterprise\RetailOrderManagement\Payload\Exception\InvalidPayload;
 
-class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial_Eb2cCore_Helper_Interface
+class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial_Core_Helper_Interface
 {
     const TAX_FAILED_MESSAGE = 'Radial_Tax_Request_Failed';
 
-    /** @var Radial_Eb2cCore_Helper_Data */
+    /** @var Radial_Core_Helper_Data */
     protected $coreHelper;
     /** @var Radial_Tax_Helper_Factory */
     protected $taxFactory;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $logContext;
 
     /**
      * @param array $args May contain key/value for:
-     * - core_helper    => Radial_Eb2cCore_Helper_Data
+     * - core_helper    => Radial_Core_Helper_Data
      * - tax_factory    => Radial_Tax_Helper_Factory
-     * - logger         => Radial_MageLog_Helper_Data
-     * - log_context    => Radial_MageLog_Helper_Context
+     * - logger         => EbayEnterprise_MageLog_Helper_Data
+     * - log_context    => EbayEnterprise_MageLog_Helper_Context
      */
     public function __construct(array $args = [])
     {
@@ -47,7 +47,7 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
             $this->logger,
             $this->logContext
         ) = $this->checkTypes(
-            $this->nullCoalesce($args, 'core_helper', Mage::helper('eb2ccore')),
+            $this->nullCoalesce($args, 'core_helper', Mage::helper('radial_core')),
             $this->nullCoalesce($args, 'tax_factory', Mage::helper('radial_tax/factory')),
             $this->nullCoalesce($args, 'logger', Mage::helper('ebayenterprise_magelog')),
             $this->nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context'))
@@ -57,17 +57,17 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
     /**
      * Enforce type checks on constructor init params.
      *
-     * @param Radial_Eb2cCore_Helper_Data
+     * @param Radial_Core_Helper_Data
      * @param Radial_Tax_Helper_Factory
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @return array
      */
     protected function checkTypes(
-        Radial_Eb2cCore_Helper_Data $coreHelper,
+        Radial_Core_Helper_Data $coreHelper,
         Radial_Tax_Helper_Factory $taxFactory,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext
     ) {
         return func_get_args();
     }
@@ -86,13 +86,13 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
     }
 
     /**
-     * @see Radial_Eb2cCore_Helper_Interface::getConfigModel
+     * @see Radial_Core_Helper_Interface::getConfigModel
      * @param mixed
-     * @return Radial_Eb2cCore_Model_Config_Registry
+     * @return Radial_Core_Model_Config_Registry
      */
     public function getConfigModel($store = null)
     {
-        return Mage::getModel('eb2ccore/config_registry')
+        return Mage::getModel('radial_core/config_registry')
             ->setStore($store)
             ->addConfigModel(Mage::getSingleton('radial_tax/config'));
     }

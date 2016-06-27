@@ -28,9 +28,9 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
     protected $_addressId;
     /** @var Radial_Tax_Helper_Factory */
     protected $_taxFactory;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $_logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
 
     /**
@@ -39,8 +39,8 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
      *                         - address => Mage_Sales_Model_Quote_Address
      *                         May contain key/value for:
      *                         - tax_factory => Radial_Tax_Helper_Factory
-     *                         - logger => Radial_MageLog_Helper_Data
-     *                         - log_context => Radial_MageLog_Helper_Context
+     *                         - logger => EbayEnterprise_MageLog_Helper_Data
+     *                         - log_context => EbayEnterprise_MageLog_Helper_Context
      */
     public function __construct(array $args)
     {
@@ -67,16 +67,16 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
      * @param ITaxedShipGroup
      * @param Mage_Sales_Model_Quote_Address
      * @param Radial_Tax_Helper_Factory
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @return array
      */
     protected function _checkTypes(
         ITaxedShipGroup $shipGroups,
         Mage_Sales_Model_Quote_Address $address,
         Radial_Tax_Helper_Factory $taxFactory,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext
     ) {
         return [$shipGroups, $address, $taxFactory, $logger, $logContext];
     }

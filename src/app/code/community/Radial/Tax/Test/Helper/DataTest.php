@@ -17,7 +17,7 @@ class Radial_Tax_Test_Helper_DataTest extends EcomDev_PHPUnit_Test_Case
 {
     /** @var Radial_Tax_Helper_Data */
     protected $helper;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $origLogContext;
 
     public function setUp()

@@ -23,7 +23,7 @@ class Radial_Tax_Model_Request_Builder_Quote
     protected $_quote;
     /** @var Radial_Tax_Helper_Factory */
     protected $_taxFactory;
-    /** @var Radial_Eb2cCore_Model_Config_Registry */
+    /** @var Radial_Core_Model_Config_Registry */
     protected $_taxConfig;
 
     /**
@@ -32,7 +32,7 @@ class Radial_Tax_Model_Request_Builder_Quote
      *                         - quote => Mage_Sales_Model_Quote
      *                         May contain key/value for:
      *                         - tax_factory => Radial_Tax_Helper_Factory
-     *                         - tax_config => Radial_Eb2cCore_Model_Config_Registry
+     *                         - tax_config => Radial_Core_Model_Config_Registry
      */
     public function __construct(array $args)
     {
@@ -62,7 +62,7 @@ class Radial_Tax_Model_Request_Builder_Quote
         Mage_Sales_Model_Quote $quote,
         ITaxDutyFeeQuoteRequest $payload,
         Radial_Tax_Helper_Factory $taxFactory,
-        Radial_Eb2cCore_Model_Config_Registry $config
+        Radial_Core_Model_Config_Registry $config
     ) {
         return [$quote, $payload, $taxFactory, $config];
     }

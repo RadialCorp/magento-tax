@@ -16,7 +16,7 @@
 /**
  * Configuration model to be registered with the eb2c core config helper.
  */
-class Radial_Tax_Model_Config extends Radial_Eb2cCore_Model_Config_Abstract
+class Radial_Tax_Model_Config extends Radial_Core_Model_Config_Abstract
 {
     protected $_configPaths = array(
         'admin_origin_city' => 'radial_tax/admin_origin/city',

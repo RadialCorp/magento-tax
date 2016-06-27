@@ -36,11 +36,11 @@ class Radial_Tax_Model_Order_Create_Orderitem
     protected $_fees;
     /** @var IOrderItem */
     protected $_orderItemPayload;
-    /** @var EbayEnterpise_Eb2cCore_Model_Config_Registry */
+    /** @var EbayEnterpise_Core_Model_Config_Registry */
     protected $_taxConfig;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $_logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
     /** @var array */
     protected $_taxRecordsBySource = [];
@@ -50,10 +50,10 @@ class Radial_Tax_Model_Order_Create_Orderitem
      *                         - tax_records => Radial_Tax_Model_Record[]
      *                         - order_item_payload => eBayEnterprise\RetailOrderManagement\Payload\Order\IOrderItem
      *                         May contain key/values for:
-     *                         - logger => Radial_MageLog_Helper_Data
-     *                         - log_context => Radial_MageLog_Helper_Context
+     *                         - logger => EbayEnterprise_MageLog_Helper_Data
+     *                         - log_context => EbayEnterprise_MageLog_Helper_Context
      *                         - payload_helper => Radial_Tax_Helper_Payload
-     *                         - tax_config => Radial_Eb2cCore_Model_Config_Registry
+     *                         - tax_config => Radial_Core_Model_Config_Registry
      *                         - fees => Radial_Tax_Model_Fee[]
      *                         - duty => Radial_Tax_Model_Duty
      */
@@ -91,10 +91,10 @@ class Radial_Tax_Model_Order_Create_Orderitem
      * @param Mage_Sales_Model_Order_Item
      * @param Radial_Tax_Model_Record[]
      * @param IOrderItem
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @param Radial_Tax_Helper_Payload
-     * @param Radial_Eb2cCore_Model_Config_Registry
+     * @param Radial_Core_Model_Config_Registry
      * @param Radial_Tax_Model_Fee[]
      * @param Radial_Tax_Model_Duty|null
      * @return array
@@ -103,10 +103,10 @@ class Radial_Tax_Model_Order_Create_Orderitem
         Mage_Sales_Model_Order_Item $item,
         array $taxRecords,
         IOrderItem $orderItemPayload,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext,
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext,
         Radial_Tax_Helper_Payload $payloadHelper,
-        Radial_Eb2cCore_Model_Config_Registry $taxConfig,
+        Radial_Core_Model_Config_Registry $taxConfig,
         array $fees = [],
         Radial_Tax_Model_Duty $duty = null
     ) {

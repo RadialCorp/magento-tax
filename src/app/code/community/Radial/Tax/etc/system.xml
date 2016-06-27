@@ -14,7 +14,7 @@ http://opensource.org/licenses/osl-3.0.php
 -->
 <config>
     <sections>
-        <eb2ccore translate="label" module="radial_tax">
+        <radial_core translate="label" module="radial_tax">
             <groups>
                 <radial_tax translate="label">
                     <label>Tax Admin Origin</label>
@@ -100,6 +100,6 @@ http://opensource.org/licenses/osl-3.0.php
                     </fields>
                 </radial_tax>
             </groups>
-        </eb2ccore>
+        </radial_core>
     </sections>
 </config>

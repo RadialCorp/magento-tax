@@ -36,9 +36,9 @@ class Radial_Tax_Model_Request_Builder_Address
     protected $_payloadHelper;
     /** @var Radial_Tax_Helper_Factory */
     protected $_taxFactory;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $_logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
 
     /**
@@ -50,8 +50,8 @@ class Radial_Tax_Model_Request_Builder_Address
      *    - selection_helper => Radial_Tax_Helper_Item_Selection
      *    - payload_helper => Radial_Tax_Helper_Payload
      *    - tax_factory => Radial_Tax_Helper_Factory
-     *    - logger => Radial_MageLog_Helper_Data
-     *    - log_context => Radial_MageLog_Helper_Context
+     *    - logger => EbayEnterprise_MageLog_Helper_Data
+     *    - log_context => EbayEnterprise_MageLog_Helper_Context
      */
     public function __construct(array $args)
     {
@@ -86,8 +86,8 @@ class Radial_Tax_Model_Request_Builder_Address
      * @param Radial_Tax_Helper_Item_Selection
      * @param Radial_Tax_Helper_Payload
      * @param Radial_Tax_Helper_Factory
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @return array
      */
     protected function _checkTypes(
@@ -97,8 +97,8 @@ class Radial_Tax_Model_Request_Builder_Address
         Radial_Tax_Helper_Item_Selection $selectionHelper,
         Radial_Tax_Helper_Payload $payloadHelper,
         Radial_Tax_Helper_Factory $taxFactory,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext
     ) {
         return func_get_args();
     }

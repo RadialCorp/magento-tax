@@ -36,7 +36,7 @@ class Radial_Tax_Test_Model_ObserverTest extends EcomDev_PHPUnit_Test_Case
             ->method('getMetaData')
             ->will($this->returnValue([]));
 
-        $this->coreSession = $this->getModelMockBuilder('eb2ccore/session')
+        $this->coreSession = $this->getModelMockBuilder('radial_core/session')
             ->disableOriginalConstructor()
             ->setMethods(['isTaxUpdateRequired', 'updateWithQuote', 'resetTaxUpdateRequired'])
             ->getMock();
@@ -58,7 +58,7 @@ class Radial_Tax_Test_Model_ObserverTest extends EcomDev_PHPUnit_Test_Case
      */
     public function testHandleSalesQuoteCollectTotalsAfterSuccess()
     {
-        // Eb2cCore_Session Interactions
+        // Core_Session Interactions
         // Tax update required flag should be checked before doing anything.
         // Should only collect new taxes when true.
         $this->coreSession->expects($this->any())

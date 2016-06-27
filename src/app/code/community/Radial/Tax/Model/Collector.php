@@ -20,9 +20,9 @@ class Radial_Tax_Model_Collector
 {
     /** @var Radial_Tax_Helper_Data */
     protected $_taxHelper;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $_logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
     /** @var Radial_Tax_Model_Session */
     protected $_taxSession;
@@ -30,8 +30,8 @@ class Radial_Tax_Model_Collector
     /**
      * @param array May include keys/value pairs:
      *                  - tax_helper => Radial_Tax_Helper_Data
-     *                  - logger => Radial_MageLog_Helper_Data
-     *                  - log_context => Radial_MageLog_Helper_Context
+     *                  - logger => EbayEnterprise_MageLog_Helper_Data
+     *                  - log_context => EbayEnterprise_MageLog_Helper_Context
      *                  - tax_session => Radial_Tax_Model_Session
      */
     public function __construct(array $args = [])
@@ -53,15 +53,15 @@ class Radial_Tax_Model_Collector
      * Enforce type checks on construct args array.
      *
      * @param Radial_Tax_Helper_Data
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @param Radial_Tax_Model_Session
      * @return array
      */
     protected function _checkTypes(
         Radial_Tax_Helper_Data $taxHelper,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext,
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext,
         Radial_Tax_Model_Session $taxSession = null
     ) {
         return func_get_args();

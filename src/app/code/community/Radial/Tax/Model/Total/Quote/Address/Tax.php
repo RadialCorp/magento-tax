@@ -27,17 +27,17 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
     protected $_taxCollector;
     /** @var Radial_Tax_Helper_Data */
     protected $_helper;
-    /** @var Radial_MageLog_Helper_Data */
+    /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $_logger;
-    /** @var Radial_MageLog_Helper_Context */
+    /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
 
     /**
      * @param array $args May contain key/value for:
      *                         - helper => Radial_Tax_Helper_Data
      *                         - tax_collector => Radial_Tax_Model_Collector
-     *                         - logger => Radial_MageLog_Helper_Data
-     *                         - log_context => Radial_MageLog_Helper_Context
+     *                         - logger => EbayEnterprise_MageLog_Helper_Data
+     *                         - log_context => EbayEnterprise_MageLog_Helper_Context
      */
     public function __construct(array $args = [])
     {
@@ -59,15 +59,15 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
      *
      * @param Radial_Tax_Helper_Data
      * @param Radial_Tax_Model_Collector
-     * @param Radial_MageLog_Helper_Data
-     * @param Radial_MageLog_Helper_Context
+     * @param EbayEnterprise_MageLog_Helper_Data
+     * @param EbayEnterprise_MageLog_Helper_Context
      * @return array
      */
     protected function _checkTypes(
         Radial_Tax_Helper_Data $helper,
         Radial_Tax_Model_Collector $taxCollector,
-        Radial_MageLog_Helper_Data $logger,
-        Radial_MageLog_Helper_Context $logContext
+        EbayEnterprise_MageLog_Helper_Data $logger,
+        EbayEnterprise_MageLog_Helper_Context $logContext
     ) {
         return [
             $helper,
