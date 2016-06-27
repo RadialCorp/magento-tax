@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2013-2016 Radial Commerce Inc.
+
+NOTICE OF LICENSE
+
+This source file is subject to the Open Software License (OSL 3.0)
+that is bundled with this package in the file LICENSE.md.
+It is also available through the world-wide-web at this URL:
+http://opensource.org/licenses/osl-3.0.php
+
+@copyright   Copyright (c) 2013-2016 Radial Commerce Inc. (http://www.radial.com/)
+@license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+-->
+<config>
+    <sections>
+        <eb2ccore translate="label" module="radial_tax">
+            <groups>
+                <radial_tax translate="label">
+                    <label>Tax Admin Origin</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>700</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <admin_origin_line1 translate="label">
+                            <label>Line1</label>
+                            <config_path>radial_tax/admin_origin/line1</config_path>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </admin_origin_line1>
+                        <admin_origin_line2 translate="label">
+                            <label>Line2</label>
+                            <config_path>radial_tax/admin_origin/line2</config_path>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </admin_origin_line2>
+                        <admin_origin_line3 translate="label">
+                            <label>Line3</label>
+                            <config_path>radial_tax/admin_origin/line3</config_path>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </admin_origin_line3>
+                        <admin_origin_line4 translate="label">
+                            <label>Line4</label>
+                            <config_path>radial_tax/admin_origin/line4</config_path>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </admin_origin_line4>
+                        <admin_origin_city translate="label">
+                            <label>City</label>
+                            <config_path>radial_tax/admin_origin/city</config_path>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </admin_origin_city>
+                        <admin_origin_main_division translate="label">
+                            <label>State Code</label>
+                            <config_path>radial_tax/admin_origin/main_division</config_path>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </admin_origin_main_division>
+                        <admin_origin_country_code translate="label">
+                            <label>Country Code</label>
+                            <config_path>radial_tax/admin_origin/country_code</config_path>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </admin_origin_country_code>
+                        <admin_origin_postal_code translate="label">
+                            <label>Postal Code</label>
+                            <config_path>radial_tax/admin_origin/postal_code</config_path>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </admin_origin_postal_code>
+                    </fields>
+                </radial_tax>
+            </groups>
+        </eb2ccore>
+    </sections>
+</config>

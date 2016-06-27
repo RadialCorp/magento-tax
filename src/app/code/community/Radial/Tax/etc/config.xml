@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright (c) 2013-2016 Radial Commerce Inc.
+
+NOTICE OF LICENSE
+
+This source file is subject to the Open Software License (OSL 3.0)
+that is bundled with this package in the file LICENSE.md.
+It is also available through the world-wide-web at this URL:
+http://opensource.org/licenses/osl-3.0.php
+
+@copyright   Copyright (c) 2013-2016 Radial Commerce Inc. (http://www.radial.com/)
+@license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+-->
+<config>
+    <modules>
+        <Radial_Tax>
+            <version>1.6.0</version>
+        </Radial_Tax>
+    </modules>
+    <global>
+        <blocks>
+            <radial_tax>
+                <class>Radial_Tax_Block</class>
+            </radial_tax>
+        </blocks>
+        <models>
+            <radial_tax>
+                <class>Radial_Tax_Model</class>
+                <resourceModel>radial_tax_resource</resourceModel>
+            </radial_tax>
+        </models>
+        <helpers>
+            <radial_tax>
+                <class>Radial_Tax_Helper</class>
+            </radial_tax>
+        </helpers>
+        <events>
+            <!-- Taxes requested from the tax service in this event -->
+            <sales_quote_collect_totals_after>
+                <observers>
+                    <radial_tax_reset_tax_flags>
+                        <class>radial_tax/observer</class>
+                        <method>handleSalesQuoteCollectTotalsAfter</method>
+                    </radial_tax_reset_tax_flags>
+                </observers>
+            </sales_quote_collect_totals_after>
+        </events>
+        <sales>
+            <quote>
+                <totals>
+                    <radial_tax>
+                        <after>subtotal,shipping</after>
+                        <before>grand_total</before>
+                        <class>radial_tax/total_quote_address_tax</class>
+                    </radial_tax>
+                </totals>
+                <item>
+                    <!--
+                        Only product attributes listed in this configuration
+                        (merged with Mage_Sales/etc/config.xml and others)
+                        will be included on products loaded for quote items.
+                        For HTS Codes to be available while making TDF requests, the
+                        hts_codes product attribute must be included in the list.
+                    -->
+                    <product_attributes>
+                        <hts_codes/>
+                        <country_of_manufacture/>
+                        <tax_code/>
+                    </product_attributes>
+                </item>
+            </quote>
+        </sales>
+    </global>
+    <frontend>
+        <translate>
+            <modules>
+                <Radial_Tax>
+                    <files>
+                        <default>Radial_Tax.csv</default>
+                    </files>
+                </Radial_Tax>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <radial_tax>
+                    <file>radial_tax.xml</file>
+                </radial_tax>
+            </updates>
+        </layout>
+    </frontend>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Radial_Tax>
+                    <files>
+                        <default>Radial_Tax.csv</default>
+                    </files>
+                </Radial_Tax>
+            </modules>
+        </translate>
+    </adminhtml>
+    <default>
+        <radial_tax>
+            <api>
+                <service>taxes</service>
+                <operation>quote</operation>
+            </api>
+            <duty>
+                <rate_code>eb2c-duty-amount</rate_code>
+            </duty>
+            <pricing>
+                <vat_inclusive>0</vat_inclusive>
+            </pricing>
+        </radial_tax>
+    </default>
+    <phpunit>
+        <suite>
+            <modules>
+                <Radial_Tax/>
+            </modules>
+        </suite>
+    </phpunit>
+</config>
