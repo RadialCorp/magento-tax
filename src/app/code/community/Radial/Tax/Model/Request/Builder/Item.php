@@ -350,7 +350,7 @@ class Radial_Tax_Model_Request_Builder_Item
                 }
             }
         }
-        return $item->getProduct() ?: Mage::getModel('catalog/product')->load($item->getProductId());
+        return Mage::getModel('catalog/product')->loadByAttribute($item->getSku(), 'sku');
     }
 
     /**
