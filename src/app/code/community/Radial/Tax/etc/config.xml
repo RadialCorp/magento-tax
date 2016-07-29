@@ -15,7 +15,7 @@ http://opensource.org/licenses/osl-3.0.php
 <config>
     <modules>
         <Radial_Tax>
-            <version>1.6.0</version>
+            <version>1.6.1</version>
         </Radial_Tax>
     </modules>
     <global>
@@ -35,6 +35,14 @@ http://opensource.org/licenses/osl-3.0.php
                 <class>Radial_Tax_Helper</class>
             </radial_tax>
         </helpers>
+	<resources>
+            <radial_tax_setup>
+                <setup>
+                    <module>Radial_Tax</module>
+                    <class>Mage_Sales_Model_Mysql4_Setup</class>
+                </setup>
+            </radial_tax_setup>
+        </resources>
         <events>
             <!-- Taxes requested from the tax service in this event -->
             <sales_quote_collect_totals_after>
