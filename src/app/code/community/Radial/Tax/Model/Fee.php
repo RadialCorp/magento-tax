@@ -65,7 +65,7 @@ class Radial_Tax_Model_Fee extends Varien_Object
     {
         return $this->setType($feePayload->getType())
             ->setDescription($feePayload->getDescription())
-            ->setAmount($feePayload->getCharge()->getAmount())
+            ->setCharge($feePayload->getCharge())
             ->setFeeId($feePayload->getId());
     }
 
@@ -104,20 +104,20 @@ class Radial_Tax_Model_Fee extends Varien_Object
     }
 
     /**
-     * @return float
+     * @return 
      */
-    public function getAmount()
+    public function getCharge()
     {
-        return $this->getData('amount');
+        return $this->getData('charge');
     }
 
     /**
-     * @param float
+     * @param 
      * @return self
      */
-    public function setAmount($amount)
+    public function setCharge($charge)
     {
-        return $this->setData('amount', $amount);
+        return $this->setData('charge', $charge);
     }
 
     /**
