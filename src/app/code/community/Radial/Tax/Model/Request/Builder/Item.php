@@ -164,9 +164,6 @@ class Radial_Tax_Model_Request_Builder_Item
      */
     protected function _injectItemData()
     {
-	$product = Mage::getModel('catalog/product')->loadByAttribute('sku', $this->_item->getSku());
-        $screenSize = $product->getData('screen_size');
-
         $this->_orderItem
             ->setLineNumber($this->_item->getId())
             ->setItemId($this->_item->getSku())
@@ -174,7 +171,7 @@ class Radial_Tax_Model_Request_Builder_Item
             ->setDescription($this->_item->getName())
             ->setHtsCode($this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId()))
             ->setManufacturingCountryCode($this->_itemProduct->getCountryOfManufacture())
-	    ->setScreenSize($screenSize);
+	    ->setScreenSize($this->_itemProduct->getData('screen_size'));
         return $this;
     }
 
