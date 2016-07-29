@@ -65,47 +65,8 @@ class Radial_Tax_Model_Fee extends Varien_Object
     {
         return $this->setType($feePayload->getType())
             ->setDescription($feePayload->getDescription())
-            ->setAmount($feePayload->getAmount())
-            ->setId($feePayload->getItemId())
-            ->setTaxClass($feePayload->getTaxClass());
-    }
-
-    /**
-     * Id of the quote item to which the fee applies.
-     *
-     * @return int
-     */
-    public function getItemId()
-    {
-        return $this->getData('item_id');
-    }
-
-    /**
-     * @param int
-     * @return self
-     */
-    public function setItemId($itemId)
-    {
-        return $this->setData('item_id', $itemId);
-    }
-
-    /**
-     * Id of the quote address to which the fee applies.
-     *
-     * @return int
-     */
-    public function getAddressId()
-    {
-        return $this->getData('address_id');
-    }
-
-    /**
-     * @param int
-     * @return self
-     */
-    public function setAddressId($addressId)
-    {
-        return $this->setData('address_id', $addressId);
+            ->setAmount($feePayload->getCharge()->getAmount())
+            ->setFeeId($feePayload->getId());
     }
 
     /**
@@ -162,34 +123,17 @@ class Radial_Tax_Model_Fee extends Varien_Object
     /**
      * @return string
      */
-    public function getId()
+    public function getFeeId()
     {
-        return $this->getData('id');
+        return $this->getData('fee_id');
     }
 
     /**
      * @param string
      * @return self
      */
-    public function setId($id)
+    public function setFeeId($id)
     {
-        return $this->setData('id', $id);
-    }
-
-    /**
-     * @return string
-     */
-    public function getTaxClass()
-    {
-        return $this->getData('tax_class');
-    }
-
-    /**
-     * @param string
-     * @return self
-     */
-    public function setTaxClass($taxClass)
-    {
-        return $this->setData('tax_class', $taxClass);
+        return $this->setData('fee_id', $id);
     }
 }

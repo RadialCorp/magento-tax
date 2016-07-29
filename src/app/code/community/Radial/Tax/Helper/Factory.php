@@ -100,7 +100,7 @@ class Radial_Tax_Helper_Factory
     public function createTaxFee(ITaxedFee $fee, $itemId, $addressId)
     {
         return Mage::getModel(
-            'radial_tax/duty',
+            'radial_tax/fee',
             ['item_id' => $itemId, 'address_id' => $addressId, 'fee_payload' => $fee]
         );
     }

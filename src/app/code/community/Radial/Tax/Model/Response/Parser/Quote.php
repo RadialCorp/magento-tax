@@ -107,6 +107,7 @@ class Radial_Tax_Model_Response_Parser_Quote extends Radial_Tax_Model_Response_P
                 );
             }
         }
+
         // Flatten each nested array of tax data - allows for a single array_merge
         // instead of iteratively calling array_merge on each pass when extracting
         // tax data for each ship group.

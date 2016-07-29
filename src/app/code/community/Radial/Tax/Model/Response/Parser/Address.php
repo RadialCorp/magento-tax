@@ -97,7 +97,7 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
         // ship group - e.g. $taxRecords = [[$recordA, $recordB], [$recordC, $recordD]].
         // Prepopulate tax records with data extracted for the address for gifting
         // so it will get merged together with item taxes.
-        $taxRecords = [$this->_extractGiftingTaxRecords()];
+        $taxRecords = [];
         $duties = [];
         $fees = [];
 

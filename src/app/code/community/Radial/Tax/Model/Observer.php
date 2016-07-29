@@ -144,62 +144,6 @@ class Radial_Tax_Model_Observer
     }
 
     /**
-     * set the tax header error flag on the order create request.
-     * @param  Varien_Event_Observer
-     * @return self
-     */
-    public function handleOrderCreateBeforeAttachEvent(Varien_Event_Observer $observer)
-    {
-        $event = $observer->getEvent();
-        Mage::getModel(
-            'radial_tax/order_create_order',
-            ['order_create_request' => $event->getPayload()]
-        )->addTaxHeaderErrorFlag();
-        return $this;
-    }
-
-    /**
-     * set gifting tax data on the shipgroup payload for the order create request
-     * @param  Varien_Event_Observer
-     * @return self
-     */
-    public function handleOrderCreateShipGroupEvent(Varien_Event_Observer $observer)
-    {
-        $event = $observer->getEvent();
-        Mage::getModel(
-            'radial_tax/order_create_shipgroup',
-            [
-                'address' => $event->getAddress(),
-                'ship_group' => $event->getShipGroupPayload(),
-            ]
-        )->addGiftTaxesToPayload();
-        return $this;
-    }
-
-    /**
-     * set tax data on the orderitem payload for the order create request
-     * @param  Varien_Event_Observer
-     * @return self
-     */
-    public function handleOrderCreateItemEvent(Varien_Event_Observer $observer)
-    {
-        $event = $observer->getEvent();
-        $item = $event->getItem();
-        $quoteItemId = $item->getQuoteItemId();
-        Mage::getModel(
-            'radial_tax/order_create_orderitem',
-            [
-                'item' => $event->getItem(),
-                'tax_records' => $this->taxCollector->getTaxRecordsByItemId($quoteItemId),
-                'duty' => $this->taxCollector->getTaxDutyByItemId($quoteItemId),
-                'fees' => $this->taxCollector->getTaxFeesByItemId($quoteItemId),
-                'order_item_payload' => $event->getItemPayload(),
-            ]
-        )->addTaxesToPayload();
-        return $this;
-    }
-
-    /**
      * Recollect quote totals to update amounts based on newly received tax
      * data. This collect totals call is expected to happen recursively within
      * collect totals. The flags in radial_core/session are expected to prevent

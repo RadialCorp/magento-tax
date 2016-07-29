@@ -114,7 +114,7 @@ class Radial_Tax_Model_Response_Parser_Item extends Radial_Tax_Model_Response_Pa
                 Radial_Tax_Model_Record::SOURCE_DUTY_DISCOUNT,
                 $this->_orderItem->getDutyPricing()
             ),
-            $this->_extractFees(),
+	    $this->_extractFeesTaxRecords(),
             $this->_extractItemCustomizationTaxRecords(),
             $this->_extractGiftingTaxRecords()
         );
@@ -150,10 +150,7 @@ class Radial_Tax_Model_Response_Parser_Item extends Radial_Tax_Model_Response_Pa
      */
     protected function _extractFees()
     {
-        $fees = [];
-        foreach ($this->_orderItem->getFees() as $fee) {
-            $fees[] = $this->_taxFactory->createTaxFee($fee, $this->_itemId, $this->_addressId);
-        }
+	$fees[] = $this->_taxFactory->createFeeForFeeIterable($this->_orderItem->getFees(), $this->_itemId, $this->_addressId);
         return $this->_flattenArray($fees);
     }
 
@@ -193,6 +190,7 @@ class Radial_Tax_Model_Response_Parser_Item extends Radial_Tax_Model_Response_Pa
                 );
             }
         }
+
         return $this->_flattenArray($taxRecords);
     }
 
@@ -208,10 +206,11 @@ class Radial_Tax_Model_Response_Parser_Item extends Radial_Tax_Model_Response_Pa
             $taxRecords[] = $this->_extractPricingTaxRecords(
                 Radial_Tax_Model_Record::SOURCE_FEE,
                 Radial_Tax_Model_Record::SOURCE_FEE_DISCOUNT,
-                $fee->getPricing(),
+                $fee->getCharge(),
                 ['fee_id' => $fee->getId()]
             );
         }
+
         return $this->_flattenArray($taxRecords);
     }
 
@@ -238,6 +237,7 @@ class Radial_Tax_Model_Response_Parser_Item extends Radial_Tax_Model_Response_Pa
                 ['item_id' => $this->_itemId]
             );
         }
+
         return $this->_flattenArray($taxRecords);
     }
 
