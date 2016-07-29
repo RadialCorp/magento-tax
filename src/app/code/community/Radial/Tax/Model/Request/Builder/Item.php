@@ -171,7 +171,7 @@ class Radial_Tax_Model_Request_Builder_Item
             ->setDescription($this->_item->getName())
             ->setHtsCode($this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId()))
             ->setManufacturingCountryCode($this->_itemProduct->getCountryOfManufacture())
-	    ->setScreenSize($this->_itemProduct->getData('screen_size'));
+	    ->setScreenSize($this->_itemProduct->getScreenSize());
         return $this;
     }
 
