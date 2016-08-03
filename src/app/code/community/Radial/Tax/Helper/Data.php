@@ -135,6 +135,21 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
     }
 
     /**
+     * Make an API request to the TDF service for the invoice 
+     *
+     * @param Mage_Sales_Model_Order
+     * @param Mage_Sales_Model_Order_Invoice
+     * @param type - Tax Invoice Type
+     * @throws Radial_Tax_Exception_Collector_Exception If tax records could not be invoiced
+     */
+    public function requestTaxesForInvoice(Mage_Sales_Model_Order $order, Mage_Sales_Model_Order_Invoice $invoice, $type)
+    {
+        $api = $this->getSdkApiInvoice();
+        $this->_prepareRequestInvoice($api, $order, $invoice, $type)
+            ->_sendApiRequest($api);
+    }
+
+    /**
      * Get an API object for the SDK to make the TDF request.
      *
      * @return IBidirectionalApi
@@ -146,6 +161,19 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
         return $this->coreHelper->getSdkApi(
             $taxConfig->apiService,
             $taxConfig->apiOperation
+        );
+    }
+
+    /**
+     * Get an API object for the SDK to make the TDF request.
+     *
+     * @return IBidirectionalApi
+     */
+    protected function getSdkApiInvoice()
+    {
+        return $this->coreHelper->getSdkApi(
+            $taxConfig->apiService, 
+            "invoice" 
         );
     }
 
@@ -176,6 +204,37 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
         }
         $taxRequest = $this->taxFactory
             ->createRequestBuilderQuote($requestBody, $quote)
+            ->getTaxRequest();
+        $api->setRequestBody($taxRequest);
+        return $this;
+    }
+
+    /**
+     * Prepare the API request with data from the quote - fill out and set
+     * the request payload.
+     *
+     * @param IBidirectionalApi
+     * @param Mage_Sales_Model_Order
+     * @param Mage_Sales_Model_Order_invoice
+     * @param Tax Invoice Type
+     * @return self
+     */
+    protected function _prepareRequestInvoice(IBidirectionalApi $api, Mage_Sales_Model_Order $order, Mage_Sales_Model_Order_Invoice $invoice, $type)
+    {
+        try {
+            $requestBody = $api->getRequestBody();
+        } catch (Exception $e) {
+            // If the SDK cannot handle sending requests to the tax/quote
+            // service operation but is expected to, the SDK is likely broken.
+            // As this would fall into the "human intervention required"
+            // category of errors, log crit the exception.
+            $this->logger->critical(
+                'Tax invoice service request unsupported by SDK.',
+                $this->logContext->getMetaData(__CLASS__, [], $e)
+            );
+        }
+        $taxRequest = $this->taxFactory
+            ->createRequestBuilderInvoice($requestBody, $order, $invoice, $type)
             ->getTaxRequest();
         $api->setRequestBody($taxRequest);
         return $this;

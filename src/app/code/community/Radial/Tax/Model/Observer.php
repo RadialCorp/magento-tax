@@ -143,6 +143,66 @@ class Radial_Tax_Model_Observer
         return $this;
     }
 
+     /**
+     * Collect new tax totals if necessary before submitting tax invoice. 
+     * Tax totals collected after all other quote totals so tax totals for the
+     * entire quote may be collected at one - all other totals for all other
+     * addresses must have already been collected.
+     *
+     * If new taxes are collected, all quote totals must be recollected.
+     *
+     * @param Varien_Event_Observer
+     * @return self
+     */
+    public function processTaxInvoiceForInvoice(Varien_Event_Observer $observer)
+    {
+	$invoice = $observer->getEvent()->getInvoice();
+	//$invoice = Mage::getModel("sales/order_invoice")->load($invoiceId);
+	$order = $invoice->getOrder();
+	$type = "SALE";
+
+	//Try the invoice
+	try {
+            $this->taxCollector->collectTaxesForInvoice($order, $invoice, $type);
+        } catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
+            $this->logger->debug('Tax Invoice is not valid.', $this->logContext->getMetaData(__CLASS__));
+            throw $e;
+	} catch (Radial_Tax_Exception_Collector_Exception $e) {
+            // Want TDF to be non-blocking so exceptions from making the
+            // request should be caught. Still need to exit here when there
+            // is an exception, however, to allow the TDF to be retried
+            // (don't reset update required flag) and prevent totals from being
+            // recollected (nothing to update and, more imporantly, would
+            // continue to loop until PHP crashes or a TDF request succeeds).
+            $this->logger->warning('Tax request failed.', $this->logContext->getMetaData(__CLASS__, [], $e));
+            return $this;
+        }
+	
+        return $this;
+    }
+
+    /**
+     * @param    Varien_Event_Observer
+     * @return   self
+     */
+    public function copyFromQuoteToOrder(Varien_Event_Observer $observer)
+    {
+	$order = $observer->getEvent()->getOrder();
+	$quoteId = $order->getQuoteId();
+	$quote = Mage::getModel('sales/quote')->load($quoteId);
+
+	$taxFees = $quote->getData('radial_tax_fees');
+	$taxDuties = $quote->getData('radial_tax_duties');
+	$taxRecords = $quote->getData('radial_tax_taxrecords');
+
+	$order->setData('radial_tax_fees', $taxFees);
+	$order->setData('radial_tax_duties', $taxDuties);
+	$order->setData('radial_tax_taxrecords', $taxRecords);
+	$order->save();
+
+	return $this;
+    }
+
     /**
      * Recollect quote totals to update amounts based on newly received tax
      * data. This collect totals call is expected to happen recursively within

@@ -27,8 +27,8 @@ class Radial_Tax_Helper_Item_Selection
      * "flagged" as the grouped item which should still be included; all items
      * in a bundle should be included.
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract[]
-     * @return Mage_Sales_Model_Quote_Item_Abstract[]
+     * @param Mage_Core_Model_Abstract[]
+     * @return Mage_Core_Model_Abstract[]
      */
     public function selectFrom(array $items)
     {
@@ -38,10 +38,10 @@ class Radial_Tax_Helper_Item_Selection
     /**
      * Filter for selecting only items to be included in an tax request.
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract
+     * @param Mage_Core_Model_Abstract
      * @return bool
      */
-    public function isItemIncluded(Mage_Sales_Model_Quote_Item_Abstract $item)
+    public function isItemIncluded(Mage_Core_Model_Abstract $item)
     {
         return !$this->itemIsConfigurableChild($item);
     }
@@ -49,10 +49,10 @@ class Radial_Tax_Helper_Item_Selection
     /**
      * Check if the item is the child of a configurable product.
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract
+     * @param Mage_Core_Model_Abstract
      * @return bool
      */
-    protected function itemIsConfigurableChild(Mage_Sales_Model_Quote_Item_Abstract $item)
+    protected function itemIsConfigurableChild(Mage_Core_Model_Abstract $item)
     {
         $parentItem = $item->getParentItem();
         return ($parentItem && $parentItem->getProductType() === Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);

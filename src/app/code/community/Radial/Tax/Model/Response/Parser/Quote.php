@@ -88,7 +88,6 @@ class Radial_Tax_Model_Response_Parser_Quote extends Radial_Tax_Model_Response_P
      */
     protected function _extractTaxData()
     {
-        // Each of these will hold an array of arrays of data extracted from each
         // ship group - e.g. $taxRecords = [[$recordA, $recordB], [$recordC, $recordD]].
         $taxRecords = [];
         $duties = [];
