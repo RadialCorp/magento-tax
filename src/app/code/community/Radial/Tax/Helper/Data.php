@@ -172,7 +172,7 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
     protected function getSdkApiInvoice()
     {
         return $this->coreHelper->getSdkApi(
-            "taxes",
+            $taxConfig->apiService, 
             "invoice" 
         );
     }

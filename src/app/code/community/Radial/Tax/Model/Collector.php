@@ -18,11 +18,6 @@
  */
 class Radial_Tax_Model_Collector
 {
-    const QUOTE_RECORDS_CACHE_KEY = 'radial_tax_quote_records_';
-    const QUOTE_DUTIES_CACHE_KEY = 'radial_tax_quote_duties_';
-    const QUOTE_FEES_CACHE_KEY = 'radial_tax_quote_fees_';
-    const QUOTE_CACHE_TAG = 'radial_tax_cache_tag_';
-
     /** @var Radial_Tax_Helper_Data */
     protected $_taxHelper;
     /** @var EbayEnterprise_MageLog_Helper_Data */

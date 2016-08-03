@@ -1,6 +1,37 @@
 <?php
 
+/* @var $installer Mage_Core_Model_Resource_Setup */
 $installer = $this;
+$installer->startSetup();
+
+$entities = array(
+        'quote',
+        'order'
+);
+
+$options = array(
+        'type' => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'visible' => false,
+        'required' => false
+);
+
+$attrList = array(
+	'radial_tax_taxrecords', 'radial_tax_duties', 'radial_tax_fees'
+);
+
+foreach ($entities as $entity) {
+	$model = 'sales/' . $entity;
+
+	foreach( $attrList as $attrN )
+	{
+		$attr = Mage::getResourceModel($model)->loadByCode($entity, $attrN)
+		if( !$attr->getId())
+		{
+			$installer->addAttribute($entity, $attrN, $options);
+		}
+	}
+}
+
 $installerA = Mage::getResourceModel('catalog/setup', 'catalog_setup');
 
 $entity = 'catalog_product';
@@ -71,3 +102,5 @@ if( !$attr->getId())
 	    'used_in_product_listing' => true
 	));
 }
+
+$installer->endSetup();

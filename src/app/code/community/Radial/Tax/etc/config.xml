@@ -15,7 +15,7 @@ http://opensource.org/licenses/osl-3.0.php
 <config>
     <modules>
         <Radial_Tax>
-            <version>1.6.0</version>
+            <version>1.6.1</version>
         </Radial_Tax>
     </modules>
     <global>
