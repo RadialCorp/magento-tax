@@ -13,6 +13,8 @@
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use eBayEnterprise\RetailOrderManagement\Payload\IPayload;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedShipGroupIterable;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IShipGroupIterable;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IDestinationIterable;
 
@@ -28,7 +30,7 @@ class Radial_Tax_Model_Request_Builder_Address
     protected $_destinationIterable;
     /** @var IDestination */
     protected $_destination;
-    /** @var Mage_Sales_Model_Quote_Address */
+    /** @var Mage_Customer_Model_Address_Abstract */
     protected $_address;
     /** @var Radial_Tax_Helper_Item_Selection */
     protected $_selectionHelper;
@@ -40,18 +42,21 @@ class Radial_Tax_Model_Request_Builder_Address
     protected $_logger;
     /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
+    /** @var Mage_Sales_Model_Order_Invoice */
+    protected $_invoice;
 
     /**
      * @param array $args Must contain key/value for:
-     *    - ship_group_iterable => eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IShipGroupIterable
+     *    - ship_group_iterable => eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IShipGroupIterable | eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedShipGroupIterable
      *    - destination_iterable => eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IDestinationIterable
-     *    - address => Mage_Sales_Model_Quote_Address
+     *    - address => Mage_Customer_Model_Address_Abstract
      *    May contain key/value for:
      *    - selection_helper => Radial_Tax_Helper_Item_Selection
      *    - payload_helper => Radial_Tax_Helper_Payload
      *    - tax_factory => Radial_Tax_Helper_Factory
      *    - logger => EbayEnterprise_MageLog_Helper_Data
      *    - log_context => EbayEnterprise_MageLog_Helper_Context
+     *    - invoice => Mage_Sales_Model_Order_Invoice
      */
     public function __construct(array $args)
     {
@@ -63,7 +68,8 @@ class Radial_Tax_Model_Request_Builder_Address
             $this->_payloadHelper,
             $this->_taxFactory,
             $this->_logger,
-            $this->_logContext
+            $this->_logContext,
+	    $this->_invoice
         ) = $this->_checkTypes(
             $args['ship_group_iterable'],
             $args['destination_iterable'],
@@ -72,7 +78,8 @@ class Radial_Tax_Model_Request_Builder_Address
             $this->_nullCoalesce($args, 'payload_helper', Mage::helper('radial_tax/payload')),
             $this->_nullCoalesce($args, 'tax_factory', Mage::helper('radial_tax/factory')),
             $this->_nullCoalesce($args, 'logger', Mage::helper('ebayenterprise_magelog')),
-            $this->_nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context'))
+            $this->_nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context')),
+	    $args['invoice']
         );
         $this->_populateRequest();
     }
@@ -80,25 +87,27 @@ class Radial_Tax_Model_Request_Builder_Address
     /**
      * Enforce type checks on constructor args array.
      *
-     * @param IShipGroupIterable
+     * @param IShipGroupIterable | ITaxedShipGroupIterable
      * @param IDestinationIterable
-     * @param Mage_Sales_Model_Quote_Address
+     * @param Mage_Customer_Model_Address_Abstract
      * @param Radial_Tax_Helper_Item_Selection
      * @param Radial_Tax_Helper_Payload
      * @param Radial_Tax_Helper_Factory
      * @param EbayEnterprise_MageLog_Helper_Data
      * @param EbayEnterprise_MageLog_Helper_Context
+     * @param Mage_Sales_Model_Order_Invoice
      * @return array
      */
     protected function _checkTypes(
-        IShipGroupIterable $shipGroupIterable,
+        IPayload $shipGroupIterable,
         IDestinationIterable $destinationIterable,
-        Mage_Sales_Model_Quote_Address $address,
+        Mage_Customer_Model_Address_Abstract $address,
         Radial_Tax_Helper_Item_Selection $selectionHelper,
         Radial_Tax_Helper_Payload $payloadHelper,
         Radial_Tax_Helper_Factory $taxFactory,
         EbayEnterprise_MageLog_Helper_Data $logger,
-        EbayEnterprise_MageLog_Helper_Context $logContext
+        EbayEnterprise_MageLog_Helper_Context $logContext,
+	Mage_Sales_Model_Order_Invoice $invoice
     ) {
         return func_get_args();
     }
@@ -129,7 +138,7 @@ class Radial_Tax_Model_Request_Builder_Address
     /**
      * Get the ship group payload for the address.
      *
-     * @return IShipGroup|null
+     * @return IShipGroup|ITaxedShipGroup|null
      */
     public function getShipGroupPayload()
     {
@@ -182,27 +191,56 @@ class Radial_Tax_Model_Request_Builder_Address
         // The first item needs to include shipping totals, use this flag to
         // track when item is the first item.
         $first = true;
-        foreach ($this->_selectionHelper->selectFrom($this->_address->getAllItems()) as $item) {
-            // Add shipping amounts to the first item - necessary way of sending
-            // address level shipping totals which is the only way Magento can
-            // report shipping totals.
-            if ($first) {
-                $item->setIncludeShippingTotals(true);
-            }
 
-            $itemBuilder = $this->_taxFactory->createRequestBuilderItem(
-                $orderItemIterable,
-                $this->_address,
-                $item
-            );
+	if( !$this->_invoice->getId())
+	{
+        	foreach ($this->_selectionHelper->selectFrom($this->_address->getAllItems()) as $item) {
+        	    // Add shipping amounts to the first item - necessary way of sending
+       	    	    // address level shipping totals which is the only way Magento can
+        	    // report shipping totals.
+        	    if ($first) {
+        	        $item->setIncludeShippingTotals(true);
+        	    }
 
-            $itemPayload = $itemBuilder->getOrderItemPayload();
-            if ($itemPayload) {
-                $orderItemIterable[$itemPayload] = null;
-            }
-            // After the first iteration, this should always be false.
-            $first = false;
+        	    $itemBuilder = $this->_taxFactory->createRequestBuilderItem(
+                        $orderItemIterable,
+                        $this->_address,
+                        $item,
+			$this->_invoice
+                    );
+
+            	    $itemPayload = $itemBuilder->getOrderItemPayload();
+                    if ($itemPayload) {
+                	$orderItemIterable[$itemPayload] = null;
+            	    }
+                    // After the first iteration, this should always be false.
+            	    $first = false;
+        	}
+	} else {
+		foreach ($this->_selectionHelper->selectFrom($this->_invoice->getAllItems()) as $item) {
+		    // Add shipping amounts to the first item - necessary way of sending
+        	    // address level shipping totals which is the only way Magento can
+        	    // report shipping totals.
+        	    if ($first) {
+        	        $item->setIncludeShippingTotals(true);
+        	    }
+
+        	    $itemBuilder = $this->_taxFactory->createRequestBuilderItem(
+        	       $orderItemIterable,
+        	       $this->_address,
+        	       $item,
+		       $this->_invoice
+        	    );
+
+        	    $itemPayload = $itemBuilder->getOrderItemPayload();
+        	    if ($itemPayload) {
+        	        $orderItemIterable[$itemPayload] = null;
+       	    	    } 
+            	    // After the first iteration, this should always be false.
+            	    $first = false;
+	        }
         }
+
         return $this;
     }
 
@@ -213,8 +251,17 @@ class Radial_Tax_Model_Request_Builder_Address
      */
     protected function _validateAddressIsDestination()
     {
-        return $this->_address->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_BILLING
-            || $this->_validateAddressIsShipGroup();
+	if( $this->_invoice->getId())
+	{
+		$order = $this->_invoice->getOrder();
+		$address = $order->getBillingAddress();
+		$shipAddress = $order->getShippingAddress();
+
+		return $this->_address->getId() === $address->getId() || $this->_validateAddressIsShipGroup();
+	} else {
+        	return $this->_address->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_BILLING
+        	    || $this->_validateAddressIsShipGroup();
+        }
     }
 
     /**
@@ -224,10 +271,23 @@ class Radial_Tax_Model_Request_Builder_Address
      */
     protected function _validateAddressIsShipGroup()
     {
-        // This assume that the address is in a valid state to be
-        // included and does not check for individual data constraints
-        // to be met.
-        return (bool) count($this->_address->getAllItems());
+	if( $this->_invoice->getId())
+	{
+		$order = $this->_invoice->getOrder();
+		$shipAddress = $order->getShippingAddress();
+
+		if ( $shipAddress->getId() === $this->_address->getId() )
+		{
+			return (bool) count($this->_invoice->getAllItems());
+		} else {
+			return false;
+		}
+	} else {
+        	// This assume that the address is in a valid state to be
+        	// included and does not check for individual data constraints
+        	// to be met.
+        	return (bool) count($this->_address->getAllItems());
+	}
     }
 
     /**

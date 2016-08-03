@@ -18,6 +18,11 @@
  */
 class Radial_Tax_Model_Collector
 {
+    const QUOTE_RECORDS_CACHE_KEY = 'radial_tax_quote_records_';
+    const QUOTE_DUTIES_CACHE_KEY = 'radial_tax_quote_duties_';
+    const QUOTE_FEES_CACHE_KEY = 'radial_tax_quote_fees_';
+    const QUOTE_CACHE_TAG = 'radial_tax_cache_tag_';
+
     /** @var Radial_Tax_Helper_Data */
     protected $_taxHelper;
     /** @var EbayEnterprise_MageLog_Helper_Data */
@@ -286,10 +291,11 @@ class Radial_Tax_Model_Collector
      * Collect taxes for quote, making an SDK tax request if necessary.
      *
      * @param Mage_Sales_Model_Quote
+     * @param orderId (optional)
      * @return self
      * @throws Radial_Tax_Exception_Collector_Exception If TDF cannot be collected.
      */
-    public function collectTaxes(Mage_Sales_Model_Quote $quote)
+    public function collectTaxes(Mage_Sales_Model_Quote $quote, $orderId = null)
     {
         $this->_logger->debug('Collecting new tax data.', $this->_logContext->getMetaData(__CLASS__));
         try {
@@ -315,6 +321,32 @@ class Radial_Tax_Model_Collector
             ->setTaxDuties($taxResults->getTaxDuties())
             ->setTaxFees($taxResults->getTaxFees())
             ->setTaxRequestSuccess(true);
+
+	$quote->setData("radial_tax_taxrecords", serialize($taxResults->getTaxRecords()));
+	$quote->setData("radial_tax_duties", serialize($taxResults->getTaxDuties()));
+	$quote->setData("radial_tax_fees", serialize($taxResults->getTaxFees()));
+	$quote->save();
+
+        return $this;
+    }
+
+    /**
+     * Collect taxes for invoice, making an SDK tax request if necessary.
+     *
+     * @param Mage_Sales_Model_Order
+     * @param Mage_Sales_Model_Order_Invoice
+     * @param type - Tax Invoice Type
+     * @return self
+     * @throws Radial_Tax_Exception_Collector_Exception If TDF cannot be collected.
+     */
+    public function collectTaxesForInvoice(Mage_Sales_Model_Order $order, Mage_Sales_Model_Order_Invoice $invoice, $type)
+    {
+        $this->_logger->debug('Collecting invoice tax data.', $this->_logContext->getMetaData(__CLASS__));
+        try {
+            $taxResults = $this->_taxHelper->requestTaxesForInvoice($order, $invoice, $type);
+        } catch (Radial_Tax_Exception_Collector_Exception $e) {
+            throw $e;
+        }
         return $this;
     }
 

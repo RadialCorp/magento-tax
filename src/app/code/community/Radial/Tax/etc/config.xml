@@ -15,7 +15,7 @@ http://opensource.org/licenses/osl-3.0.php
 <config>
     <modules>
         <Radial_Tax>
-            <version>1.6.1</version>
+            <version>1.6.0</version>
         </Radial_Tax>
     </modules>
     <global>
@@ -39,10 +39,42 @@ http://opensource.org/licenses/osl-3.0.php
             <radial_tax_setup>
                 <setup>
                     <module>Radial_Tax</module>
-                    <class>Mage_Sales_Model_Mysql4_Setup</class>
+		    <class>Mage_Sales_Model_Mysql4_Setup</class>
                 </setup>
             </radial_tax_setup>
         </resources>
+	<fieldsets>
+    		<sales_convert_quote>
+        		<radial_tax_taxrecords>
+		            <to_order_item>*</to_order_item>
+        		</radial_tax_taxrecords>
+    		</sales_convert_quote>
+    		<sales_convert_order>
+        		<radial_tax_taxrecords>
+            			<to_quote_item>*</to_quote_item>
+        		</radial_tax_taxrecords>
+    		</sales_convert_order>
+		<sales_convert_quote>
+                        <radial_tax_duties>
+                            <to_order_item>*</to_order_item>
+                        </radial_tax_duties>
+                </sales_convert_quote>
+                <sales_convert_order>
+                        <radial_tax_duties>
+                                <to_quote_item>*</to_quote_item>
+                        </radial_tax_duties>
+                </sales_convert_order>
+		<sales_convert_quote>
+                        <radial_tax_fees>
+                            <to_order_item>*</to_order_item>
+                        </radial_tax_fees>
+                </sales_convert_quote>
+                <sales_convert_order>
+                        <radial_tax_fees>
+                                <to_quote_item>*</to_quote_item>
+                        </radial_tax_fees>
+                </sales_convert_order>
+	</fieldsets>
         <events>
             <!-- Taxes requested from the tax service in this event -->
             <sales_quote_collect_totals_after>
@@ -53,6 +85,22 @@ http://opensource.org/licenses/osl-3.0.php
                     </radial_tax_reset_tax_flags>
                 </observers>
             </sales_quote_collect_totals_after>
+	    <sales_order_invoice_save_after>
+		<observers>
+		    <radial_tax_invoice_tax>
+			<class>radial_tax/observer</class>
+			<method>processTaxInvoiceForInvoice</method>
+		    </radial_tax_invoice_tax>
+		</observers>
+	    </sales_order_invoice_save_after>
+	    <sales_order_place_after>
+                <observers>
+                    <radial_tax_copy_to_order>
+		    	<class>radial_tax/observer</class>
+			<method>copyFromQuoteToOrder</method>
+		    </radial_tax_copy_to_order>
+		</observers>
+            </sales_order_place_after>
         </events>
         <sales>
             <quote>

@@ -13,12 +13,16 @@
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use eBayEnterprise\RetailOrderManagement\Payload\IPayload;
 use eBayEnterprise\RetailOrderManagement\Payload\Checkout\ITax;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IDestinationIterable;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IOrderItemRequestIterable;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IShipGroupIterable;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedShipGroupIterable;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxDutyFeeQuoteReply;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxDutyFeeQuoteRequest;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxDutyFeeInvoiceReply;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxDutyFeeInvoiceRequest;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedDutyPriceGroup;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedFee;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedFeeIterable;
@@ -162,12 +166,12 @@ class Radial_Tax_Helper_Factory
      * Construct a new address tax response parser.
      *
      * @param ITaxedShipGroup
-     * @param Mage_Sales_Model_Quote_Address
+     * @param Mage_Customer_Model_Address_Abstract
      * @return Radial_Tax_Model_Response_Parser_Address
      */
     public function createResponseAddressParser(
         ITaxedShipGroup $shipGroup,
-        Mage_Sales_Model_Quote_Address $address
+        Mage_Customer_Model_Address_Abstract $address
     ) {
         return Mage::getModel(
             'radial_tax/response_parser_address',
@@ -225,24 +229,27 @@ class Radial_Tax_Helper_Factory
     }
 
     /**
-     * Construct a new quote tax request builder.
+     * Construct a new invoice tax request builder.
      *
-     * @param IShipGroupIterable
-     * @param IDestinationIterable
-     * @param Mage_Sales_Model_Quote_Address
-     * @return Radial_Tax_Model_Request_Builder_Address
+     * @param ITaxDutyFeeInvoiceRequest
+     * @param Mage_Sales_Model_Quote
+     * @param Mage_Sales_Model_Order_Invoice
+     * @param type - Tax Invoice Type
+     * @return Radial_Tax_Model_Request_Builder_Invoice
      */
-    public function createRequestBuilderAddress(
-        IShipGroupIterable $shipGroupIterable,
-        IDestinationIterable $destinationIterable,
-        Mage_Sales_Model_Quote_Address $address
+    public function createRequestBuilderInvoice(
+        ITaxDutyFeeInvoiceRequest $payload,
+        Mage_Sales_Model_Order $order,
+	Mage_Sales_Model_Order_Invoice $invoice,
+	$type
     ) {
         return Mage::getModel(
-            'radial_tax/request_builder_address',
+            'radial_tax/request_builder_invoice',
             [
-                'ship_group_iterable' => $shipGroupIterable,
-                'destination_iterable' => $destinationIterable,
-                'address' => $address,
+                'payload' => $payload,
+                'order' => $order,
+		'invoice' => $invoice,
+		'type' => $type,
             ]
         );
     }
@@ -250,15 +257,41 @@ class Radial_Tax_Helper_Factory
     /**
      * Construct a new quote tax request builder.
      *
-     * @param IOrderItemRequestIterable
+     * @param IShipGroupIterable | ITaxedShipGroupIterable
+     * @param IDestinationIterable
      * @param Mage_Sales_Model_Quote_Address
-     * @param Mage_Sales_Model_Quote_Item_Abstract
+     * @return Radial_Tax_Model_Request_Builder_Address
+     */
+    public function createRequestBuilderAddress(
+        IPayload $shipGroupIterable,
+        IDestinationIterable $destinationIterable,
+        Mage_Customer_Model_Address_Abstract $address,
+	Mage_Sales_Model_Order_Invoice $invoice = null
+    ) {
+        return Mage::getModel(
+            'radial_tax/request_builder_address',
+            [
+                'ship_group_iterable' => $shipGroupIterable,
+                'destination_iterable' => $destinationIterable,
+                'address' => $address,
+		'invoice' => $invoice,
+            ]
+        );
+    }
+
+    /**
+     * Construct a new quote tax request builder.
+     *
+     * @param IOrderItemRequestIterable | ITaxedOrderItemIterable
+     * @param Mage_Customer_Model_Address_Abstract
+     * @param Mage_Core_Model_Abstract
      * @return Radial_Tax_Model_Request_Builder_Item
      */
     public function createRequestBuilderItem(
-        IOrderItemRequestIterable $orderItemIterable,
-        Mage_Sales_Model_Quote_Address $address,
-        Mage_Sales_Model_Quote_Item_Abstract $item
+        IPayload $orderItemIterable,
+        Mage_Customer_Model_Address_Abstract $address,
+        Mage_Core_Model_Abstract $item,
+	Mage_Sales_Model_Order_Invoice $invoice
     ) {
         return Mage::getModel(
             'radial_tax/request_builder_item',
@@ -266,6 +299,7 @@ class Radial_Tax_Helper_Factory
                 'order_item_iterable' => $orderItemIterable,
                 'address' => $address,
                 'item' => $item,
+		'invoice' => $invoice,
             ]
         );
     }
