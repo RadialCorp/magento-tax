@@ -24,11 +24,7 @@ foreach ($entities as $entity) {
 
 	foreach( $attrList as $attrN )
 	{
-		$attr = Mage::getResourceModel($model)->loadByCode($entity, $attrN)
-		if( !$attr->getId())
-		{
-			$installer->addAttribute($entity, $attrN, $options);
-		}
+		$installer->addAttribute($entity, $attrN, $options);
 	}
 }
 
@@ -88,10 +84,10 @@ $attr = Mage::getResourceModel('catalog/eav_attribute')
 if( !$attr->getId())
 {
 	$installerA->addAttribute(Mage_Catalog_Model_Product::ENTITY, 'screen_size', array(
-	    'type' => 'text',
+	    'type' => 'varchar',
 	    'group' => 'PTF',
 	    'label' => 'Screen Size',
-	    'input' => 'textarea',
+	    'input' => 'text',
 	    'global' => Mage_Catalog_Model_Resource_Eav_Attribute::SCOPE_WEBSITE,
 	    'visible' => true,
 	    'required' => false,
