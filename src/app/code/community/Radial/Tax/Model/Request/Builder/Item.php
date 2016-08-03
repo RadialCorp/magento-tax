@@ -264,8 +264,8 @@ class Radial_Tax_Model_Request_Builder_Item
 		$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
 		    ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
                     ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
-		    ->setTaxClass("76511");
-		if ($canIncludeAmounts) {
+		    ->setTaxClass($this->_itemProduct->getTaxCode());
+                if ($canIncludeAmounts) {
                     $this->_discountHelper->transferInvoiceTaxDiscounts($this->_item, $merchandiseInvoicePricing);
                 }
 
