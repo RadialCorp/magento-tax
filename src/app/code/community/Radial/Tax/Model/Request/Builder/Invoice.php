@@ -126,6 +126,7 @@ class Radial_Tax_Model_Request_Builder_Invoice
         $this->_payload->setCurrency($this->_order->getOrderCurrencyCode())
             ->setVatInclusivePricingFlag($this->_taxConfig->vatInclusivePricingFlag)
             ->setCustomerTaxId($taxVat)
+	    ->setTaxTransactionId($this->_order->getData('radial_tax_transaction_id'))
 	    ->setOrderId($this->_order->getIncrementId())
 	    ->setInvoiceNumber($this->_invoice->getIncrementId())
 	    ->setInvoiceType($this->_type)

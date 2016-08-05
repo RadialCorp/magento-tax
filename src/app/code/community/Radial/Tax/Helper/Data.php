@@ -321,6 +321,14 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
             );
             throw $this->_failTaxCollection();
         }
+	
+	$taxTransactionId = $responseBody->getTaxTransactionId();
+	if($taxTransactionId)
+	{
+		$quote->setData('radial_tax_transaction_id', $taxTransactionId);
+		$quote->save();
+	}
+
         $responseParser = $this->taxFactory
             ->createResponseQuoteParser($responseBody, $quote);
         return $this->taxFactory->createTaxResults(

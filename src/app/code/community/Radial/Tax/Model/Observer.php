@@ -194,10 +194,12 @@ class Radial_Tax_Model_Observer
 	$taxFees = $quote->getData('radial_tax_fees');
 	$taxDuties = $quote->getData('radial_tax_duties');
 	$taxRecords = $quote->getData('radial_tax_taxrecords');
+	$taxTransactionId = $quote->getData('radial_tax_transaction_id');
 
 	$order->setData('radial_tax_fees', $taxFees);
 	$order->setData('radial_tax_duties', $taxDuties);
 	$order->setData('radial_tax_taxrecords', $taxRecords);
+	$order->setData('radial_tax_transaction_id', $taxTransactionId);
 	$order->save();
 
 	return $this;
