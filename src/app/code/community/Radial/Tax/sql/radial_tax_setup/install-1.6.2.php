@@ -28,6 +28,15 @@ foreach ($entities as $entity) {
 	}
 }
 
+$optionsN = array(
+	'type' => Varien_Db_Ddl_Table::TYPE_VARCHAR,
+	'visible' => false,
+	'required' => false
+);
+
+$installer->addAttribute('invoice', 'radial_tax_transmit', $optionsN);
+$installer->addAttribute('creditmemo', 'radial_tax_transmit', $optionsN);
+
 $installerA = Mage::getResourceModel('catalog/setup', 'catalog_setup');
 
 $entity = 'catalog_product';

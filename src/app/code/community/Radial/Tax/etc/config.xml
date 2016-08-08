@@ -43,6 +43,15 @@ http://opensource.org/licenses/osl-3.0.php
                 </setup>
             </radial_tax_setup>
         </resources>
+	<template>
+                <email>
+                        <custom_email_template3 module="Tax">
+                               <label>Radial - Tax Exception Report</label>
+                                <file>tax_exception_template.html</file>
+                                <type>html</type>
+                        </custom_email_template3>
+                </email>
+        </template>
 	<fieldsets>
     		<sales_convert_quote>
         		<radial_tax_taxrecords>
@@ -85,14 +94,22 @@ http://opensource.org/licenses/osl-3.0.php
                     </radial_tax_reset_tax_flags>
                 </observers>
             </sales_quote_collect_totals_after>
-	    <sales_order_invoice_save_after>
+	    <sales_order_invoice_pay>
 		<observers>
 		    <radial_tax_invoice_tax>
 			<class>radial_tax/observer</class>
 			<method>processTaxInvoiceForInvoice</method>
 		    </radial_tax_invoice_tax>
 		</observers>
-	    </sales_order_invoice_save_after>
+	    </sales_order_invoice_pay>
+	    <sales_order_creditmemo_refund>
+                <observers>
+                    <radial_tax_creditmemo_tax>
+                        <class>radial_tax/observer</class>
+                        <method>processTaxInvoiceForCreditmemo</method>
+                    </radial_tax_creditmemo_tax>
+                </observers>
+            </sales_order_creditmemo_refund>
 	    <sales_order_place_after>
                 <observers>
                     <radial_tax_copy_to_order>
@@ -170,7 +187,25 @@ http://opensource.org/licenses/osl-3.0.php
                 <vat_inclusive>0</vat_inclusive>
             </pricing>
         </radial_tax>
+	<radial_core>
+                <radial_tax_core>
+                        <maxretries>3</maxretries>
+                        <responsetimeout>20000</responsetimeout>
+                </radial_tax_core>
+        </radial_core>
     </default>
+    <crontab>
+        <jobs>
+            <radial_tax_retry_invoice>
+                <schedule><cron_expr>*/5 * * * *</cron_expr></schedule>
+                <run><model>radial_tax/cron::cronTaxInvoiceForInvoice</model></run>
+            </radial_tax_retry_invoice>
+	    <radial_tax_retry_creditmemo>
+                <schedule><cron_expr>*/5 * * * *</cron_expr></schedule>
+                <run><model>radial_tax/cron::cronTaxInvoiceForCreditmemo</model></run>
+            </radial_tax_retry_creditmemo>
+        </jobs>
+    </crontab>
     <phpunit>
         <suite>
             <modules>
