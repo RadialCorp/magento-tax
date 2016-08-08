@@ -193,6 +193,7 @@ class Radial_Tax_Model_Observer
 
         $creditmemo->setData('radial_tax_transmit', 0);
 	$comment = "Tax Invoice Successfully Queued for Creditmemo: ". $creditmemo->getIncrementId();
+	$creditmemo->addComment($comment, false, true);
         $creditmemo->save();
 
 	//Mark the invoice comments as sent.
