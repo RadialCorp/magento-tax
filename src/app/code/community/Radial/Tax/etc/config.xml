@@ -29,11 +29,6 @@ http://opensource.org/licenses/osl-3.0.php
                 <class>Radial_Tax_Model</class>
                 <resourceModel>radial_tax_resource</resourceModel>
             </radial_tax>
-	    <sales>
-                <rewrite>
-                    <order_invoice_total_tax>Radial_Tax_Model_Sales_Order_Invoice_Total_Tax</order_invoice_total_tax>
-                </rewrite>
-            </sales>
         </models>
         <helpers>
             <radial_tax>
@@ -178,23 +173,6 @@ http://opensource.org/licenses/osl-3.0.php
                 </Radial_Tax>
             </modules>
         </translate>
-	<layout>
-        	<updates>
-        	    <radial_tax>
-        	 	    <file>radial_tax.xml</file>
-        	    </radial_tax>
-        	</updates>
-	</layout>
-	<events>
-        	<sales_order_grid_collection_load_before>
-        	    <observers>
-        	        <radial_tax_invoice_grid>
-        	            <model>radial_tax/observer</model>
-        	            <method>salesInvoiceGridCollectionLoadBefore</method>
-        	        </radial_tax_invoice_grid>
-        	    </observers>
-        	</sales_order_grid_collection_load_before>
-        </events>
     </adminhtml>
     <default>
         <radial_tax>
