@@ -44,7 +44,7 @@ class Radial_Tax_Model_Request_Builder_Item
     protected $_logger;
     /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
-    /** @var Mage_Sales_Model_Order_Invoice */
+    /** @var Mage_Sales_Model_Abstract */
     protected $_invoice;
 
     /**
@@ -59,7 +59,7 @@ class Radial_Tax_Model_Request_Builder_Item
      *                         - discount_helper => Radial_Core_Helper_Discount
      *                         - logger => EbayEnterprise_MageLog_Helper_Data
      *                         - log_context => EbayEnterprise_MageLog_Helper_Context
-     *			       - invoice => Mage_Sales_Model_Order_Invoice
+     *			       - invoice => Mage_Sales_Model_Abstract
      */
     public function __construct(array $args)
     {
@@ -103,7 +103,7 @@ class Radial_Tax_Model_Request_Builder_Item
      * @param Radial_Core_Helper_Discount
      * @param EbayEnterprise_MageLog_Helper_Data
      * @param EbayEnterprise_MageLog_Helper_Context
-     * @param Mage_Sales_Model_Order_Invoice
+     * @param Mage_Sales_Model_Abstract
      * @return array
      */
     protected function _checkTypes(
@@ -116,7 +116,7 @@ class Radial_Tax_Model_Request_Builder_Item
         Radial_Core_Helper_Discount $discountHelper,
         EbayEnterprise_MageLog_Helper_Data $logger,
         EbayEnterprise_MageLog_Helper_Context $logContext,
-	Mage_Sales_Model_Order_Invoice $invoice
+	Mage_Sales_Model_Abstract $invoice
     ) {
         return [
             $orderItemIterable,
@@ -261,13 +261,24 @@ class Radial_Tax_Model_Request_Builder_Item
 
 	if($this->_invoice->getId())
 	{
-		$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
-		    ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
-                    ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
-		    ->setTaxClass($this->_itemProduct->getTaxCode());
-                if ($canIncludeAmounts) {
-                    $this->_discountHelper->transferInvoiceTaxDiscounts($this->_item, $merchandiseInvoicePricing);
-                }
+		if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
+		{
+			$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
+			    ->setUnitPrice($canIncludeAmounts ? -$this->_item->getPrice() : 0)
+                	    ->setAmount($canIncludeAmounts ? -$this->_item->getRowTotal() : 0)
+			    ->setTaxClass($this->_itemProduct->getTaxCode());
+                	if ($canIncludeAmounts) {
+                	    $this->_discountHelper->transferInvoiceTaxDiscounts($this->_item, $merchandiseInvoicePricing);
+                	}
+		} else {
+			$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
+                            ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
+                            ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
+                            ->setTaxClass($this->_itemProduct->getTaxCode());
+                        if ($canIncludeAmounts) {
+                            $this->_discountHelper->transferInvoiceTaxDiscounts($this->_item, $merchandiseInvoicePricing);
+                        }
+		}
 
 		$this->_orderItem->setMerchandisePricing($merchandiseInvoicePricing);
 	} else {
@@ -288,24 +299,36 @@ class Radial_Tax_Model_Request_Builder_Item
         if ($this->_item->getIncludeShippingTotals()) {
 	    if($this->_invoice->getId())
 	    {
-		$order = $this->_invoice->getOrder();
-		$shipping = $order->getShippingInclTax();
-		
-		if($shipping)
+		if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
 		{
-			//Magento does not break this down by item level, so sending flatrate / qty in invoice
-			$shipAmountF = ($this->_invoice->getOrder()->getShippingAmount() / $this->_invoice->getOrder()->getData('total_qty_ordered')) * $this->_item->getQty();
-			$shipAmount = round($shipAmountF, 2);
+			//S&H is specifically itemized in returns, so use the entered value here. - RK
+                        $shipAmount = -$this->_invoice->getShippingInclTax();
+
+                        $invoicePricing = $this->_orderItem->getEmptyInvoicePriceGroup()
+                                ->setAmount($shipAmount)
+                                ->setTaxClass($this->_taxConfig->shippingTaxClass);
+
+                        $this->_orderItem->setInvoicePricing($invoicePricing);
 		} else {
-			$shipAmount = 0;
+			$order = $this->_invoice->getOrder();
+			$shipping = $order->getShippingInclTax();
+		
+			if($shipping)
+			{
+				//Magento does not break this down by item level, so sending flatrate / qty in invoice
+				$shipAmountF = ($this->_invoice->getOrder()->getShippingAmount() / $this->_invoice->getOrder()->getData('total_qty_ordered')) * $this->_item->getQty();
+				$shipAmount = round($shipAmountF, 2);
+			} else {
+				$shipAmount = 0;
+			}
+
+			$invoicePricing = $this->_orderItem->getEmptyInvoicePriceGroup()
+                		->setAmount($shipAmount)
+                		->setTaxClass($this->_taxConfig->shippingTaxClass);
+            		$this->_addInvoiceShippingDiscount($invoicePricing);
+
+			$this->_orderItem->setInvoicePricing($invoicePricing);
 		}
-
-		$invoicePricing = $this->_orderItem->getEmptyInvoicePriceGroup()
-                	->setAmount($shipAmount)
-                	->setTaxClass($this->_taxConfig->shippingTaxClass);
-            	$this->_addInvoiceShippingDiscount($invoicePricing);
-
-		$this->_orderItem->setInvoicePricing($invoicePricing);
 	    } else {
 		$shippingPricing = $this->_orderItem->getEmptyShippingPriceGroup()
                 	->setAmount($this->_address->getShippingAmount())

@@ -233,14 +233,14 @@ class Radial_Tax_Helper_Factory
      *
      * @param ITaxDutyFeeInvoiceRequest
      * @param Mage_Sales_Model_Quote
-     * @param Mage_Sales_Model_Order_Invoice
+     * @param Mage_Sales_Model_Abstract
      * @param type - Tax Invoice Type
      * @return Radial_Tax_Model_Request_Builder_Invoice
      */
     public function createRequestBuilderInvoice(
         ITaxDutyFeeInvoiceRequest $payload,
         Mage_Sales_Model_Order $order,
-	Mage_Sales_Model_Order_Invoice $invoice,
+	Mage_Sales_Model_Abstract $invoice,
 	$type
     ) {
         return Mage::getModel(
@@ -266,7 +266,7 @@ class Radial_Tax_Helper_Factory
         IPayload $shipGroupIterable,
         IDestinationIterable $destinationIterable,
         Mage_Customer_Model_Address_Abstract $address,
-	Mage_Sales_Model_Order_Invoice $invoice = null
+	Mage_Sales_Model_Abstract $invoice = null
     ) {
         return Mage::getModel(
             'radial_tax/request_builder_address',
@@ -291,7 +291,7 @@ class Radial_Tax_Helper_Factory
         IPayload $orderItemIterable,
         Mage_Customer_Model_Address_Abstract $address,
         Mage_Core_Model_Abstract $item,
-	Mage_Sales_Model_Order_Invoice $invoice
+	Mage_Sales_Model_Abstract $invoice
     ) {
         return Mage::getModel(
             'radial_tax/request_builder_item',

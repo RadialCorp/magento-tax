@@ -27,7 +27,7 @@ class Radial_Tax_Model_Request_Builder_Invoice
     protected $_taxFactory;
     /** @var Radial_Core_Model_Config_Registry */
     protected $_taxConfig;
-    /** @var Mage_Sales_Model_Order_Invoice */
+    /** @var Mage_Sales_Model_Abstract */
     protected $_invoice;
 
     /**
@@ -37,7 +37,7 @@ class Radial_Tax_Model_Request_Builder_Invoice
      *                         May contain key/value for:
      *                         - tax_factory => Radial_Tax_Helper_Factory
      *                         - tax_config => Radial_Core_Model_Config_Registry
-     *			       - invoice => Mage_Sales_Model_Order_Invoice 
+     *			       - invoice => Mage_Sales_Model_Abstract
      */
     public function __construct(array $args)
     {
@@ -65,7 +65,7 @@ class Radial_Tax_Model_Request_Builder_Invoice
      * @param Mage_Sales_Model_Order
      * @param ITaxDutyFeeInvoiceRequest
      * @param Radial_Tax_Helper_Factory
-     * @param Mage_Sales_Model_Order_Invoice
+     * @param Mage_Sales_Model_Abstract
      * @return array
      */
     protected function _checkTypes(
@@ -73,7 +73,7 @@ class Radial_Tax_Model_Request_Builder_Invoice
         ITaxDutyFeeInvoiceRequest $payload,
         Radial_Tax_Helper_Factory $taxFactory,
         Radial_Core_Model_Config_Registry $config,
-	Mage_Sales_Model_Order_Invoice $invoice,
+	Mage_Sales_Model_Abstract $invoice,
 	$type
     ) {
         return [$order, $payload, $taxFactory, $config, $invoice, $type];

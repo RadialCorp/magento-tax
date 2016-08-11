@@ -42,7 +42,7 @@ class Radial_Tax_Model_Request_Builder_Address
     protected $_logger;
     /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
-    /** @var Mage_Sales_Model_Order_Invoice */
+    /** @var Mage_Sales_Model_Abstract */
     protected $_invoice;
 
     /**
@@ -56,7 +56,7 @@ class Radial_Tax_Model_Request_Builder_Address
      *    - tax_factory => Radial_Tax_Helper_Factory
      *    - logger => EbayEnterprise_MageLog_Helper_Data
      *    - log_context => EbayEnterprise_MageLog_Helper_Context
-     *    - invoice => Mage_Sales_Model_Order_Invoice
+     *    - invoice => Mage_Sales_Model_Abstract
      */
     public function __construct(array $args)
     {
@@ -95,7 +95,7 @@ class Radial_Tax_Model_Request_Builder_Address
      * @param Radial_Tax_Helper_Factory
      * @param EbayEnterprise_MageLog_Helper_Data
      * @param EbayEnterprise_MageLog_Helper_Context
-     * @param Mage_Sales_Model_Order_Invoice
+     * @param Mage_Sales_Model_Abstract
      * @return array
      */
     protected function _checkTypes(
@@ -107,7 +107,7 @@ class Radial_Tax_Model_Request_Builder_Address
         Radial_Tax_Helper_Factory $taxFactory,
         EbayEnterprise_MageLog_Helper_Data $logger,
         EbayEnterprise_MageLog_Helper_Context $logContext,
-	Mage_Sales_Model_Order_Invoice $invoice
+	Mage_Sales_Model_Abstract $invoice
     ) {
         return func_get_args();
     }

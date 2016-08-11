@@ -329,12 +329,12 @@ class Radial_Tax_Model_Collector
      * Collect taxes for invoice, making an SDK tax request if necessary.
      *
      * @param Mage_Sales_Model_Order
-     * @param Mage_Sales_Model_Order_Invoice
+     * @param Mage_Sales_Model_Abstract
      * @param type - Tax Invoice Type
      * @return self
      * @throws Radial_Tax_Exception_Collector_Exception If TDF cannot be collected.
      */
-    public function collectTaxesForInvoice(Mage_Sales_Model_Order $order, Mage_Sales_Model_Order_Invoice $invoice, $type)
+    public function collectTaxesForInvoice(Mage_Sales_Model_Order $order, Mage_Sales_Model_Abstract $invoice, $type)
     {
         $this->_logger->debug('Collecting invoice tax data.', $this->_logContext->getMetaData(__CLASS__));
         try {

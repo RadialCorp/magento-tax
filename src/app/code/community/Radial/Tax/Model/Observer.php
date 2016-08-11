@@ -221,6 +221,31 @@ class Radial_Tax_Model_Observer
 	$taxRecords = $quote->getData('radial_tax_taxrecords');
 	$taxTransactionId = $quote->getData('radial_tax_transaction_id');
 
+	$addressId = $quote->getShippingAddress();
+	$taxTotal = $this->_totalTaxRecordsCalculatedTaxes(unserialize($taxRecords));
+        $dutyTotal = $this->_totalDuties(unserialize($taxDuties));
+        $feeTotal = $this->_totalFees(unserialize($taxFees));
+        $total = $taxTotal + $dutyTotal + $feeTotal;
+
+	foreach( unserialize($taxRecords) as $taxRecord )
+	{
+		$item = Mage::getModel('sales/order_item')->getCollection()
+   			->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))->getFirstItem();
+
+		$prev += $item->getTaxAmount();
+
+		$item->setTaxAmount($prev + $taxRecord->getCalculatedTax());
+		$item->save();
+	}
+
+	foreach( $order->getAllItems() as $orderItem )
+	{
+		$div = $orderItem->getTaxAmount() / $orderItem->getBaseRowTotal();
+		$orderItem->setTaxPercent(round($div, 2));
+		$orderItem->save();
+	}
+
+	$order->setData('tax_amount', $total);
 	$order->setData('radial_tax_fees', $taxFees);
 	$order->setData('radial_tax_duties', $taxDuties);
 	$order->setData('radial_tax_taxrecords', $taxRecords);
@@ -259,5 +284,56 @@ class Radial_Tax_Model_Observer
             $this->logger->warning('Attempted to recollect totals for taxes during a recursive collection. Additional collection averted to prevent further recursion.', $this->logContext->getMetaData(__CLASS__));
         }
         return $quote;
+    }
+
+       /**
+     * Get the total tax amount for an address.
+     *
+     * @param Radial_Tax_Model_Record[]
+     * @return float
+     */
+    protected function _totalTaxRecordsCalculatedTaxes(array $taxRecords)
+    {
+        return array_reduce(
+            $taxRecords,
+            function ($total, $taxRecord) {
+                return $total + $taxRecord->getCalculatedTax();
+            },
+            0.00
+        );
+    }
+
+    /**
+     * Get the total of all duties for an address.
+     *
+     * @param Radial_Tax_Model_Duty[]
+     * @return float
+     */
+    protected function _totalDuties(array $duties)
+    {
+        return array_reduce(
+            $duties,
+            function ($total, $duty) {
+                return $total + $duty->getAmount();
+            },
+            0.00
+        );
+    }
+
+    /**
+     * Get the total of all fees for an address.
+     *
+     * @param Radial_Tax_Model_Fee[]
+     * @return float
+     */
+    protected function _totalFees(array $fees)
+    {
+        return array_reduce(
+            $fees,
+            function ($total, $fee) {
+                return $total + $fee->getAmount();
+            },
+            0.00
+        );
     }
 }

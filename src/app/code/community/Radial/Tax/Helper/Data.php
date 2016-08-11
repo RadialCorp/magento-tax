@@ -138,11 +138,11 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
      * Make an API request to the TDF service for the invoice 
      *
      * @param Mage_Sales_Model_Order
-     * @param Mage_Sales_Model_Order_Invoice
+     * @param Mage_Sales_Model_Abstract
      * @param type - Tax Invoice Type
      * @throws Radial_Tax_Exception_Collector_Exception If tax records could not be invoiced
      */
-    public function requestTaxesForInvoice(Mage_Sales_Model_Order $order, Mage_Sales_Model_Order_Invoice $invoice, $type)
+    public function requestTaxesForInvoice(Mage_Sales_Model_Order $order, Mage_Sales_Model_Abstract $invoice, $type)
     {
         $api = $this->getSdkApiInvoice();
         $this->_prepareRequestInvoice($api, $order, $invoice, $type)
@@ -217,11 +217,11 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
      *
      * @param IBidirectionalApi
      * @param Mage_Sales_Model_Order
-     * @param Mage_Sales_Model_Order_invoice
+     * @param Mage_Sales_Model_Abstract
      * @param Tax Invoice Type
      * @return self
      */
-    protected function _prepareRequestInvoice(IBidirectionalApi $api, Mage_Sales_Model_Order $order, Mage_Sales_Model_Order_Invoice $invoice, $type)
+    protected function _prepareRequestInvoice(IBidirectionalApi $api, Mage_Sales_Model_Order $order, Mage_Sales_Model_Abstract $invoice, $type)
     {
         try {
             $requestBody = $api->getRequestBody();
