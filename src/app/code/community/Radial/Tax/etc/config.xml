@@ -110,14 +110,14 @@ http://opensource.org/licenses/osl-3.0.php
                     </radial_tax_creditmemo_tax>
                 </observers>
             </sales_order_creditmemo_refund>
-	    <sales_order_place_after>
+	    <checkout_submit_all_after>
                 <observers>
                     <radial_tax_copy_to_order>
 		    	<class>radial_tax/observer</class>
 			<method>copyFromQuoteToOrder</method>
 		    </radial_tax_copy_to_order>
 		</observers>
-            </sales_order_place_after>
+            </checkout_submit_all_after>
         </events>
         <sales>
             <quote>
