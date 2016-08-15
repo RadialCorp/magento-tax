@@ -141,9 +141,10 @@ class Radial_Tax_Model_Cron
 
         		    $this->logger->warning('Tax request failed.', $this->logContext->getMetaData(__CLASS__, [], $e));
 
-			    $taxEmailA = explode(',', Mage::getStoreConfig('radial_core/radial_tax_core/tax_email'));
-            		    if( !empty($taxEmailA) )
+			    $taxEmailProp = Mage::getStoreConfig('radial_core/radial_tax_core/tax_email');
+            		    if( $taxEmailProp )
             		    {
+				$taxEmailA = explode(',', $taxEmailProp );
                 		foreach( $taxEmailA as $taxEmail )
                 		{
                         		$taxName = Mage::app()->getStore()->getName() . ' - ' . 'Tax Admin';
@@ -154,7 +155,7 @@ class Radial_Tax_Model_Cron
                         		$emailTemplateVariables['myvar1'] = gmdate("Y-m-d\TH:i:s\Z");
                         		$emailTemplateVariables['myvar2'] = $e->getMessage();
                         		$emailTemplateVariables['myvar3'] = $e->getTraceAsString();
-                        		$emailTemplateVariables['myvar4'] = htmlspecialchars($cleanedResponseXml);
+                        		$emailTemplateVariables['myvar4'] = htmlspecialchars($cleanedRequestXml);
 
                         		$processedTemplate = $emailTemplate->getProcessedTemplate($emailTemplateVariables);
                         		//Sending E-Mail to Tax Admin Email.
@@ -256,9 +257,10 @@ class Radial_Tax_Model_Cron
 
                             $this->logger->warning('Tax request failed.', $this->logContext->getMetaData(__CLASS__, [], $e));
 
-                            $taxEmailA = explode(',', Mage::getStoreConfig('radial_core/radial_tax_core/tax_email'));
-                            if( !empty($taxEmailA) )
+			    $taxEmailProperty = Mage::getStoreConfig('radial_core/radial_tax_core/tax_email');
+                            if( $taxEmailProperty )
                             {
+				$taxEmailA = explode(',', $taxEmailProperty);
                                 foreach( $taxEmailA as $taxEmail )
                                 {
                                         $taxName = Mage::app()->getStore()->getName() . ' - ' . 'Tax Admin';
@@ -269,7 +271,7 @@ class Radial_Tax_Model_Cron
                                         $emailTemplateVariables['myvar1'] = gmdate("Y-m-d\TH:i:s\Z");
                                         $emailTemplateVariables['myvar2'] = $e->getMessage();
                                         $emailTemplateVariables['myvar3'] = $e->getTraceAsString();
-                                        $emailTemplateVariables['myvar4'] = htmlspecialchars($cleanedResponseXml);
+                                        $emailTemplateVariables['myvar4'] = htmlspecialchars($cleanedRequestXml);
 
                                         $processedTemplate = $emailTemplate->getProcessedTemplate($emailTemplateVariables);
                                         //Sending E-Mail to Tax Admin Email.
