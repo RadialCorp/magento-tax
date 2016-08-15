@@ -311,19 +311,10 @@ class Radial_Tax_Model_Request_Builder_Item
                         $this->_orderItem->setInvoicePricing($invoicePricing);
 		} else {
 			$order = $this->_invoice->getOrder();
-			$shipping = $order->getShippingInclTax();
+			$shipping = $this->_invoice->getShippingInclTax();
 		
-			if($shipping)
-			{
-				//Magento does not break this down by item level, so sending flatrate / qty in invoice
-				$shipAmountF = ($this->_invoice->getOrder()->getShippingAmount() / $this->_invoice->getOrder()->getData('total_qty_ordered')) * $this->_item->getQty();
-				$shipAmount = round($shipAmountF, 2);
-			} else {
-				$shipAmount = 0;
-			}
-
 			$invoicePricing = $this->_orderItem->getEmptyInvoicePriceGroup()
-                		->setAmount($shipAmount)
+                		->setAmount($shipping)
                 		->setTaxClass($this->_taxConfig->shippingTaxClass);
             		$this->_addInvoiceShippingDiscount($invoicePricing);
 
@@ -338,6 +329,81 @@ class Radial_Tax_Model_Request_Builder_Item
             	$this->_orderItem->setShippingPricing($shippingPricing);
 	    }
         }
+
+	//Add Duty Data
+	if( $this->_invoice->getId())
+	{
+		$dutyGroup = unserialize($this->_invoice->getOrder()->getData('radial_tax_duties'));
+
+		if($dutyGroup)
+		{
+			$orderItemId = $this->_item->getOrderItemId();
+                        $orderId = $this->_invoice->getOrder()->getId();
+
+			foreach( $dutyGroup as $duty )
+			{
+				$itemC = Mage::getModel('sales/order_item')->getCollection()
+                                		->addFieldToFilter('item_id', array('eq' => $orderItemId))
+						->addFieldToFilter('order_id', array('eq' => $orderId));
+
+				if( $itemC->getSize() > 0 )
+				{
+					$item = $itemC->getFirstItem();
+					if( $duty->getItemId() === $item->getQuoteItemId())
+					{
+						$amountPer = round($duty->getAmount() / (int) $item->getQtyOrdered(), 2);
+                                                $amountPer = $amountPer * (int) $this->_item->getQty();
+
+						$dutyPricing = $this->_orderItem->getEmptyDutyPriceGroup()
+							->setCalculationError($dutyGroup->getCalculationError())
+							->setAmount($amountPer)
+							->setTaxClass($dutyGroup->getTaxClass());
+
+						$this->_orderItem->setDutyPricing($dutyPricing);
+					}
+				}
+			}
+		}
+
+		//Add Fees Data
+		$taxRecordFees = unserialize($this->_invoice->getOrder()->getData('radial_tax_fees'));
+		if( $taxRecordFees )
+		{
+			$fees = $this->_orderItem->getFees();
+			$orderItemId = $this->_item->getOrderItemId();
+                        $orderId = $this->_invoice->getOrder()->getId();
+
+			foreach( $taxRecordFees as $taxFeeRecord )
+			{
+                                $itemC = Mage::getModel('sales/order_item')->getCollection()
+                                                ->addFieldToFilter('item_id', array('eq' => $orderItemId))
+                                                ->addFieldToFilter('order_id', array('eq' => $orderId));
+
+				if( $itemC->getSize() > 0 )
+                                {
+                                        $item = $itemC->getFirstItem();
+					if( $taxFeeRecord->getItemId() === $item->getQuoteItemId())
+                                        {
+						$fee = $fees->getEmptyFee()
+								->setType($taxFeeRecord->getType())
+								->setDescription($taxFeeRecord->getDescription())
+								->setId($taxFeeRecord->getFeeId());
+	
+						$amountPer = round($taxFeeRecord->getAmount() / (int) $item->getQtyOrdered(), 2);
+						$amountPer = $amountPer * (int) $this->_item->getQty();
+
+						$feePriceGroup = $fee->getEmptyFeePriceGroup()->setAmount($amountPer);
+						$fee->setCharge($feePriceGroup);
+
+						$fees[$fee] = $fee;	
+					}
+				}
+			}
+
+			$this->_orderItem->setFees($fees);
+		}
+	}
+
         return $this;
     }
 
