@@ -141,12 +141,15 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
      * @param Mage_Sales_Model_Abstract
      * @param type - Tax Invoice Type
      * @throws Radial_Tax_Exception_Collector_Exception If tax records could not be invoiced
+     * @return  Request String
      */
     public function requestTaxesForInvoice(Mage_Sales_Model_Order $order, Mage_Sales_Model_Abstract $invoice, $type)
     {
         $api = $this->getSdkApiInvoice();
         $this->_prepareRequestInvoice($api, $order, $invoice, $type)
             ->_sendApiRequest($api);
+
+	return $api->getRequestBody()->serialize();
     }
 
     /**

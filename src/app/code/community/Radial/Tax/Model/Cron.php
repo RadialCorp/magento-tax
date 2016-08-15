@@ -109,7 +109,7 @@ class Radial_Tax_Model_Cron
 
         		//Try the invoice
         		try {
-        		    $this->taxCollector->collectTaxesForInvoice($order, $invoice, $type);
+        		    $requestBody = $this->taxCollector->collectTaxesForInvoice($order, $invoice, $type);
 			    $comment = "Tax Invoice Successfully Submitted for Invoice: ". $invoice->getIncrementId();
 
 			    //Mark the invoice comments as sent.
@@ -155,7 +155,7 @@ class Radial_Tax_Model_Cron
                         		$emailTemplateVariables['myvar1'] = gmdate("Y-m-d\TH:i:s\Z");
                         		$emailTemplateVariables['myvar2'] = $e->getMessage();
                         		$emailTemplateVariables['myvar3'] = $e->getTraceAsString();
-                        		$emailTemplateVariables['myvar4'] = htmlspecialchars($cleanedRequestXml);
+                        		$emailTemplateVariables['myvar4'] = htmlspecialchars($requestBody);
 
                         		$processedTemplate = $emailTemplate->getProcessedTemplate($emailTemplateVariables);
                         		//Sending E-Mail to Tax Admin Email.
@@ -225,7 +225,7 @@ class Radial_Tax_Model_Cron
 
                         //Try the invoice
                         try {
-                            $this->taxCollector->collectTaxesForInvoice($order, $creditmemo, $type);
+                            $requestBody = $this->taxCollector->collectTaxesForInvoice($order, $creditmemo, $type);
 
 			    $comment = "Tax Invoice Successfully Submitted for Creditmemo: ". $creditmemo->getIncrementId();
 
@@ -271,7 +271,7 @@ class Radial_Tax_Model_Cron
                                         $emailTemplateVariables['myvar1'] = gmdate("Y-m-d\TH:i:s\Z");
                                         $emailTemplateVariables['myvar2'] = $e->getMessage();
                                         $emailTemplateVariables['myvar3'] = $e->getTraceAsString();
-                                        $emailTemplateVariables['myvar4'] = htmlspecialchars($cleanedRequestXml);
+                                        $emailTemplateVariables['myvar4'] = htmlspecialchars($requestBody);
 
                                         $processedTemplate = $emailTemplate->getProcessedTemplate($emailTemplateVariables);
                                         //Sending E-Mail to Tax Admin Email.

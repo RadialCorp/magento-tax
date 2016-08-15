@@ -213,4 +213,15 @@ http://opensource.org/licenses/osl-3.0.php
             </modules>
         </suite>
     </phpunit>
+    <admin>
+        <routers>
+            <radial_tax>
+                <use>admin</use>
+                <args>
+                    <frontName>radial_tax</frontName>
+                    <module>Radial_Tax_Adminhtml</module>
+                </args>
+            </radial_tax>
+        </routers>
+    </admin>
 </config>
