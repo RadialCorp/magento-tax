@@ -264,7 +264,7 @@ class Radial_Tax_Model_Request_Builder_Item
 		if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
 		{
 			$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
-			    ->setUnitPrice($canIncludeAmounts ? -$this->_item->getPrice() : 0)
+			    ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
                 	    ->setAmount($canIncludeAmounts ? -$this->_item->getRowTotal() : 0)
 			    ->setTaxClass($this->_itemProduct->getTaxCode());
                 	if ($canIncludeAmounts) {
@@ -302,7 +302,7 @@ class Radial_Tax_Model_Request_Builder_Item
 		if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
 		{
 			//S&H is specifically itemized in returns, so use the entered value here. - RK
-                        $shipAmount = -$this->_invoice->getShippingInclTax();
+                        $shipAmount = -$this->_invoice->getShippingAmount();
 
                         $invoicePricing = $this->_orderItem->getEmptyInvoicePriceGroup()
                                 ->setAmount($shipAmount)
