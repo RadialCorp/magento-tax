@@ -117,5 +117,7 @@ class Radial_Tax_Adminhtml_AdminhtmlController extends Mage_Adminhtml_Controller
                 $currentPage++;
                 $objectCollection->clear();
         } while ($currentPage <= $pages);
+
+	$this->_redirect('adminhtml/system_config/edit/section/radial_core');
     }
 }
