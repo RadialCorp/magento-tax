@@ -218,12 +218,16 @@ class Radial_Tax_Model_Observer
 	$taxRecords = unserialize($quote->getData('radial_tax_taxrecords'));
 	$taxTransactionId = $quote->getData('radial_tax_transaction_id');
 
+	$orderC = Mage::getModel('sales/order')->getCollection()
+                                        ->addFieldToFilter('quote_id', array('eq' => $quote->getId()))->getAllIds();
+
 	if( count($taxRecords) > 0 )
 	{
 		foreach( $taxRecords as $taxRecord )
 		{
 			$itemC = Mage::getModel('sales/order_item')->getCollection()
-   				->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()));
+   				->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
+				->addFieldToFilter('order_id', array('in' => $orderC));
 
 			if( $itemC->getSize() > 0 )
 			{
@@ -239,7 +243,6 @@ class Radial_Tax_Model_Observer
 				$new = $prev + $taxRecord->getCalculatedTax();
 				$div = $new / $item->getRowTotal();
 				$item->setTaxAmount($new);
-				$item->setTaxPercent(round($div, 2));
 				$item->save();
 			}
 		}
@@ -249,8 +252,9 @@ class Radial_Tax_Model_Observer
 	{
 		foreach( $taxDuties as $taxDuty )
 		{
-			$itemC = Mage::getModel('sales/order_item')->getCollection()
-                	        ->addFieldToFilter('quote_item_id', array('eq' => $taxDuty->getItemId()));
+                        $itemC = Mage::getModel('sales/order_item')->getCollection()
+                                ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
+                                ->addFieldToFilter('order_id', array('in' => $orderC));
 
 			if( $itemC->getSize() > 0 )
                 	{
@@ -267,7 +271,6 @@ class Radial_Tax_Model_Observer
                         	$div = $new / $item->getRowTotal();
 
                         	$item->setTaxAmount($new);
-                        	$item->setTaxPercent(round($div, 2));
                         	$item->save();
 			}
 		}
@@ -277,8 +280,9 @@ class Radial_Tax_Model_Observer
 	{
 		foreach( $taxFees as $taxFee )
         	{
-                	$itemC = Mage::getModel('sales/order_item')->getCollection()
-                	        ->addFieldToFilter('quote_item_id', array('eq' => $taxFee->getItemId()));
+                        $itemC = Mage::getModel('sales/order_item')->getCollection()
+                                ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
+                                ->addFieldToFilter('order_id', array('in' => $orderC));
 
         		if( $itemC->getSize() > 0 )
                         {
@@ -295,7 +299,6 @@ class Radial_Tax_Model_Observer
                                 $div = $new / $item->getRowTotal();
 
                                 $item->setTaxAmount($new);
-                                $item->setTaxPercent(round($div, 2));
                                 $item->save();
                         }
 		}
