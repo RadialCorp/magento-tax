@@ -241,7 +241,10 @@ class Radial_Tax_Model_Observer
 				}
 
 				$new = $prev + $taxRecord->getCalculatedTax();
-				$div = $new / $item->getRowTotal();
+				if($new)
+				{
+					$div = $new / $item->getRowTotal();
+				}
 				$item->setTaxAmount($new);
 				$item->save();
 			}
@@ -268,7 +271,10 @@ class Radial_Tax_Model_Observer
                         	}
 
                         	$new = $prev + $taxDuty->getAmount();
-                        	$div = $new / $item->getRowTotal();
+				if($new)
+				{
+                        		$div = $new / $item->getRowTotal();
+				}
 
                         	$item->setTaxAmount($new);
                         	$item->save();
@@ -296,7 +302,10 @@ class Radial_Tax_Model_Observer
                                 }
 
                                 $new = $prev + $taxFee->getAmount();
-                                $div = $new / $item->getRowTotal();
+				if($new)
+				{
+                                	$div = $new / $item->getRowTotal();
+				}
 
                                 $item->setTaxAmount($new);
                                 $item->save();
