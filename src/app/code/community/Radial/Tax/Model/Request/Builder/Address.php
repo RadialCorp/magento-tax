@@ -171,9 +171,17 @@ class Radial_Tax_Model_Request_Builder_Address
                 // level and not item level.
                 ->setChargeType(self::SHIPPING_CHARGE_TYPE);
 
-            if ($this->_checkAddressHasGifting()) {
-                $this->_payloadHelper->giftingItemToGiftingPayload($this->_address, $this->_shipGroup);
-            }
+	    if( $this->_invoice->getId() )
+            {
+                if ($this->_invoice->getOrder()->getGwId() && $this->_invoice->getOrder()->getGwPrice())
+		{
+                     $this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup);
+                }
+            } else {
+            	if ($this->_checkAddressHasGifting()) {
+            	    $this->_payloadHelper->giftingItemToGiftingPayload($this->_address, $this->_shipGroup);
+            	}
+	    }
 
             $this->_injectItemData();
         }

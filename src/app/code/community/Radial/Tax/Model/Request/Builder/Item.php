@@ -240,13 +240,29 @@ class Radial_Tax_Model_Request_Builder_Item
      */
     protected function _injectGiftingData()
     {
-        if ($this->_itemHasGifting()) {
-            // Given payload will be updated to include gifting data from the
-            // item, so no need to handle the return value as the side-effects
-            // of the method will accomplish all that is needed to add gifting
-            // data to the payload.
-            $this->_payloadHelper->giftingItemToGiftingPayload($this->_item, $this->_orderItem);
-        }
+	if( $this->_invoice->getId() )
+	{
+		$itemC = Mage::getModel('sales/order_item')->getCollection()
+                                ->addFieldToFilter('item_id', array('eq' => $this->_item->getOrderItemId()));
+
+		if( $itemC->getSize() > 0 )
+		{
+			$item = $itemC->getFirstItem();
+
+			if ($item->getGwId() && $item->getGwPrice())
+			{
+				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($item, $this->_orderItem);
+			}
+		}
+	} else {
+        	if ($this->_itemHasGifting()) {
+        	    // Given payload will be updated to include gifting data from the
+        	    // item, so no need to handle the return value as the side-effects
+        	    // of the method will accomplish all that is needed to add gifting
+        	    // data to the payload.
+        	    $this->_payloadHelper->giftingItemToGiftingPayload($this->_item, $this->_orderItem);
+		}
+	}
         return $this;
     }
 

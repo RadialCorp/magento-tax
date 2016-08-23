@@ -221,6 +221,8 @@ class Radial_Tax_Model_Observer
 	$orderC = Mage::getModel('sales/order')->getCollection()
                                         ->addFieldToFilter('quote_id', array('eq' => $quote->getId()))->getAllIds();
 
+	$taxTotal = 0;
+
 	if( count($taxRecords) > 0 )
 	{
 		foreach( $taxRecords as $taxRecord )
@@ -233,95 +235,55 @@ class Radial_Tax_Model_Observer
 			{
 				$item = $itemC->getFirstItem();
 
-				if( $item->getTaxAmount())
+				if( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING )
 				{
-					$prev = $item->getTaxAmount();
+					$prev = $item->getGwTaxAmount();
+                                        $item->setData('gw_base_tax_amount', $prev + $taxRecord->getCalculatedTax());
+                                        $item->setData('gw_tax_amount', $prev + $taxRecord->getCalculatedTax());
+					$item->save();
+				} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING ) {
+					$order = $observer->getEvent()->getOrder();
+					$prev = $order->getGwTaxAmount();
+					$order->setData('gw_base_tax_amount', $prev + $taxRecord->getCalculatedTax());
+                                        $order->setData('gw_tax_amount', $prev + $taxRecord->getCalculatedTax());
+					$order->getResource()->saveAttribute($order, 'gw_tax_amount');
+					$order->getResource()->saveAttribute($order, 'gw_base_tax_amount');
 				} else {
-					$prev = 0;
-				}
+					if( $taxRecord['tax_source'] !== Radial_Tax_Model_Record::SOURCE_SHIPPING && $taxRecord['tax_source'] !== Radial_Tax_Model_Record::SOURCE_SHIPPING_DISCOUNT && $taxRecord['tax_source'] !== Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING && $taxRecord['tax_source'] !== Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING && Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING_DISCOUNT && Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING_DISCOUNT )
+					{
+						if( $item->getTaxAmount())
+						{
+							$prev = $item->getTaxAmount();
+						} else {
+							$prev = 0;
+						}
 
-				$new = $prev + $taxRecord->getCalculatedTax();
-				if($new)
-				{
-					$div = $new / $item->getRowTotal();
+						$new = $prev + $taxRecord->getCalculatedTax();
+						if($new)
+						{
+							$div = $new / $item->getRowTotal();
+						}
+						$item->setTaxAmount($new);
+						$item->save();
+					}
 				}
-				$item->setTaxAmount($new);
-				$item->save();
 			}
-		}
-	}
 
-	if( count($taxDuties) > 0 )
-	{
-		foreach( $taxDuties as $taxDuty )
-		{
-                        $itemC = Mage::getModel('sales/order_item')->getCollection()
-                                ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
-                                ->addFieldToFilter('order_id', array('in' => $orderC));
-
-			if( $itemC->getSize() > 0 )
-                	{
-                        	$item = $itemC->getFirstItem();
-
-                        	if( $item->getTaxAmount())
-                        	{
-                                	$prev = $item->getTaxAmount();
-                        	} else {
-                                	$prev = 0;
-                        	}
-
-                        	$new = $prev + $taxDuty->getAmount();
-				if($new)
-				{
-                        		$div = $new / $item->getRowTotal();
-				}
-
-                        	$item->setTaxAmount($new);
-                        	$item->save();
-			}
-		}
-	}
-	
-	if( count($taxFees) > 0 )
-	{
-		foreach( $taxFees as $taxFee )
-        	{
-                        $itemC = Mage::getModel('sales/order_item')->getCollection()
-                                ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
-                                ->addFieldToFilter('order_id', array('in' => $orderC));
-
-        		if( $itemC->getSize() > 0 )
-                        {
-                                $item = $itemC->getFirstItem();
-
-                                if( $item->getTaxAmount())
-                                {
-                                        $prev = $item->getTaxAmount();
-                                } else {
-                                        $prev = 0;
-                                }
-
-                                $new = $prev + $taxFee->getAmount();
-				if($new)
-				{
-                                	$div = $new / $item->getRowTotal();
-				}
-
-                                $item->setTaxAmount($new);
-                                $item->save();
-                        }
+			$taxTotal += $taxRecord->getCalculatedTax();
 		}
 	}
 
 	if( !$quote->getIsMultiShipping())
 	{
-		$taxTotal = 0;
 		$orderI = $observer->getEvent()->getOrder()->getIncrementId();
 		$order = Mage::getModel('sales/order')->loadByIncrementId($orderI);
 
 		foreach( $order->getAllItems() as $orderItem )
-		{		
-			$taxTotal += $orderItem->getTaxAmount();
+		{
+			$prevPrice = $orderItem->getData('gw_price');
+			$orderItem->setData('gw_price', $prevPrice * $orderItem->getQtyOrdered());
+			$orderItem->setData('gw_base_price', $prevPrice * $orderItem->getQtyOrdered());
+			$orderItem->save();
 		}
 
 		$order->setData('tax_amount', $taxTotal);
@@ -344,7 +306,17 @@ class Radial_Tax_Model_Observer
 			foreach( $order->getAllItems() as $orderItem )
 			{
                         	$taxTotal += $orderItem->getTaxAmount();
+				$taxTotal += $orderItem->getGwTaxAmount();
+				$taxTotal += $orderItem->getHiddenTaxAmount();
+
+				$orderItem->setData('gw_price', $prevPrice * $orderItem->getQtyOrdered());
+                        	$orderItem->setData('gw_base_price', $prevPrice * $orderItem->getQtyOrdered());
+                        	$orderItem->save();
                 	}
+
+			$taxTotal += $quote->getGwTaxAmount();
+			$taxTotal += $quote->getGwItemsTaxAmount();
+			$taxTotal += $quote->getGwCardTaxAmount();
 
                 	$order->setData('tax_amount', $taxTotal);
                 	$order->setData('radial_tax_fees', serialize($taxFees));

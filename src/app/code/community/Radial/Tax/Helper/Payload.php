@@ -18,6 +18,8 @@ use eBayEnterprise\RetailOrderManagement\Payload\Order\ITax;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IGifting;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IMailingAddress;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IPhysicalAddress;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedShipGroup;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedGifting;
 
 /**
  * Methods for converting Magento types into corresponding ROM SDK payload
@@ -114,6 +116,40 @@ class Radial_Tax_Helper_Payload
                 ->setGiftDescription($giftWrap->getDesign())
                 ->setGiftPricing($giftPricing);
         }
+        return $giftingPayload;
+    }
+
+     /**
+     * Trasfer data from an "item" with gifting options to a Gifting payload.
+     * The "item" may be a quote item or quote address, as either may have
+     * gift options data, retrievable in the same way.
+     *
+     * @param Varien_Object
+     * @param ITaxedGifting
+     * @return ITaxedGifting
+     */
+    public function giftingItemToGiftingPayloadInvoice(
+        Varien_Object $giftItem,
+        ITaxedGifting $giftingPayload
+    ) {
+        $giftPricing = $giftingPayload->getEmptyGiftPriceGroup();
+        $giftWrap = Mage::getModel('enterprise_giftwrapping/wrapping')->load($giftItem->getGwId());
+        if ($giftWrap->getId()) {
+	    if( $giftItem instanceof Mage_Sales_Model_Order_Item )
+	    {
+            	$giftPricing->setUnitPrice($giftItem->getBasePrice())
+            	    ->setAmount($giftItem->getGwPrice())
+            	    ->setTaxClass($giftWrap->getEb2cTaxClass());
+	    } else {
+		$giftPricing->setUnitPrice($giftWrap->getBasePrice())
+                    ->setAmount($giftWrap->getBasePrice())
+                    ->setTaxClass($giftWrap->getEb2cTaxClass());
+	    }
+            $giftingPayload
+            	    ->setGiftItemId($giftWrap->getEb2cSku())
+            	    ->setGiftDescription($giftWrap->getDesign())
+            	    ->setGiftPricing($giftPricing);
+	}
         return $giftingPayload;
     }
 
