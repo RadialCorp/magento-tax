@@ -18,7 +18,6 @@ use eBayEnterprise\RetailOrderManagement\Payload\Order\ITax;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IGifting;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IMailingAddress;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IPhysicalAddress;
-use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedShipGroup;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedGifting;
 
 /**
@@ -97,6 +96,7 @@ class Radial_Tax_Helper_Payload
     ) {
         $giftPricing = $giftingPayload->getEmptyGiftPriceGroup();
         $giftWrap = Mage::getModel('enterprise_giftwrapping/wrapping')->load($giftItem->getGwId());
+
         if ($giftWrap->getId()) {
             // For quote items (which will have a quantity), gift wrapping price
             // on the item will be the price for a single item to be wrapped,
@@ -108,9 +108,18 @@ class Radial_Tax_Helper_Payload
             // Add pricing data for gift wrapping - does not include discounts
             // as Magento does not support applying discounts to gift wrapping
             // out-of-the-box.
-            $giftPricing->setUnitPrice($giftWrap->getBasePrice())
-                ->setAmount($giftItem->getGwPrice() * $giftQty)
-                ->setTaxClass($giftWrap->getEb2cTaxClass());
+
+	    if( $giftItem instanceof Mage_Sales_Model_Quote_Item )
+	    {
+            	$giftPricing->setUnitPrice($giftItem->getGwPrice())
+            	    ->setAmount($giftItem->getGwPrice() * $giftQty)
+            	    ->setTaxClass($giftWrap->getEb2cTaxClass());
+	    } else {
+		$giftPricing->setUnitPrice($giftWrap->getBasePrice())
+                    ->setAmount($giftWrap->getBasePrice())
+                    ->setTaxClass($giftWrap->getEb2cTaxClass());
+	    }
+
             $giftingPayload
                 ->setGiftItemId($giftWrap->getEb2cSku())
                 ->setGiftDescription($giftWrap->getDesign())
@@ -137,8 +146,8 @@ class Radial_Tax_Helper_Payload
         if ($giftWrap->getId()) {
 	    if( $giftItem instanceof Mage_Sales_Model_Order_Item )
 	    {
-            	$giftPricing->setUnitPrice($giftItem->getBasePrice())
-            	    ->setAmount($giftItem->getGwPrice())
+            	$giftPricing->setUnitPrice($giftItem->getGwPrice())
+            	    ->setAmount($giftItem->getGwPrice() * $giftItem->getQty())
             	    ->setTaxClass($giftWrap->getEb2cTaxClass());
 	    } else {
 		$giftPricing->setUnitPrice($giftWrap->getBasePrice())

@@ -240,8 +240,10 @@ class Radial_Tax_Model_Observer
 					if( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING )
 					{
 						$prev = $item->getGwTaxAmount();
-                                        	$item->setData('gw_base_tax_amount', $prev + $taxRecord->getCalculatedTax());
-                                        	$item->setData('gw_tax_amount', $prev + $taxRecord->getCalculatedTax());
+						$newAmt = $taxRecord->getCalculatedTax() / $item->getQtyOrdered();
+
+                                        	$item->setData('gw_base_tax_amount', $prev + $new);
+                                        	$item->setData('gw_tax_amount', $prev + $new);
 						$item->save();
 					} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING ) {
 						$order = $observer->getEvent()->getOrder();
@@ -269,8 +271,9 @@ class Radial_Tax_Model_Observer
 							$item->save();
 						}
 					}
-					$taxTotal += $taxRecord->getCalculatedTax();
 				}
+
+				$taxTotal += $taxRecord->getCalculatedTax();
 			}
 		}
 	}
@@ -298,8 +301,9 @@ class Radial_Tax_Model_Observer
                         		$item->setTaxAmount($new);
                         		$item->save();
 
-					$taxTotal += $taxDuty->getAmount();
 				}
+
+				$taxTotal += $taxDuty->getAmount();
 			}
 		}
 	}
@@ -326,8 +330,9 @@ class Radial_Tax_Model_Observer
                                 	$div = $new / $item->getRowTotal();
                                 	$item->setTaxAmount($new);
                                 	$item->save();
-					$taxTotal += $taxFee->getAmount();
                         	}
+
+				$taxTotal += $taxFee->getAmount();
 			}
 		}
 	}
@@ -336,14 +341,6 @@ class Radial_Tax_Model_Observer
 	{
 		$orderI = $observer->getEvent()->getOrder()->getIncrementId();
 		$order = Mage::getModel('sales/order')->loadByIncrementId($orderI);
-
-		foreach( $order->getAllItems() as $orderItem )
-		{
-			$prevPrice = $orderItem->getData('gw_price');
-			$orderItem->setData('gw_price', $prevPrice * $orderItem->getQtyOrdered());
-			$orderItem->setData('gw_base_price', $prevPrice * $orderItem->getQtyOrdered());
-			$orderItem->save();
-		}
 
 		$order->setData('tax_amount', $taxTotal);
         	$order->setData('radial_tax_fees', serialize($taxFees));
@@ -365,12 +362,8 @@ class Radial_Tax_Model_Observer
 			foreach( $order->getAllItems() as $orderItem )
 			{
                         	$taxTotal += $orderItem->getTaxAmount();
-				$taxTotal += $orderItem->getGwTaxAmount();
+				$taxTotal += $orderItem->getGwTaxAmount() * $orderItem->getQtyOrdered();
 				$taxTotal += $orderItem->getHiddenTaxAmount();
-
-				$orderItem->setData('gw_price', $prevPrice * $orderItem->getQtyOrdered());
-                        	$orderItem->setData('gw_base_price', $prevPrice * $orderItem->getQtyOrdered());
-                        	$orderItem->save();
                 	}
 
 			$taxTotal += $quote->getGwTaxAmount();
