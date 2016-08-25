@@ -229,6 +229,20 @@ class Radial_Tax_Model_Observer
 		{
 			if( $taxRecord->getCalculatedTax() > 0 )
 			{
+				$order = $observer->getEvent()->getOrder();
+
+				// Tabulate Address Level Gifting Outside of Item Level Stuff
+				if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING ) 
+				{
+					
+					$prev = $order->getGwTaxAmount();
+                                        $order->setData('gw_base_tax_amount', $prev + $taxRecord->getCalculatedTax());
+                                        $order->setData('gw_tax_amount', $prev + $taxRecord->getCalculatedTax());
+                                        $order->getResource()->saveAttribute($order, 'gw_tax_amount');
+                                        $order->getResource()->saveAttribute($order, 'gw_base_tax_amount');
+					continue;
+                                }
+
 				$itemC = Mage::getModel('sales/order_item')->getCollection()
    					->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
 					->addFieldToFilter('order_id', array('in' => $orderC));
@@ -240,36 +254,66 @@ class Radial_Tax_Model_Observer
 					if( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING )
 					{
 						$prev = $item->getGwTaxAmount();
-						$newAmt = $taxRecord->getCalculatedTax() / $item->getQtyOrdered();
-
-                                        	$item->setData('gw_base_tax_amount', $prev + $new);
-                                        	$item->setData('gw_tax_amount', $prev + $new);
-						$item->save();
-					} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING ) {
-						$order = $observer->getEvent()->getOrder();
-						$prev = $order->getGwTaxAmount();
-						$order->setData('gw_base_tax_amount', $prev + $taxRecord->getCalculatedTax());
-                                	        $order->setData('gw_tax_amount', $prev + $taxRecord->getCalculatedTax());
-						$order->getResource()->saveAttribute($order, 'gw_tax_amount');
-						$order->getResource()->saveAttribute($order, 'gw_base_tax_amount');
-					} else {
-						if( $taxRecord['tax_source'] !== Radial_Tax_Model_Record::SOURCE_SHIPPING && $taxRecord['tax_source'] !== Radial_Tax_Model_Record::SOURCE_SHIPPING_DISCOUNT && $taxRecord['tax_source'] !== Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING && $taxRecord['tax_source'] !== Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING && Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING_DISCOUNT && Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING_DISCOUNT )
+						if( $prev )
 						{
-							if( $item->getTaxAmount())
-							{
-								$prev = $item->getTaxAmount();
-							} else {
-								$prev = 0;
-							}
+							$prev = $item->getGwTaxAmount();
+						} else {
+							$prev = 0;
+						}	
 
-							$new = $prev + $taxRecord->getCalculatedTax();
-							if($new)
-							{
-								$div = $new / $item->getRowTotal();
-							}
-							$item->setTaxAmount($new);
-							$item->save();
+						$new = $prev + $taxRecord->getCalculatedTax();
+						if($new)
+						{
+							$div = $new / $item->getQtyOrdered();
+							$new = $div;
 						}
+
+                                        	$item->setData('gw_base_tax_amount', $new);
+                                        	$item->setData('gw_tax_amount', $new);
+						$item->save();
+					} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_SHIPPING || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_SHIPPING_DISCOUNT ) {
+						$prev = $order->getShippingTaxAmount();
+
+						$order->setData('base_shipping_tax_amount', $prev + $taxRecord->getCalculatedTax());
+						$order->setData('shipping_tax_amount', $prev + $taxRecord->getCalculatedTax());
+					
+						$prev = $order->getShippingInclTax();	
+						$order->setData('shipping_incl_tax', $prev + $taxRecord->getCalculatedTax());
+						$order->setData('base_shipping_incl_tax', $prev + $taxRecord->getCalculatedTax());
+
+						$order->getResource()->saveAttribute($order, 'shipping_incl_tax');
+						$order->getResource()->saveAttribute($order, 'base_shipping_incl_tax');
+						$order->getResource()->saveAttribute($order, 'base_shipping_tax_amount');
+						$order->getResource()->saveAttribute($order, 'shipping_tax_amount');
+					} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT ) {
+						if( $item->getTaxAmount())
+						{
+							$prev = $item->getTaxAmount();
+						} else {
+							$prev = 0;
+						}
+
+						$new = $prev + $taxRecord->getCalculatedTax();
+						if($new)
+						{
+							$div = $new / $item->getQtyOrdered();
+							$new = $div;	
+						}
+						$item->setTaxAmount($new);
+
+						$newP = $new + $item->getPrice();
+
+						$item->setPriceInclTax($newP);
+						$item->setBasePriceInclTax($newP);				
+
+						$newS = $taxRecord->getCalculatedTax() + $item->getRowTotal();
+						$item->setRowTotalInclTax($newS);
+						$item->setBaseRowTotalInclTax($newS);
+
+						$item->save();
+					} else {
+						// Customizations
+						Mage::Log("Outlier Tax Records: ". print_r($taxRecord, true));
 					}
 				}
 
@@ -301,9 +345,8 @@ class Radial_Tax_Model_Observer
                         		$item->setTaxAmount($new);
                         		$item->save();
 
+					$taxTotal += $taxDuty->getAmount();
 				}
-
-				$taxTotal += $taxDuty->getAmount();
 			}
 		}
 	}
@@ -330,9 +373,8 @@ class Radial_Tax_Model_Observer
                                 	$div = $new / $item->getRowTotal();
                                 	$item->setTaxAmount($new);
                                 	$item->save();
+					$taxTotal += $taxFee->getAmount();
                         	}
-
-				$taxTotal += $taxFee->getAmount();
 			}
 		}
 	}
@@ -362,7 +404,7 @@ class Radial_Tax_Model_Observer
 			foreach( $order->getAllItems() as $orderItem )
 			{
                         	$taxTotal += $orderItem->getTaxAmount();
-				$taxTotal += $orderItem->getGwTaxAmount() * $orderItem->getQtyOrdered();
+				$taxTotal += $orderItem->getGwTaxAmount();
 				$taxTotal += $orderItem->getHiddenTaxAmount();
                 	}
 
