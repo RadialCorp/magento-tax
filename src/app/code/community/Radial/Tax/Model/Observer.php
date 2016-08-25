@@ -229,6 +229,7 @@ class Radial_Tax_Model_Observer
 		{
 			if( $taxRecord->getCalculatedTax() > 0 )
 			{
+				$taxTotal += $taxRecord->getCalculatedTax();
 				$order = $observer->getEvent()->getOrder();
 
 				// Tabulate Address Level Gifting Outside of Item Level Stuff
@@ -271,6 +272,11 @@ class Radial_Tax_Model_Observer
                                         	$item->setData('gw_base_tax_amount', $new);
                                         	$item->setData('gw_tax_amount', $new);
 						$item->save();
+
+						$order->setData('gw_items_base_tax_amount', $prev + $taxRecord->getCalculatedTax());
+						$order->setData('gw_items_tax_amount', $prev + $taxRecord->getCalculatedTax());
+						$order->getResource()->saveAttribute($order, 'gw_items_base_tax_amount');
+						$order->getResource()->saveAttribute($order, 'gw_items_tax_amount');
 					} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_SHIPPING || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_SHIPPING_DISCOUNT ) {
 						$prev = $order->getShippingTaxAmount();
 
@@ -286,6 +292,8 @@ class Radial_Tax_Model_Observer
 						$order->getResource()->saveAttribute($order, 'base_shipping_tax_amount');
 						$order->getResource()->saveAttribute($order, 'shipping_tax_amount');
 					} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT ) {
+						// Update Item Record
+
 						if( $item->getTaxAmount())
 						{
 							$prev = $item->getTaxAmount();
@@ -294,12 +302,9 @@ class Radial_Tax_Model_Observer
 						}
 
 						$new = $prev + $taxRecord->getCalculatedTax();
-						if($new)
-						{
-							$div = $new / $item->getQtyOrdered();
-							$new = $div;	
-						}
 						$item->setTaxAmount($new);
+
+						$new = $new / $item->getQtyOrdered();
 
 						$newP = $new + $item->getPrice();
 
@@ -311,13 +316,18 @@ class Radial_Tax_Model_Observer
 						$item->setBaseRowTotalInclTax($newS);
 
 						$item->save();
+	
+						// Update Order Record
+						$prev = $order->getSubtotalInclTax();
+						$order->setData('base_subtotal_incl_tax', $prev + $taxRecord->getCalculatedTax());
+						$order->setData('subtotal_incl_tax', $prev + $taxRecord->getCalculatedTax());
+						$order->getResource()->saveAttribute($order, 'base_subtotal_incl_tax');
+						$order->getResource()->saveAttribute($order, 'subtotal_incl_tax');
 					} else {
 						// Customizations
 						Mage::Log("Outlier Tax Records: ". print_r($taxRecord, true));
 					}
 				}
-
-				$taxTotal += $taxRecord->getCalculatedTax();
 			}
 		}
 	}
