@@ -223,6 +223,8 @@ class Radial_Tax_Model_Observer
 
 	$taxTotal = 0;
 
+	$order = $observer->getEvent()->getOrder();
+
 	if( count($taxRecords) > 0 )
 	{
 		foreach( $taxRecords as $taxRecord )
@@ -230,7 +232,6 @@ class Radial_Tax_Model_Observer
 			if( $taxRecord->getCalculatedTax() > 0 )
 			{
 				$taxTotal += $taxRecord->getCalculatedTax();
-				$order = $observer->getEvent()->getOrder();
 
 				// Tabulate Address Level Gifting Outside of Item Level Stuff
 				if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING ) 
@@ -306,12 +307,12 @@ class Radial_Tax_Model_Observer
 
 						$new = $new / $item->getQtyOrdered();
 
-						$newP = $new + $item->getPrice();
+						$newP = $new + $item->getPriceInclTax();
 
 						$item->setPriceInclTax($newP);
 						$item->setBasePriceInclTax($newP);				
 
-						$newS = $taxRecord->getCalculatedTax() + $item->getRowTotal();
+						$newS = $taxRecord->getCalculatedTax() + $item->getRowTotalInclTax();
 						$item->setRowTotalInclTax($newS);
 						$item->setBaseRowTotalInclTax($newS);
 
@@ -351,9 +352,25 @@ class Radial_Tax_Model_Observer
                                 		$prev = 0;
                         		}
                         		$new = $prev + $taxDuty->getAmount();
-                        		$div = $new / $item->getRowTotal();
                         		$item->setTaxAmount($new);
+
+					$newD = $taxDuty->getAmount() / $item->getQtyOrdered();
+                                        $newP = $newD + $item->getPriceInclTax();
+
+                                        $item->setPriceInclTax($newP);
+                                        $item->setBasePriceInclTax($newP);
+
+                                        $newS = $taxDuty->getAmount() + $item->getRowTotalInclTax();
+                                        $item->setRowTotalInclTax($newS);
+                                        $item->setBaseRowTotalInclTax($newS);
                         		$item->save();
+
+					// Update Order Record
+                                        $prev = $order->getSubtotalInclTax();
+                                        $order->setData('base_subtotal_incl_tax', $prev + $taxDuty->getAmount());
+                                        $order->setData('subtotal_incl_tax', $prev + $taxDuty->getAmount());
+                                        $order->getResource()->saveAttribute($order, 'base_subtotal_incl_tax');
+                                        $order->getResource()->saveAttribute($order, 'subtotal_incl_tax');
 
 					$taxTotal += $taxDuty->getAmount();
 				}
@@ -380,9 +397,26 @@ class Radial_Tax_Model_Observer
                                 	        $prev = 0;
                                 	}
                                 	$new = $prev + $taxFee->getAmount();
-                                	$div = $new / $item->getRowTotal();
                                 	$item->setTaxAmount($new);
-                                	$item->save();
+				
+					$div = $taxFee->getAmount() / $item->getQtyOrdered();	
+					$newP = $div + $item->getPriceInclTax();
+
+                                        $item->setPriceInclTax($newP);
+                                        $item->setBasePriceInclTax($newP);
+                        
+                                        $newS = $taxFee->getAmount() + $item->getRowTotalInclTax();
+                                        $item->setRowTotalInclTax($newS);
+                                        $item->setBaseRowTotalInclTax($newS);
+                                        $item->save();
+
+                                        // Update Order Record
+                                        $prev = $order->getSubtotalInclTax();
+                                        $order->setData('base_subtotal_incl_tax', $prev + $taxFee->getAmount());
+                                        $order->setData('subtotal_incl_tax', $prev + $taxFee->getAmount());
+                                        $order->getResource()->saveAttribute($order, 'base_subtotal_incl_tax');
+                                        $order->getResource()->saveAttribute($order, 'subtotal_incl_tax');					
+
 					$taxTotal += $taxFee->getAmount();
                         	}
 			}
