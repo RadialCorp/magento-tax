@@ -20,6 +20,10 @@ use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IMailingAddress;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\IPhysicalAddress;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedShipGroup;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedGifting;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ICustomizationIterable;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedCustomizationIterable;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ICustomization;
+use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedCustomization;
 
 /**
  * Methods for converting Magento types into corresponding ROM SDK payload
@@ -29,6 +33,20 @@ use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedGifting;
  */
 class Radial_Tax_Helper_Payload
 {
+    /**
+     * Get a value from an array if it exists or get a default.
+     *
+     * @codeCoverageIgnore
+     * @param array
+     * @param string
+     * @param mixed
+     * @return mixed
+     */
+    protected function _nullCoalesce(array $array, $key, $default)
+    {
+        return isset($array[$key]) ? $array[$key] : $default;
+    }
+
     /**
      * Transfer data from a Magento customer address model to a ROM SDK
      * MailingAddress payload.
@@ -128,6 +146,104 @@ class Radial_Tax_Helper_Payload
         return $giftingPayload;
     }
 
+    /**
+     * Add the printed card from Magento Enterprise to the tax call for invoice / quote
+     * Note that this is the ultimate section for product customizations.. so extending this to support a true iterable might need to be required.
+     *
+     * @param Varien_Object
+     * @param ICustomizationIterable
+     * @return ICustomization
+     */
+    public function transferGwPrintedCard(Varien_Object $salesObject, ICustomizationIterable $customizations)
+    {
+        /** @var ICustomization $printCardCustomization */
+	$printCardCustomization = $customizations->getEmptyCustomization();
+       
+	$quote = Mage::getModel('sales/quote')->load($salesObject->getQuoteId());
+
+	/* Printed Card Data */
+	$customizationData = array();
+	$customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+	$customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+	$customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
+	$customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
+	$customizationData['description'] = "MAGE Printed Card";
+
+	$printCardCustomization = $this->_fillOutCustomization($printCardCustomization, $customizationData);
+
+	return $printCardCustomization;
+    }
+
+    /**
+     * Add the printed card from Magento Enterprise to the tax call for invoice / quote
+     * Note that this is the ultimate section for product customizations.. so extending this to support a true iterable might need to be required.
+     *
+     * @param Varien_Object
+     * @param ITaxedCustomizationIterable
+     * @return ITaxedCustomization
+     */
+    public function transferGwPrintedCardInvoice(Varien_Object $salesObject, ITaxedCustomizationIterable $customizations)
+    {
+        /** @var ITaxedCustomization $printCardCustomization */
+        $printCardCustomization = $customizations->getEmptyCustomization();
+
+	$order = Mage::getModel('sales/order')->load($salesObject->getOrderId());
+
+        /* Printed Card Data */
+        $customizationData = array();
+        $customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+        $customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+        $customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
+        $customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
+        $customizationData['description'] = "MAGE Printed Card";
+
+        $printCardCustomization = $this->_fillOutCustomizationInvoice($printCardCustomization, $customizationData);
+
+	return $printCardCustomization;
+    }
+
+    /**
+     * Fill out the data in an ICustomization
+     *
+     * @param ICustomization
+     * @param array $customizationData
+     * @return ICustomization
+     */
+    protected function _fillOutCustomization(ICustomization $customizationPayload, array $customizationData)
+    {
+	$customizationPricing = $customizationPayload->getEmptyPriceGroup();
+	$customizationPricing->setUnitPrice($this->_nullCoalesce($customizationData, 'unit_price', null))
+			     ->setAmount($this->_nullCoalesce($customizationData, 'amount', null))	
+			     ->setTaxClass($this->_nullCoalesce($customizationData, 'tax_class', null));
+
+	$customizationPayload->setItemId($this->_nullCoalesce($customizationData, 'item_id', null))
+			     ->setItemDescription($this->_nullCoalesce($customizationData, 'description', null))
+			     ->setUpCharge($customizationPricing);
+
+	return $customizationPayload;
+    }
+
+    /**
+     * Fill out the data in an ITaxedCustomization
+     *
+     * @param ITaxedCustomization
+     * @param array $customizationData
+     * @return ITaxedCustomization
+     */
+    protected function _fillOutCustomizationInvoice(ITaxedCustomization $customizationPayload, array $customizationData)
+    {
+        $customizationPricing = $customizationPayload->getEmptyPriceGroup();
+        $customizationPricing->setUnitPrice($this->_nullCoalesce($customizationData, 'unit_price', null))
+                             ->setAmount($this->_nullCoalesce($customizationData, 'amount', null))
+                             ->setTaxClass($this->_nullCoalesce($customizationData, 'tax_class', null));
+
+        $customizationPayload->setItemId($this->_nullCoalesce($customizationData, 'item_id', null))
+                             ->setItemDescription($this->_nullCoalesce($customizationData, 'description', null))
+                             ->setUpCharge($customizationPricing);
+
+        return $customizationPayload;
+    }
+
      /**
      * Trasfer data from an "item" with gifting options to a Gifting payload.
      * The "item" may be a quote item or quote address, as either may have
@@ -135,19 +251,28 @@ class Radial_Tax_Helper_Payload
      *
      * @param Varien_Object
      * @param ITaxedGifting
+     * @param Varien_Object
      * @return ITaxedGifting
      */
     public function giftingItemToGiftingPayloadInvoice(
         Varien_Object $giftItem,
-        ITaxedGifting $giftingPayload
+        ITaxedGifting $giftingPayload,
+ 	Varien_Object $invoiceItem = null
     ) {
         $giftPricing = $giftingPayload->getEmptyGiftPriceGroup();
-        $giftWrap = Mage::getModel('enterprise_giftwrapping/wrapping')->load($giftItem->getGwId());
+
+	if( $invoiceItem )
+	{
+        	$giftWrap = Mage::getModel('enterprise_giftwrapping/wrapping')->load($invoiceItem->getGwId());
+	} else {
+		$giftWrap = Mage::getModel('enterprise_giftwrapping/wrapping')->load($giftItem->getGwId());
+	}
         if ($giftWrap->getId()) {
-            if( $giftItem instanceof Mage_Sales_Model_Order_Item )
+            if( $invoiceItem instanceof Mage_Sales_Model_Order_Item )
             {
-                $giftPricing->setUnitPrice($giftItem->getGwPrice())
-                    ->setAmount($giftItem->getGwPrice() * $giftItem->getQty())
+		$giftQty = $giftItem->getQty() ?: 1;
+                $giftPricing->setUnitPrice($invoiceItem->getGwPrice())
+                    ->setAmount($invoiceItem->getGwPrice() * $giftQty)
                     ->setTaxClass($giftWrap->getEb2cTaxClass());
             } else {
                 $giftPricing->setUnitPrice($giftWrap->getBasePrice())
@@ -159,6 +284,7 @@ class Radial_Tax_Helper_Payload
             	    ->setGiftDescription($giftWrap->getDesign())
             	    ->setGiftPricing($giftPricing);
 	}
+
         return $giftingPayload;
     }
 

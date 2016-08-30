@@ -291,7 +291,8 @@ class Radial_Tax_Helper_Factory
         IPayload $orderItemIterable,
         Mage_Customer_Model_Address_Abstract $address,
         Mage_Core_Model_Abstract $item,
-	Mage_Sales_Model_Abstract $invoice
+	Mage_Sales_Model_Abstract $invoice,
+	$first
     ) {
         return Mage::getModel(
             'radial_tax/request_builder_item',
@@ -300,6 +301,7 @@ class Radial_Tax_Helper_Factory
                 'address' => $address,
                 'item' => $item,
 		'invoice' => $invoice,
+		'first' => $first,
             ]
         );
     }

@@ -173,10 +173,16 @@ class Radial_Tax_Model_Request_Builder_Address
 
 	    if( $this->_invoice->getId() )
             {
-                if ($this->_invoice->getOrder()->getGwId() && $this->_invoice->getOrder()->getGwPrice())
+		// Only Send Gift Wrap on First Invoice
+		$invoiceCol = $this->_invoice->getOrder()->getInvoiceCollection()->addAttributeToSort('increment_id', 'ASC');
+
+		if( strcmp($invoiceCol->getFirstItem()->getIncrementId(), $this->_invoice->getIncrementId()) === 0 )
 		{
-                     $this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup);
-                }
+                	if ($this->_invoice->getOrder()->getGwId() && $this->_invoice->getOrder()->getGwPrice())
+			{
+                	     $this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup );
+                	}
+		}
             } else {
             	if ($this->_checkAddressHasGifting()) {
             	    $this->_payloadHelper->giftingItemToGiftingPayload($this->_address, $this->_shipGroup);
@@ -214,7 +220,8 @@ class Radial_Tax_Model_Request_Builder_Address
                         $orderItemIterable,
                         $this->_address,
                         $item,
-			$this->_invoice
+			$this->_invoice,
+			$first
                     );
 
             	    $itemPayload = $itemBuilder->getOrderItemPayload();
@@ -237,7 +244,8 @@ class Radial_Tax_Model_Request_Builder_Address
         	       $orderItemIterable,
         	       $this->_address,
         	       $item,
-		       $this->_invoice
+		       $this->_invoice,
+		       $first
         	    );
 
         	    $itemPayload = $itemBuilder->getOrderItemPayload();

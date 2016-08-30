@@ -46,6 +46,8 @@ class Radial_Tax_Model_Request_Builder_Item
     protected $_logContext;
     /** @var Mage_Sales_Model_Abstract */
     protected $_invoice;
+    /** @var boolean */
+    protected $_first;
 
     /**
      * @param array $args Must contain key/value for:
@@ -60,6 +62,7 @@ class Radial_Tax_Model_Request_Builder_Item
      *                         - logger => EbayEnterprise_MageLog_Helper_Data
      *                         - log_context => EbayEnterprise_MageLog_Helper_Context
      *			       - invoice => Mage_Sales_Model_Abstract
+     *			       - first => boolean
      */
     public function __construct(array $args)
     {
@@ -73,7 +76,8 @@ class Radial_Tax_Model_Request_Builder_Item
             $this->_discountHelper,
             $this->_logger,
             $this->_logContext,
-	    $this->_invoice
+	    $this->_invoice,
+	    $this->_first
         ) = $this->_checkTypes(
             $args['order_item_iterable'],
             $args['address'],
@@ -84,7 +88,8 @@ class Radial_Tax_Model_Request_Builder_Item
             $this->_nullCoalesce($args, 'discount_helper', Mage::helper('radial_core/discount')),
             $this->_nullCoalesce($args, 'logger', Mage::helper('ebayenterprise_magelog')),
             $this->_nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context')),
-	    $args['invoice']
+	    $args['invoice'],
+	    $args['first']
         );
         $this->_itemProduct = $this->getItemProduct($this->_item);
         $this->_orderItem = $this->_orderItemIterable->getEmptyOrderItem();
@@ -104,6 +109,7 @@ class Radial_Tax_Model_Request_Builder_Item
      * @param EbayEnterprise_MageLog_Helper_Data
      * @param EbayEnterprise_MageLog_Helper_Context
      * @param Mage_Sales_Model_Abstract
+     * @param first
      * @return array
      */
     protected function _checkTypes(
@@ -116,7 +122,8 @@ class Radial_Tax_Model_Request_Builder_Item
         Radial_Core_Helper_Discount $discountHelper,
         EbayEnterprise_MageLog_Helper_Data $logger,
         EbayEnterprise_MageLog_Helper_Context $logContext,
-	Mage_Sales_Model_Abstract $invoice
+	Mage_Sales_Model_Abstract $invoice,
+	$first
     ) {
         return [
             $orderItemIterable,
@@ -128,7 +135,8 @@ class Radial_Tax_Model_Request_Builder_Item
             $discountHelper,
             $logger,
             $logContext,
-	    $invoice
+	    $invoice,
+	    $first
         ];
     }
 
@@ -165,7 +173,8 @@ class Radial_Tax_Model_Request_Builder_Item
         return $this->_injectItemData()
             ->_injectOriginData()
             ->_injectPricingData()
-            ->_injectGiftingData();
+            ->_injectGiftingData()
+	    ->_injectCustomizationData();
     }
 
     /**
@@ -251,7 +260,7 @@ class Radial_Tax_Model_Request_Builder_Item
 
 			if ($item->getGwId() && $item->getGwPrice())
 			{
-				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($item, $this->_orderItem);
+				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_item, $this->_orderItem, $item);
 			}
 		}
 	} else {
@@ -264,6 +273,45 @@ class Radial_Tax_Model_Request_Builder_Item
 		}
 	}
         return $this;
+    }
+
+    /**
+     * Inject Customization Data for Printed Cards (for now)
+     *
+     * @return self
+     */
+    protected function _injectCustomizationData()
+    {
+	$gwCardSku = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
+        $gwCardTaxClass = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
+	$gwCardPriceStore = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+
+	if( $this->_invoice->getId())
+	{
+		$order = $this->_invoice->getOrder();
+
+		// Only Send Gift Wrap on First Invoice
+                $invoiceCol = $order->getInvoiceCollection()->addAttributeToSort('increment_id', 'ASC');
+
+                if( strcmp($invoiceCol->getFirstItem()->getIncrementId(), $this->_invoice->getIncrementId()) === 0 )
+                {
+			if( $order->getGwAddCard() && $order->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore && $this->_first)
+			{
+				$customizations = $this->_orderItem->getCustomizations();
+				$customization = $this->_payloadHelper->transferGwPrintedCardInvoice($this->_item, $customizations);
+				$customizations[$customization] = $customization;
+				$this->_orderItem->setCustomizations($customizations);
+			}
+		}
+	} else {
+                if( $this->_address->getGwAddCard() && $this->_address->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore && $this->_first)
+                {
+			$customizations = $this->_orderItem->getCustomizations();
+                        $customization = $this->_payloadHelper->transferGwPrintedCard($this->_item, $customizations);
+			$customizations[$customization] = $customization;
+			$this->_orderItem->setCustomizations($customizations);
+                }
+	}
     }
 
     /**
