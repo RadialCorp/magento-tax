@@ -225,10 +225,22 @@ class Radial_Tax_Model_Request_Builder_Item
             'postcode' => $this->_taxConfig->adminOriginPostalCode,
         ]);
 
-        // Shipping origin may be set on order items if this information has been
-        // retrieved from ROM services. When not available, default to the same
-        // address set as the admin origin.
-        $shippingOrigin = $this->delegateShippingOrigin() ?: $adminOrigin;
+	// In the PTF Model, we have no idea where items are being shipped from except if defined in the Magento Admin Under 
+	// System -> Configuration -> Shipping Settings -> Origin
+
+	$shippingOrigin = Mage::getModel('customer/address', [
+            'street' => rtrim(
+                implode([
+                    Mage::getStoreConfig('shipping/origin/street_line1'),
+                    Mage::getStoreConfig('shipping/origin/street_line2')
+		]),
+                "\n"
+            ),
+            'city' => Mage::getStoreConfig('shipping/origin/city'),
+            'region_id' => Mage::getStoreConfig('shipping/origin/region_id'),
+            'country_id' => Mage::getStoreConfig('shipping/origin/country_id'),
+            'postcode' => Mage::getStoreConfig('shipping/origin/postcode'),
+        ]);
 
         $this->_orderItem
             ->setAdminOrigin($this->_payloadHelper->customerAddressToPhysicalAddressPayload(
