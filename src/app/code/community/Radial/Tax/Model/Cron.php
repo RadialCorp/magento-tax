@@ -235,6 +235,7 @@ class Radial_Tax_Model_Cron
                                         ->setComment($comment)
                                         ->setEntityName('order');
                             $order->addStatusHistory($history);
+			    $order->save();
 
 			    $creditmemo->addComment($comment, false, true);
 			    $creditmemo->setData('radial_tax_transmit', -1);
