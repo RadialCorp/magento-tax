@@ -25,6 +25,8 @@ class Radial_Tax_Model_Observer
     protected $logger;
     /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $logContext;
+    /** @var Radial_Tax_Helper_Data */
+    protected $helper;
 
     /**
      * @param array
@@ -35,12 +37,14 @@ class Radial_Tax_Model_Observer
             $this->taxCollector,
             $this->coreSession,
             $this->logger,
-            $this->logContext
+            $this->logContext,
+	    $this->helper
         ) = $this->checkTypes(
             $this->nullCoalesce($args, 'tax_collector', Mage::getModel('radial_tax/collector')),
             $this->nullCoalesce($args, 'core_session', null),
             $this->nullCoalesce($args, 'logger', Mage::helper('ebayenterprise_magelog')),
-            $this->nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context'))
+            $this->nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context')),
+	    $this->nullCoalesce($args, 'helper', Mage::helper('radial_tax'))
         );
     }
 
@@ -51,13 +55,15 @@ class Radial_Tax_Model_Observer
      * @param Radial_Tax_Model_Session
      * @param EbayEnterprise_MageLog_Helper_Data
      * @param EbayEnterprise_MageLog_Helper_Context
+     * @param Radial_Tax_Helper_Data
      * @return array
      */
     protected function checkTypes(
         Radial_Tax_Model_Collector $taxCollector,
         Radial_Core_Model_Session $coreSession = null,
         EbayEnterprise_MageLog_Helper_Data $logger,
-        EbayEnterprise_MageLog_Helper_Context $logContext
+        EbayEnterprise_MageLog_Helper_Context $logContext,
+	Radial_Tax_Helper_Data $helper
     ) {
         return func_get_args();
     }
@@ -105,7 +111,8 @@ class Radial_Tax_Model_Observer
     public function handleSalesQuoteCollectTotalsAfter(Varien_Event_Observer $observer)
     {
         $coreSession = $this->getCoreSession();
-        if ($coreSession->isTaxUpdateRequired()) {
+	$enabled = $this->helper->getConfigModel()->enabled;
+        if ($coreSession->isTaxUpdateRequired() && $enabled) {
             /** @var Mage_Sales_Model_Quote */
             $quote = $observer->getEvent()->getQuote();
             try {
@@ -156,22 +163,26 @@ class Radial_Tax_Model_Observer
      */
     public function processTaxInvoiceForInvoice(Varien_Event_Observer $observer)
     {
-	$invoice = $observer->getEvent()->getInvoice();
-	$order = $invoice->getOrder();
+	$enabled = $this->helper->getConfigModel()->enabled;
+	if( $enabled )
+	{
+		$invoice = $observer->getEvent()->getInvoice();
+		$order = $invoice->getOrder();
 
-	$comment = "Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId();
+		$comment = "Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId();
 
-	$invoice->setData('radial_tax_transmit', 0);
-	$invoice->addComment($comment, false, true);
-	$invoice->save();
+		$invoice->setData('radial_tax_transmit', 0);
+		$invoice->addComment($comment, false, true);
+		$invoice->save();
 
-	//Mark the invoice comments as sent.
-        $history = Mage::getModel('sales/order_status_history')
+		//Mark the invoice comments as sent.
+        	$history = Mage::getModel('sales/order_status_history')
                       ->setStatus($order->getStatus())
                       ->setComment("Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId())
                       ->setEntityName('order');
-        $order->addStatusHistory($history);
-	$order->save();	
+        	$order->addStatusHistory($history);
+		$order->save();	
+	}
 
         return $this;
     }
@@ -189,21 +200,25 @@ class Radial_Tax_Model_Observer
      */
     public function processTaxInvoiceForCreditmemo(Varien_Event_Observer $observer)
     {
-        $creditmemo = $observer->getEvent()->getCreditmemo();
-	$order = $creditmemo->getOrder();
+	$enabled = $this->helper->getConfigModel()->enabled;
+	if( $enabled )
+	{
+        	$creditmemo = $observer->getEvent()->getCreditmemo();
+		$order = $creditmemo->getOrder();
 
-        $creditmemo->setData('radial_tax_transmit', 0);
-	$comment = "Tax Invoice Successfully Queued for Creditmemo: ". $creditmemo->getIncrementId();
-	$creditmemo->addComment($comment, false, true);
-        $creditmemo->save();
+        	$creditmemo->setData('radial_tax_transmit', 0);
+		$comment = "Tax Invoice Successfully Queued for Creditmemo: ". $creditmemo->getIncrementId();
+		$creditmemo->addComment($comment, false, true);
+        	$creditmemo->save();
 
-	//Mark the invoice comments as sent.
-        $history = Mage::getModel('sales/order_status_history')
+		//Mark the invoice comments as sent.
+        	$history = Mage::getModel('sales/order_status_history')
                        ->setStatus($order->getStatus())
                        ->setComment($comment)
                        ->setEntityName('order');
-        $order->addStatusHistory($history);
-	$order->save();
+        	$order->addStatusHistory($history);
+		$order->save();
+	}
 
         return $this;
     }
@@ -214,6 +229,12 @@ class Radial_Tax_Model_Observer
      */
     public function copyFromQuoteToOrder(Varien_Event_Observer $observer)
     {
+	$enabled = $this->helper->getConfigModel()->enabled;
+	if( !$enabled )
+	{
+		return $this;
+	}
+
 	$quote = $observer->getEvent()->getQuote();
 	$taxFees = unserialize($quote->getData('radial_tax_fees'));
 	$taxDuties = unserialize($quote->getData('radial_tax_duties'));

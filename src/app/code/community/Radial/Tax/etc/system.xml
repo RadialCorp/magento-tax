@@ -107,6 +107,15 @@ http://opensource.org/licenses/osl-3.0.php
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
                     <fields>
+			<enabledmod translate="label">
+                                <label>Enabled</label>
+                                <frontend_type>select</frontend_type>
+                                <source_model>adminhtml/system_config_source_yesno</source_model>
+                                <sort_order>1</sort_order>
+                                <show_in_default>1</show_in_default>
+                                <show_in_website>0</show_in_website>
+                                <show_in_store>0</show_in_store>
+                        </enabledmod>
 		    	<maxretries translate="label">
                             <label>Maximum Tax Transmission Retries</label>
                             <sort_order>4</sort_order>

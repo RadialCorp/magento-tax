@@ -32,5 +32,6 @@ class Radial_Tax_Model_Config extends Radial_Core_Model_Config_Abstract
         'shipping_tax_class' => 'radial_tax/tax_class/shipping',
         'tax_duty_rate_code' => 'radial_tax/duty/rate_code',
         'vat_inclusive_pricing' => 'radial_tax/pricing/vat_inclusive',
+	'enabled' => 'radial_core/radial_tax_core/enabledmod',
     );
 }

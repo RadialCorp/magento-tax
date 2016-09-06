@@ -189,6 +189,7 @@ http://opensource.org/licenses/osl-3.0.php
         </radial_tax>
 	<radial_core>
                 <radial_tax_core>
+			<enabledmod>1</enabledmod>
                         <maxretries>3</maxretries>
                         <responsetimeout>20000</responsetimeout>
 			<printedcardtaxclass>18451</printedcardtaxclass>
