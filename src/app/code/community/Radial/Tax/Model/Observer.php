@@ -171,7 +171,8 @@ class Radial_Tax_Model_Observer
                       ->setComment("Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId())
                       ->setEntityName('order');
         $order->addStatusHistory($history);
-	
+	$order->save();	
+
         return $this;
     }
 
@@ -202,6 +203,7 @@ class Radial_Tax_Model_Observer
                        ->setComment($comment)
                        ->setEntityName('order');
         $order->addStatusHistory($history);
+	$order->save();
 
         return $this;
     }

@@ -327,13 +327,33 @@ class Radial_Tax_Model_Request_Builder_Item
 	{
 		if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
 		{
+			$subtotal = -$this->_item->getRowTotal();
+
+			$itemC = Mage::getModel('sales/order_item')->getCollection()
+                                ->addFieldToFilter('item_id', array('eq' => $this->_item->getData('order_item_id')));
+
+		        if( $itemC->getSize() > 0 )
+        		{
+				$data = unserialize($itemC->getFirstItem()->getData('ebayenterprise_order_discount_data'));
+
+                		if($data)
+                		{
+                	    		foreach ($data as $loneDiscountData) {
+                	        	    if( $loneDiscountData['amount'] != 0 )
+                	        	    {
+                	        	        $appliedCount = $loneDiscountData['applied_count'];
+                	        	        $singleDisc = $loneDiscountData['amount'] / $appliedCount;
+                	        	        $newAmount = $singleDisc * $this->_item->getQty();
+                	        	        $subtotal = $subtotal + $newAmount;
+                	        	    }
+                	    		}
+                		}
+			}
+
 			$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
-			    ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
-                	    ->setAmount($canIncludeAmounts ? -$this->_item->getRowTotal() : 0)
+			    ->setUnitPrice($canIncludeAmounts ? -$this->_item->getPrice() : 0)
+                	    ->setAmount($canIncludeAmounts ? $subtotal : 0)
 			    ->setTaxClass($this->_itemProduct->getTaxCode());
-                	if ($canIncludeAmounts) {
-                	    $this->_discountHelper->transferInvoiceTaxDiscounts($this->_item, $merchandiseInvoicePricing);
-                	}
 		} else {
 			$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
                             ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
