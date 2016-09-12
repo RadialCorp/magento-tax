@@ -191,8 +191,16 @@ class Radial_Tax_Helper_Payload
 
         /* Printed Card Data */
         $customizationData = array();
-        $customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
-        $customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+
+	if( $salesObject instanceof Mage_Sales_Model_Order_Creditmemo_Item )
+	{
+        	$customizationData['unit_price'] = -Mage::getStoreConfig('sales/gift_options/printed_card_price');
+        	$customizationData['amount'] = -Mage::getStoreConfig('sales/gift_options/printed_card_price');
+	} else {
+		$customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+                $customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+	}
+
         $customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
         $customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
         $customizationData['description'] = "MAGE Printed Card";
@@ -252,12 +260,14 @@ class Radial_Tax_Helper_Payload
      * @param Varien_Object
      * @param ITaxedGifting
      * @param Varien_Object
+     * @param Bool
      * @return ITaxedGifting
      */
     public function giftingItemToGiftingPayloadInvoice(
         Varien_Object $giftItem,
         ITaxedGifting $giftingPayload,
- 	Varien_Object $invoiceItem = null
+ 	Varien_Object $invoiceItem = null,
+	$isCreditMemo
     ) {
         $giftPricing = $giftingPayload->getEmptyGiftPriceGroup();
 
@@ -274,9 +284,14 @@ class Radial_Tax_Helper_Payload
                 $giftPricing->setUnitPrice($invoiceItem->getGwPrice())
                     ->setAmount($invoiceItem->getGwPrice() * $giftQty)
                     ->setTaxClass($giftWrap->getEb2cTaxClass());
-            } else {
-                $giftPricing->setUnitPrice($giftWrap->getBasePrice())
-                    ->setAmount($giftWrap->getBasePrice())
+	    } else if ( $isCreditMemo && $invoiceItem ) {
+		$giftQty = $giftItem->getQty() ?: 1;
+                $giftPricing->setUnitPrice(-$invoiceItem->getGwPrice())
+                    ->setAmount(-$invoiceItem->getGwPrice() * $giftQty)
+                    ->setTaxClass($giftWrap->getEb2cTaxClass());
+            } else if ( $isCreditMemo && !$invoiceItem ) {
+                $giftPricing->setUnitPrice(-$giftWrap->getBasePrice())
+                    ->setAmount(-$giftWrap->getBasePrice())
                     ->setTaxClass($giftWrap->getEb2cTaxClass());
             }
 	    $giftingPayload

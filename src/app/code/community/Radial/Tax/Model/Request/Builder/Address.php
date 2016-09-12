@@ -180,7 +180,12 @@ class Radial_Tax_Model_Request_Builder_Address
 		{
                 	if ($this->_invoice->getOrder()->getGwId() && $this->_invoice->getOrder()->getGwPrice())
 			{
-                	     $this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup );
+			     if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
+			     {
+                	     	$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, '', 1 );
+			     } else {
+				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, '', 0);
+			     }
                 	}
 		}
             } else {

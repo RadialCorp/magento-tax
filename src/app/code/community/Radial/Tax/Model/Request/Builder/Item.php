@@ -272,7 +272,7 @@ class Radial_Tax_Model_Request_Builder_Item
 
 			if ($item->getGwId() && $item->getGwPrice())
 			{
-				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_item, $this->_orderItem, $item);
+				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_item, $this->_orderItem, $item, '');
 			}
 		}
 	} else {
@@ -450,10 +450,18 @@ class Radial_Tax_Model_Request_Builder_Item
 						$amountPer = round($duty->getAmount() / (int) $item->getQtyOrdered(), 2);
                                                 $amountPer = $amountPer * (int) $this->_item->getQty();
 
-						$dutyPricing = $this->_orderItem->getEmptyDutyPriceGroup()
-							->setCalculationError($dutyGroup->getCalculationError())
-							->setAmount($amountPer)
-							->setTaxClass($dutyGroup->getTaxClass());
+						if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
+						{
+							$dutyPricing = $this->_orderItem->getEmptyDutyPriceGroup()
+								->setCalculationError($dutyGroup->getCalculationError())
+								->setAmount(-$amountPer)
+								->setTaxClass($dutyGroup->getTaxClass());
+						} else {
+							$dutyPricing = $this->_orderItem->getEmptyDutyPriceGroup()
+                                                                ->setCalculationError($dutyGroup->getCalculationError())
+                                                                ->setAmount($amountPer)
+                                                                ->setTaxClass($dutyGroup->getTaxClass());
+						}
 
 						$this->_orderItem->setDutyPricing($dutyPricing);
 					}
@@ -488,7 +496,13 @@ class Radial_Tax_Model_Request_Builder_Item
 						$amountPer = round($taxFeeRecord->getAmount() / (int) $item->getQtyOrdered(), 2);
 						$amountPer = $amountPer * (int) $this->_item->getQty();
 
-						$feePriceGroup = $fee->getEmptyFeePriceGroup()->setAmount($amountPer);
+						if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
+                                                {
+							$feePriceGroup = $fee->getEmptyFeePriceGroup()->setAmount(-$amountPer);
+						} else {
+							$feePriceGroup = $fee->getEmptyFeePriceGroup()->setAmount($amountPer);
+						}
+
 						$fee->setCharge($feePriceGroup);
 
 						$fees[$fee] = $fee;	
