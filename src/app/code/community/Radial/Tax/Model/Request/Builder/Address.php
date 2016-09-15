@@ -182,9 +182,11 @@ class Radial_Tax_Model_Request_Builder_Address
 			{
 			     if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
 			     {
-                	     	$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, '', 1 );
+				$obj = new Varien_Object;
+
+                	     	$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, $obj, 1 );
 			     } else {
-				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, '', 0);
+				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, $obj, 0);
 			     }
                 	}
 		}

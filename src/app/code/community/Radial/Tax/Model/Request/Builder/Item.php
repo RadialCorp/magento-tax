@@ -407,7 +407,7 @@ class Radial_Tax_Model_Request_Builder_Item
                         $this->_orderItem->setInvoicePricing($invoicePricing);
 		} else {
 			$order = $this->_invoice->getOrder();
-			$shipping = $this->_invoice->getShippingInclTax();
+			$shipping = $this->_invoice->getShippingAmount();
 		
 			$invoicePricing = $this->_orderItem->getEmptyInvoicePriceGroup()
                 		->setAmount($shipping)

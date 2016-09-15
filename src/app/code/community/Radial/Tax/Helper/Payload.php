@@ -284,12 +284,12 @@ class Radial_Tax_Helper_Payload
                 $giftPricing->setUnitPrice($invoiceItem->getGwPrice())
                     ->setAmount($invoiceItem->getGwPrice() * $giftQty)
                     ->setTaxClass($giftWrap->getEb2cTaxClass());
-	    } else if ( $isCreditMemo && $invoiceItem ) {
+	    } else if ( $isCreditMemo && $invoiceItem->getGwPrice() ) {
 		$giftQty = $giftItem->getQty() ?: 1;
                 $giftPricing->setUnitPrice(-$invoiceItem->getGwPrice())
                     ->setAmount(-$invoiceItem->getGwPrice() * $giftQty)
                     ->setTaxClass($giftWrap->getEb2cTaxClass());
-            } else if ( $isCreditMemo && !$invoiceItem ) {
+            } else if ( $isCreditMemo && !$invoiceItem->getGwPrice() ) {
                 $giftPricing->setUnitPrice(-$giftWrap->getBasePrice())
                     ->setAmount(-$giftWrap->getBasePrice())
                     ->setTaxClass($giftWrap->getEb2cTaxClass());
