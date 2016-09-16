@@ -271,7 +271,7 @@ class Radial_Tax_Helper_Payload
     ) {
         $giftPricing = $giftingPayload->getEmptyGiftPriceGroup();
 
-	if( $invoiceItem )
+	if( $invoiceItem->getGwId() )
 	{
         	$giftWrap = Mage::getModel('enterprise_giftwrapping/wrapping')->load($invoiceItem->getGwId());
 	} else {
