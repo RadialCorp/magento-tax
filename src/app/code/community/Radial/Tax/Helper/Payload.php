@@ -278,13 +278,13 @@ class Radial_Tax_Helper_Payload
 		$giftWrap = Mage::getModel('enterprise_giftwrapping/wrapping')->load($giftItem->getGwId());
 	}
         if ($giftWrap->getId()) {
-            if( $invoiceItem instanceof Mage_Sales_Model_Order_Item )
+            if( $invoiceItem instanceof Mage_Sales_Model_Order_Item && !$isCreditMemo && $invoiceItem->getGwPrice() )
             {
 		$giftQty = $giftItem->getQty() ?: 1;
                 $giftPricing->setUnitPrice($invoiceItem->getGwPrice())
                     ->setAmount($invoiceItem->getGwPrice() * $giftQty)
                     ->setTaxClass($giftWrap->getEb2cTaxClass());
-	    } else if ( $isCreditMemo && $invoiceItem->getGwPrice() ) {
+	    } else if ( $invoiceItem instanceof Mage_Sales_Model_Order_Item && $isCreditMemo && $invoiceItem->getGwPrice() ) {
 		$giftQty = $giftItem->getQty() ?: 1;
                 $giftPricing->setUnitPrice(-$invoiceItem->getGwPrice())
                     ->setAmount(-$invoiceItem->getGwPrice() * $giftQty)
@@ -292,6 +292,10 @@ class Radial_Tax_Helper_Payload
             } else if ( $isCreditMemo && !$invoiceItem->getGwPrice() ) {
                 $giftPricing->setUnitPrice(-$giftWrap->getBasePrice())
                     ->setAmount(-$giftWrap->getBasePrice())
+                    ->setTaxClass($giftWrap->getEb2cTaxClass());
+            } else {
+            	$giftPricing->setUnitPrice($giftWrap->getBasePrice())
+                    ->setAmount($giftWrap->getBasePrice())
                     ->setTaxClass($giftWrap->getEb2cTaxClass());
             }
 	    $giftingPayload
