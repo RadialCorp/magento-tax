@@ -300,21 +300,37 @@ class Radial_Tax_Model_Request_Builder_Item
 
 	if( $this->_invoice->getId())
 	{
-		$order = $this->_invoice->getOrder();
-
-		// Only Send Gift Wrap on First Invoice
-                $invoiceCol = $order->getInvoiceCollection()->addAttributeToSort('increment_id', 'ASC');
-
-                if( strcmp($invoiceCol->getFirstItem()->getIncrementId(), $this->_invoice->getIncrementId()) === 0 )
+		if( $this->_invoice instanceof Mage_Sales_Model_Order_Invoice )
                 {
-			if( $order->getGwAddCard() && $order->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore && $this->_first)
-			{
-				$customizations = $this->_orderItem->getCustomizations();
-				$customization = $this->_payloadHelper->transferGwPrintedCardInvoice($this->_item, $customizations);
-				$customizations[$customization] = $customization;
-				$this->_orderItem->setCustomizations($customizations);
-			}
-		}
+                        // Only Send Gift Wrap on First Invoice
+                        $invoiceCol = $order->getInvoiceCollection()->addAttributeToSort('increment_id', 'ASC');
+
+                        if( strcmp($invoiceCol->getFirstItem()->getIncrementId(), $this->_invoice->getIncrementId()) === 0 )
+                        {
+                                if( $order->getGwAddCard() && $order->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore && $this->_first)
+                                {
+                                        $customizations = $this->_orderItem->getCustomizations();
+                                        $customization = $this->_payloadHelper->transferGwPrintedCardInvoice($this->_item, $customizations);
+                                        $customizations[$customization] = $customization;
+                                        $this->_orderItem->setCustomizations($customizations);
+                                }
+                        }
+                } else {
+                        // Only Send Gift Wrap on First Creditmemo
+                        $creditmemoCol = Mage::getResourceModel('sales/order_creditmemo_collection')->addAttributeToSort('increment_id', 'ASC')
+                                                ->addAttributeToFilter('order_id', $order->getId());
+
+                        if( strcmp($creditmemoCol->getFirstItem()->getIncrementId(), $this->_invoice->getIncrementId()) === 0 )
+                        {
+                                if( $order->getGwAddCard() && $order->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore && $this->_first)
+                                {
+                                        $customizations = $this->_orderItem->getCustomizations();
+                                        $customization = $this->_payloadHelper->transferGwPrintedCardInvoice($this->_item, $customizations);
+                                        $customizations[$customization] = $customization;
+                                        $this->_orderItem->setCustomizations($customizations);
+                                }
+                        }
+                }
 	} else {
                 if( $this->_address->getGwAddCard() && $this->_address->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore && $this->_first)
                 {
