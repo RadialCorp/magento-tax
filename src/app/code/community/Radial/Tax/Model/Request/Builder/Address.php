@@ -180,10 +180,10 @@ class Radial_Tax_Model_Request_Builder_Address
 		{
                 	if ($this->_invoice->getOrder()->getGwId() && $this->_invoice->getOrder()->getGwPrice())
 			{
+			     $obj = new Varien_Object;
+
 			     if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
 			     {
-				$obj = new Varien_Object;
-
                 	     	$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, $obj, 1 );
 			     } else {
 				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, $obj, 0);

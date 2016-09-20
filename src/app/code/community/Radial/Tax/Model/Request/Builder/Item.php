@@ -300,6 +300,8 @@ class Radial_Tax_Model_Request_Builder_Item
 
 	if( $this->_invoice->getId())
 	{
+		$order = $this->_invoice->getOrder();
+
 		if( $this->_invoice instanceof Mage_Sales_Model_Order_Invoice )
                 {
                         // Only Send Gift Wrap on First Invoice
