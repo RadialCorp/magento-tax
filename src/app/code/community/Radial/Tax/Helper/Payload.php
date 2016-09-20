@@ -127,7 +127,7 @@ class Radial_Tax_Helper_Payload
             // as Magento does not support applying discounts to gift wrapping
             // out-of-the-box.
             
-	    if( $giftItem instanceof Mage_Sales_Model_Quote_Item )
+	    if( $giftItem && $giftItem->getGwPrice())
             {
                 $giftPricing->setUnitPrice($giftItem->getGwPrice())
                     ->setAmount($giftItem->getGwPrice() * $giftQty)
