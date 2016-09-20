@@ -173,23 +173,30 @@ class Radial_Tax_Model_Request_Builder_Address
 
 	    if( $this->_invoice->getId() )
             {
+		$order = $this->_invoice->getOrder();
+
 		// Only Send Gift Wrap on First Invoice
 		$invoiceCol = $this->_invoice->getOrder()->getInvoiceCollection()->addAttributeToSort('increment_id', 'ASC');
+		$creditmemoCol = Mage::getResourceModel('sales/order_creditmemo_collection')->addAttributeToSort('increment_id', 'ASC')
+                                                ->addAttributeToFilter('order_id', $order->getId());
 
 		if( strcmp($invoiceCol->getFirstItem()->getIncrementId(), $this->_invoice->getIncrementId()) === 0 )
 		{
                 	if ($this->_invoice->getOrder()->getGwId() && $this->_invoice->getOrder()->getGwPrice())
 			{
 			     $obj = new Varien_Object;
-
-			     if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
-			     {
-                	     	$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, $obj, 1 );
-			     } else {
-				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, $obj, 0);
-			     }
+			     $this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, $obj, 0);
                 	}
 		}
+
+		if( strcmp($creditmemoCol->getFirstItem()->getIncrementId(), $this->_invoice->getIncrementId()) === 0 )
+                {
+                        if ($this->_invoice->getOrder()->getGwId() && $this->_invoice->getOrder()->getGwPrice())
+                        {
+                             $obj = new Varien_Object;
+                             $this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_invoice->getOrder(), $this->_shipGroup, $obj, 1 );
+                        }
+                }
             } else {
             	if ($this->_checkAddressHasGifting()) {
             	    $this->_payloadHelper->giftingItemToGiftingPayload($this->_address, $this->_shipGroup);

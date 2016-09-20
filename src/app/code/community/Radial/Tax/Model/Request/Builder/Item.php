@@ -272,7 +272,12 @@ class Radial_Tax_Model_Request_Builder_Item
 
 			if ($item->getGwId() && $item->getGwPrice())
 			{
-				$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_item, $this->_orderItem, $item, '');
+				if( $this->_item instanceof Mage_Sales_Model_Order_Creditmemo_Item )
+				{
+					$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_item, $this->_orderItem, $item, 1);
+				} else {
+					$this->_payloadHelper->giftingItemToGiftingPayloadInvoice($this->_item, $this->_orderItem, $item, 0);
+				}
 			}
 		}
 	} else {
