@@ -206,6 +206,10 @@ http://opensource.org/licenses/osl-3.0.php
                 <schedule><cron_expr>*/5 * * * *</cron_expr></schedule>
                 <run><model>radial_tax/cron::cronTaxInvoiceForCreditmemo</model></run>
             </radial_tax_retry_creditmemo>
+	    <radial_tax_retry_order_quote>
+                <schedule><cron_expr>*/5 * * * *</cron_expr></schedule>
+                <run><model>radial_tax/cron::cronOrderTaxQuoteRetry</model></run>
+            </radial_tax_retry_order_quote>
         </jobs>
     </crontab>
     <phpunit>

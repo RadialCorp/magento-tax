@@ -76,6 +76,112 @@ class Radial_Tax_Model_Cron
     }
 
     /**
+     * Collect new tax totals if necessary before submitting an order.
+     * Tax totals collected after all other quote totals so tax totals for the
+     * entire quote may be collected at one - all other totals for all other
+     * addresses must have already been collected.
+     *
+     * If new taxes are collected, all quote totals must be recollected.
+     *
+     * @return self
+     */
+    public function cronOrderTaxQuoteRetry()
+    {
+        $maxretries = Mage::getStoreConfig('radial_core/radial_tax_core/maxretries');
+        $enabled = $this->helper->getConfigModel()->enabled;
+
+        if(!$enabled)
+        {
+                return $this;
+        }
+
+        $collection= Mage::getResourceModel('sales/order_collection')
+                        ->addFieldToFilter('radial_tax_transmit', array('lt' => $maxretries))
+                        ->addFieldToFilter('radial_tax_transmit', array('neq' => -1))
+                        ->setPageSize(100);
+
+        $pages = $collection->getLastPageNumber();
+        $currentPage = 1;
+
+        do
+        {
+                $collection->setCurPage($currentPage);
+                $collection->load();
+
+                foreach( $collection as $order )
+                {
+			try
+			{
+				$requestBody = $this->taxCollector->collectTaxesForOrder($order);
+			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
+                            $this->logger->debug('Tax Quote is not valid.', $this->logContext->getMetaData(__CLASS__));
+                            throw $e;
+                        } catch (Radial_Tax_Exception_Collector_Exception $e) {
+                            // Want TDF to be non-blocking so exceptions from making the
+                            // request should be caught. Still need to exit here when there
+                            // is an exception, however, to allow the TDF to be retried
+                            // (don't reset update required flag) and prevent totals from being
+                            // recollected (nothing to update and, more imporantly, would
+                            // continue to loop until PHP crashes or a TDF request succeeds).
+
+                            $retry = $order->getRadialTaxTransmit();
+                            $retryN = $retry + 1;
+                            $order->setRadialTaxTransmit($retryN);
+                            $order->save();
+
+                            $this->logger->warning('Tax request failed.', $this->logContext->getMetaData(__CLASS__, [], $e));
+
+                            $taxEmailProp = Mage::getStoreConfig('radial_core/radial_tax_core/tax_email');
+                            if( $taxEmailProp )
+                            {
+                                $taxEmailA = explode(',', $taxEmailProp );
+                                foreach( $taxEmailA as $taxEmail )
+                                {
+                                        $taxName = Mage::app()->getStore()->getName() . ' - ' . 'Tax Admin';
+                                        $emailTemplate  = Mage::getModel('core/email_template')->loadDefault('custom_email_template3');
+
+                                        //Create an array of variables to assign to template
+                                        $emailTemplateVariables = array();
+                                        $emailTemplateVariables['myvar1'] = gmdate("Y-m-d\TH:i:s\Z");
+                                        $emailTemplateVariables['myvar2'] = $e->getMessage();
+                                        $emailTemplateVariables['myvar3'] = $e->getTraceAsString();
+                                        $emailTemplateVariables['myvar4'] = htmlspecialchars($requestBody);
+
+                                        $processedTemplate = $emailTemplate->getProcessedTemplate($emailTemplateVariables);
+                                        //Sending E-Mail to Tax Admin Email.
+                                        $mail = Mage::getModel('core/email')
+                                                ->setToName($taxName)
+                                                ->setToEmail($taxEmail)
+                                                ->setBody($processedTemplate)
+                                                ->setSubject('Tax - Invoice - Exception Report From: '. __CLASS__ . ' on ' . gmdate("Y-m-d\TH:i:s\Z") . ' UTC')
+                                                ->setFromEmail(Mage::getStoreConfig('trans_email/ident_general/email'))
+                                                ->setFromName($taxName)
+                                                ->setType('html');
+                                        try
+                                        {
+                                                //Confimation E-Mail Send
+                                                $mail->send();
+                                        }
+                                        catch(Exception $error)
+                                        {
+                                                $logMessage = sprintf('[%s] Error Sending Email: %s', __CLASS__, $error->getMessage());
+                                                Mage::log($logMessage, Zend_Log::ERR);
+                                        }
+                                 }
+                            }
+
+			    return $this;
+                        }
+                }
+
+                $currentPage++;
+                $collection->clear();
+        } while ($currentPage <= $pages);
+
+        return $this;
+    }
+
+    /**
      * Collect new tax totals if necessary before submitting tax invoice.
      * Tax totals collected after all other quote totals so tax totals for the
      * entire quote may be collected at one - all other totals for all other
@@ -88,6 +194,12 @@ class Radial_Tax_Model_Cron
     public function cronTaxInvoiceForInvoice()
     {
 	$maxretries = Mage::getStoreConfig('radial_core/radial_tax_core/maxretries');
+	$enabled = $this->helper->getConfigModel()->enabled;
+
+        if(!$enabled)
+        {
+                return $this;
+        }
 
 	$collection= Mage::getResourceModel('sales/order_invoice_collection')
 			->addFieldToFilter('radial_tax_transmit', array('lt' => $maxretries))
@@ -204,6 +316,12 @@ class Radial_Tax_Model_Cron
     public function cronTaxInvoiceForCreditmemo()
     {
 	$maxretries = Mage::getStoreConfig('radial_core/radial_tax_core/maxretries');
+	$enabled = $this->helper->getConfigModel()->enabled;
+
+        if(!$enabled)
+        {
+                return $this;
+        }
 
 	$collection= Mage::getResourceModel('sales/order_creditmemo_collection')
                         ->addFieldToFilter('radial_tax_transmit', array('lt' => $maxretries))

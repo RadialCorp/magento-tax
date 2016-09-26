@@ -132,6 +132,8 @@ class Radial_Tax_Model_Observer
                 // recollected (nothing to update and, more imporantly, would
                 // continue to loop until PHP crashes or a TDF request succeeds).
                 $this->logger->warning('Tax request failed.', $this->logContext->getMetaData(__CLASS__, [], $e));
+		$quote->setData('radial_tax_transmit', 0);
+                $quote->save();
                 return $this;
             }
             // After retrieving new tax records, update the session with data
@@ -146,7 +148,9 @@ class Radial_Tax_Model_Observer
             // dependent upon tax totals - like grand total - should update
             // to include the tax totals.
             $this->recollectTotals($quote);
-        }
+            $quote->setData('radial_tax_transmit', -1);
+            $quote->save();
+	}
         return $this;
     }
 
