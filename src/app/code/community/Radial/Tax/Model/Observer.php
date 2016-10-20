@@ -113,7 +113,7 @@ class Radial_Tax_Model_Observer
         $coreSession = $this->getCoreSession();
 	$enabled = $this->helper->getConfigModel()->enabled;
 
-	if( $!enabled )
+	if( !$enabled )
 	{
 		$quote->setData('radial_tax_transmit', 0);
             	$quote->save();
