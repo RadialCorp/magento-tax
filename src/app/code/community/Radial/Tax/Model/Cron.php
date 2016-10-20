@@ -245,6 +245,8 @@ class Radial_Tax_Model_Cron
 
                                 $creditmemo->addComment($comment, false, true);
                                 $creditmemo->save();
+
+				continue;
                         }
 
         		//Try the invoice
@@ -382,6 +384,8 @@ class Radial_Tax_Model_Cron
 
 				$creditmemo->addComment($comment, false, true);
                                 $creditmemo->save();
+
+				continue;
 			}
 
                         //Try the invoice
