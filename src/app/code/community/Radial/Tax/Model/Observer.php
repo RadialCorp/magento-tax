@@ -113,6 +113,9 @@ class Radial_Tax_Model_Observer
         $coreSession = $this->getCoreSession();
 	$enabled = $this->helper->getConfigModel()->enabled;
 
+	/** @var Mage_Sales_Model_Quote */
+        $quote = $observer->getEvent()->getQuote();
+
 	if( !$enabled )
 	{
 		$quote->setData('radial_tax_transmit', 0);
@@ -120,8 +123,6 @@ class Radial_Tax_Model_Observer
 	}
 
         if ($coreSession->isTaxUpdateRequired() && $enabled) {
-            /** @var Mage_Sales_Model_Quote */
-            $quote = $observer->getEvent()->getQuote();
             try {
                 $this->taxCollector->collectTaxes($quote);
             } catch (Radial_Tax_Exception_Collector_InvalidQuote_Exception $e) {
