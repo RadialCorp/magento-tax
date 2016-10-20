@@ -171,7 +171,7 @@ class Radial_Tax_Model_Request_Builder_Address
                 // level and not item level.
                 ->setChargeType(self::SHIPPING_CHARGE_TYPE);
 
-	    if( $this->_invoice->getId() )
+	    if( $this->_invoice->getId() && !$this->_invoice instanceof Mage_Sales_Model_Order )
             {
 		$order = $this->_invoice->getOrder();
 
@@ -198,9 +198,18 @@ class Radial_Tax_Model_Request_Builder_Address
                         }
                 }
             } else {
-            	if ($this->_checkAddressHasGifting()) {
-            	    $this->_payloadHelper->giftingItemToGiftingPayload($this->_address, $this->_shipGroup);
-            	}
+		if( $this->_invoice instanceof Mage_Sales_Model_Order )
+		{
+			if ($this->_invoice->getGwId() && $this->_invoice->getGwPrice())
+                        {
+                             $obj = new Varien_Object;
+                             $this->_payloadHelper->giftingItemToGiftingPayloadOrder($this->_invoice, $this->_shipGroup, $obj, 0);
+                        }
+		} else {
+            		if ($this->_checkAddressHasGifting()) {
+            		    $this->_payloadHelper->giftingItemToGiftingPayload($this->_address, $this->_shipGroup);
+            		}
+		}
 	    }
 
             $this->_injectItemData();
@@ -283,7 +292,13 @@ class Radial_Tax_Model_Request_Builder_Address
     {
 	if( $this->_invoice->getId())
 	{
-		$order = $this->_invoice->getOrder();
+		if( $this->_invoice instanceof Mage_Sales_Model_Order )
+                {
+                        $order = $this->_invoice;
+                } else {
+                        $order = $this->_invoice->getOrder();
+                }
+
 		$address = $order->getBillingAddress();
 		$shipAddress = $order->getShippingAddress();
 
@@ -303,7 +318,13 @@ class Radial_Tax_Model_Request_Builder_Address
     {
 	if( $this->_invoice->getId())
 	{
-		$order = $this->_invoice->getOrder();
+		if( $this->_invoice instanceof Mage_Sales_Model_Order )
+		{
+			$order = $this->_invoice;
+		} else {
+			$order = $this->_invoice->getOrder();
+		}
+
 		$shipAddress = $order->getShippingAddress();
 
 		if ( $shipAddress->getId() === $this->_address->getId() )

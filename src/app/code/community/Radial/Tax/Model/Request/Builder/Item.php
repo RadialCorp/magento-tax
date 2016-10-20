@@ -261,7 +261,7 @@ class Radial_Tax_Model_Request_Builder_Item
      */
     protected function _injectGiftingData()
     {
-	if( $this->_invoice->getId() )
+	if( $this->_invoice->getId() && !$this->_invoice instanceof Mage_Sales_Model_Order )
 	{
 		$itemC = Mage::getModel('sales/order_item')->getCollection()
                                 ->addFieldToFilter('item_id', array('eq' => $this->_item->getOrderItemId()));
@@ -303,7 +303,7 @@ class Radial_Tax_Model_Request_Builder_Item
         $gwCardTaxClass = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
 	$gwCardPriceStore = Mage::getStoreConfig('sales/gift_options/printed_card_price');
 
-	if( $this->_invoice->getId())
+	if( $this->_invoice->getId() && !$this->_invoice instanceof Mage_Sales_Model_Order )
 	{
 		$order = $this->_invoice->getOrder();
 
@@ -358,7 +358,7 @@ class Radial_Tax_Model_Request_Builder_Item
     {
         $canIncludeAmounts = $this->_canIncludeAmounts($this->_item);
 
-	if($this->_invoice->getId())
+	if($this->_invoice->getId() && !$this->_invoice instanceof Mage_Sales_Model_Order )
 	{
 		if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
 		{
@@ -416,7 +416,7 @@ class Radial_Tax_Model_Request_Builder_Item
         // item request builder. Each ship group should include shipping on
         // only one item in the ship group for address level shipping totals.
         if ($this->_item->getIncludeShippingTotals()) {
-	    if($this->_invoice->getId())
+	    if($this->_invoice->getId() && !$this->_invoice instanceof Mage_Sales_Model_Order )
 	    {
 		if( $this->_invoice instanceof Mage_Sales_Model_Order_Creditmemo )
 		{
@@ -450,7 +450,7 @@ class Radial_Tax_Model_Request_Builder_Item
         }
 
 	//Add Duty Data
-	if( $this->_invoice->getId())
+	if( $this->_invoice->getId() && !$this->_invoice instanceof Mage_Sales_Model_Order )
 	{
 		$dutyGroup = unserialize($this->_invoice->getOrder()->getData('radial_tax_duties'));
 

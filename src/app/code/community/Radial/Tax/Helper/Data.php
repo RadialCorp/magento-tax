@@ -135,6 +135,22 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
     }
 
     /**
+     * Make an API request to the TDF service for the quote and return any
+     * tax records in the response.
+     *
+     * @param Mage_Sales_Model_Order
+     * @return Radial_Tax_Model_Result
+     * @throws Radial_Tax_Exception_Collector_Exception If tax records could not be collected.
+     */
+    public function requestTaxesForOrder(Mage_Sales_Model_Order $order)
+    {
+        $api = $this->getSdkApi();
+        return $this->_prepareRequestForOrder($api, $order)
+            ->_sendApiRequest($api)
+            ->_extractResponseResultsForOrder($api, $order);
+    }
+
+    /**
      * Make an API request to the TDF service for the invoice 
      *
      * @param Mage_Sales_Model_Order
@@ -209,6 +225,38 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
         }
         $taxRequest = $this->taxFactory
             ->createRequestBuilderQuote($requestBody, $quote)
+            ->getTaxRequest();
+        $api->setRequestBody($taxRequest);
+        return $this;
+    }
+
+     /**
+     * Prepare the API request with data from the order - fill out and set
+     * the request payload.
+     *
+     * @param IBidirectionalApi
+     * @param Mage_Sales_Model_Order
+     * @return self
+     */
+    protected function _prepareRequestForOrder(IBidirectionalApi $api, Mage_Sales_Model_Order $order)
+    {
+        try {
+            $requestBody = $api->getRequestBody();
+        } catch (UnsupportedOperation $e) {
+            // If the SDK cannot handle sending requests to the tax/quote
+            // service operation but is expected to, the SDK is likely broken.
+            // As this would fall into the "human intervention required"
+            // category of errors, log crit the exception.
+            $this->logger->critical(
+                'Tax quote service request unsupported by SDK.',
+                $this->logContext->getMetaData(__CLASS__, [], $e)
+            );
+            // Throw a more generic, expected exception to prevent
+            // this from being a blocking failure.
+            throw $this->_failTaxCollection();
+        }
+        $taxRequest = $this->taxFactory
+            ->createRequestBuilderOrder($requestBody, $order)
             ->getTaxRequest();
         $api->setRequestBody($taxRequest);
         return $this;
@@ -334,6 +382,48 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
 
         $responseParser = $this->taxFactory
             ->createResponseQuoteParser($responseBody, $quote);
+        return $this->taxFactory->createTaxResults(
+            $responseParser->getTaxRecords(),
+            $responseParser->getTaxDuties(),
+            $responseParser->getTaxFees()
+        );
+    }
+
+    /**
+     * Extract tax records from the API response body for the order.
+     *
+     * @param IBidirectionalApi
+     * @param Mage_Sales_Model_Order
+     * @return Radial_Tax_Model_Result
+     */
+    protected function _extractResponseResultsForOrder(IBidirectionalApi $api, Mage_Sales_Model_Order $order)
+    {
+        try {
+            $responseBody = $api->getResponseBody();
+        } catch (UnsupportedOperation $e) {
+            // This exception handling is probably not necessary but
+            // is technically possible. If the sdk flow of
+            // getRequest->setRequest->send->getResponse is followed,
+            // which is is by the one public method of this class, this
+            // exception should never be thrown in this instance. If it
+            // were to be thrown at all by the SDK, it would have already
+            // happened during the "send" step.
+            $this->logger->critical(
+                'Tax quote service response unsupported by SDK.',
+                $this->logContext->getMetaData(__CLASS__, [], $e)
+            );
+            throw $this->_failTaxCollection();
+        }
+
+        $taxTransactionId = $responseBody->getTaxTransactionId();
+        if($taxTransactionId)
+        {
+                $order->setData('radial_tax_transaction_id', $taxTransactionId);
+        	$order->getResource()->saveAttribute($order, 'radial_tax_transaction_id');
+	}
+
+        $responseParser = $this->taxFactory
+            ->createResponseOrderParser($responseBody, $order);
         return $this->taxFactory->createTaxResults(
             $responseParser->getTaxRecords(),
             $responseParser->getTaxDuties(),

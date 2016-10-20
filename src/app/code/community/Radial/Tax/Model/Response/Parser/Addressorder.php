@@ -16,7 +16,7 @@
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedShipGroup;
 use eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedOrderItem;
 
-class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response_Parser_Abstract
+class Radial_Tax_Model_Response_Parser_Addressorder extends Radial_Tax_Model_Response_Parser_Abstract
 {
     /** @var ITaxedShipGroup */
     protected $_shipGroup;
@@ -32,6 +32,8 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
     protected $_logger;
     /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
+    /** @var Mage_Sales_Model_Order */
+    protected $_order;
 
     /**
      * @param array $args Must contain key/value for:
@@ -49,16 +51,18 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
             $this->_address,
             $this->_taxFactory,
             $this->_logger,
-            $this->_logContext
+            $this->_logContext,
+	    $this->_order
         ) = $this->_checkTypes(
             $args['ship_group'],
             $args['address'],
             $this->_nullCoalesce($args, 'tax_factory', Mage::helper('radial_tax/factory')),
             $this->_nullCoalesce($args, 'logger', Mage::helper('ebayenterprise_magelog')),
-            $this->_nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context'))
+            $this->_nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context')),
+	    $args['order']
         );
         $this->_addressId = $this->_address->getId();
-        $this->_quoteId = $this->_address->getQuoteId();
+        $this->_quoteId = $this->_order->getId();
     }
 
     /**
@@ -69,6 +73,7 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
      * @param Radial_Tax_Helper_Factory
      * @param EbayEnterprise_MageLog_Helper_Data
      * @param EbayEnterprise_MageLog_Helper_Context
+     * @param Mage_Sales_Model_Order
      * @return array
      */
     protected function _checkTypes(
@@ -76,9 +81,10 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
         Mage_Customer_Model_Address_Abstract $address,
         Radial_Tax_Helper_Factory $taxFactory,
         EbayEnterprise_MageLog_Helper_Data $logger,
-        EbayEnterprise_MageLog_Helper_Context $logContext
+        EbayEnterprise_MageLog_Helper_Context $logContext,
+	Mage_Sales_Model_Order $order
     ) {
-        return [$shipGroups, $address, $taxFactory, $logger, $logContext];
+        return [$shipGroups, $address, $taxFactory, $logger, $logContext, $order];
     }
 
     /**
@@ -150,7 +156,7 @@ class Radial_Tax_Model_Response_Parser_Address extends Radial_Tax_Model_Response
      */
     protected function _getItemForItemPayload(ITaxedOrderItem $itemPayload)
     {
-        foreach ($this->_address->getAllItems() as $item) {
+        foreach ($this->_order->getAllItems() as $item) {
             if ($item->getId() === $itemPayload->getLineNumber()) {
                 return $item;
             }

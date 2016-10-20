@@ -163,6 +163,23 @@ class Radial_Tax_Helper_Factory
     }
 
     /**
+     * Construct a new quote tax for order response parser.
+     *
+     * @param ITaxDutyFeeQuoteReply
+     * @param Mage_Sales_Model_Order
+     * @return Radial_Tax_Model_Response_Parser_Order
+     */
+    public function createResponseOrderParser(
+        ITaxDutyFeeQuoteReply $taxResponse,
+        Mage_Sales_Model_Order $order
+    ) {
+        return Mage::getModel(
+            'radial_tax/response_parser_order',
+            ['tax_response' => $taxResponse, 'order' => $order,]
+        );
+    }
+
+    /**
      * Construct a new address tax response parser.
      *
      * @param ITaxedShipGroup
@@ -183,6 +200,29 @@ class Radial_Tax_Helper_Factory
     }
 
     /**
+     * Construct a new address tax response parser.
+     *
+     * @param ITaxedShipGroup
+     * @param Mage_Customer_Model_Address_Abstract
+     * @param Mage_Sales_Model_Order
+     * @return Radial_Tax_Model_Response_Parser_Address
+     */
+    public function createResponseAddressParserOrder(
+        ITaxedShipGroup $shipGroup,
+        Mage_Customer_Model_Address_Abstract $address,
+	Mage_Sales_Model_Order $order
+    ) {
+        return Mage::getModel(
+            'radial_tax/response_parser_addressorder',
+            [
+                'ship_group' => $shipGroup,
+                'address' => $address,
+		'order' => $order,
+            ]
+        );
+    }
+
+    /**
      * Construct a new item tax response parser.
      *
      * @param ITaxedOrderItem
@@ -193,7 +233,7 @@ class Radial_Tax_Helper_Factory
      */
     public function createResponseItemParser(
         ITaxedOrderItem $orderItem,
-        Mage_Sales_Model_Quote_Item_Abstract $item,
+        Mage_Core_Model_Abstract $item,
         $addressId,
         $quoteId
     ) {
@@ -224,6 +264,26 @@ class Radial_Tax_Helper_Factory
             [
                 'payload' => $payload,
                 'quote' => $quote,
+            ]
+        );
+    }
+
+    /**
+     * Construct a new quote tax request for order builder.
+     *
+     * @param ITaxDutyFeeQuoteRequest
+     * @param Mage_Sales_Model_Order
+     * @return Radial_Tax_Model_Request_Builder_Order
+     */
+    public function createRequestBuilderOrder(
+        ITaxDutyFeeQuoteRequest $payload,
+        Mage_Sales_Model_Order $order
+    ) {
+        return Mage::getModel(
+            'radial_tax/request_builder_order',
+            [
+                'payload' => $payload,
+                'order' => $order,
             ]
         );
     }

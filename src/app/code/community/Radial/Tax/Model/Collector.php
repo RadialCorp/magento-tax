@@ -283,6 +283,39 @@ class Radial_Tax_Model_Collector
     }
 
     /**
+     * Collect taxes for order, making an SDK tax request if necessary.
+     *
+     * @param Mage_Sales_Model_Order
+     * @param orderId (optional)
+     * @return self
+     * @throws Radial_Tax_Exception_Collector_Exception If TDF cannot be collected.
+     */
+    public function collectTaxesForOrder(Mage_Sales_Model_Order $order)
+    {
+        $this->_logger->debug('Collecting new tax data for order (retry).', $this->_logContext->getMetaData(__CLASS__));
+        try {
+            $taxResults = $this->_taxHelper->requestTaxesForOrder($order);
+        } catch (Radial_Tax_Exception_Collector_Exception $e) {
+            // If tax records needed to be updated but could be collected,
+            // any previously collected taxes need to be cleared out to
+            // prevent tax data that is no longer applicable to the quote
+            // from being preserved. E.g. taxes for an item no longer in
+            // the quote or calculated for a different shipping/billing
+            // address cannot be preserved. Complexity of individually
+            // pruning tax data in this case does not seem worth the
+            // cost at this time.
+            throw $e;
+        }
+        $order->setData("radial_tax_taxrecords", serialize($taxResults->getTaxRecords()));
+        $order->setData("radial_tax_duties", serialize($taxResults->getTaxDuties()));
+        $order->setData("radial_tax_fees", serialize($taxResults->getTaxFees()));
+	$order->setData("radial_tax_transmit", -1);
+        $order->save();
+
+        return $this;
+    }
+
+    /**
      * Collect taxes for quote, making an SDK tax request if necessary.
      *
      * @param Mage_Sales_Model_Quote

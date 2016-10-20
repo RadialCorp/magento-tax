@@ -24,7 +24,7 @@ class Radial_Tax_Model_Response_Parser_Item extends Radial_Tax_Model_Response_Pa
     protected $_quoteId;
     /** @var int */
     protected $_addressId;
-    /** @var Mage_Sales_Model_Quote_Item_Abstract */
+    /** @var  Mage_Core_Model_Abstract */
     protected $_item;
     /** @var int */
     protected $_itemId;
@@ -34,7 +34,7 @@ class Radial_Tax_Model_Response_Parser_Item extends Radial_Tax_Model_Response_Pa
     /**
      * @param array $args Must contain key/value for:
      *                         - order_item => eBayEnterprise\RetailOrderManagement\Payload\TaxDutyFee\ITaxedOrderItem
-     *                         - item => Mage_Sales_Model_Quote_Item_Abstract
+     *                         - item => Mage_Core_Model_Abstract
      *                         - address_id => int
      *                         - quote_id => int
      *                         May contain key/value for:
@@ -70,7 +70,7 @@ class Radial_Tax_Model_Response_Parser_Item extends Radial_Tax_Model_Response_Pa
      */
     protected function _checkTypes(
         ITaxedOrderItem $orderItem,
-        Mage_Sales_Model_Quote_Item_Abstract $item,
+        Mage_Core_Model_Abstract $item,
         $addressId,
         $quoteId,
         Radial_Tax_Helper_Factory $taxFactory
