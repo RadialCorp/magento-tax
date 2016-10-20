@@ -113,6 +113,19 @@ class Radial_Tax_Model_Cron
 			try
 			{
 				$requestBody = $this->taxCollector->collectTaxesForOrder($order);
+
+				if( $order->getData('radial_tax_transmit') != -1 )
+                        	{
+                                	$comment = "Tax Quotation on Order Retry Successful For - Order: ". $order->getIncrementId() . ";
+                                	//Mark the invoice comments as sent.
+                                	$history = Mage::getModel('sales/order_status_history')
+                                	        ->setStatus($order->getStatus())
+                                	        ->setComment($comment)
+                                	        ->setEntityName('order');
+                                	$order->addStatusHistory($history);
+                                	$order->save();
+                        	}
+
 			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Quote is not valid.', $this->logContext->getMetaData(__CLASS__));
                             throw $e;
@@ -218,6 +231,21 @@ class Radial_Tax_Model_Cron
 		{
         		$order = $invoice->getOrder();
         		$type = "SALE";
+
+			if( $order->getData('radial_tax_transmit') != -1 ) 
+                        {
+                                $comment = "Tax Invoice: ". $invoice->getIncrementId . " Not Submitted - Order: ". $order->getIncrementId() . " Has No Tax Quotation";
+                                //Mark the invoice comments as sent.
+                                $history = Mage::getModel('sales/order_status_history')
+                                        ->setStatus($order->getStatus())
+                                        ->setComment($comment)
+                                        ->setEntityName('order');
+                                $order->addStatusHistory($history);
+                                $order->save();
+
+                                $creditmemo->addComment($comment, false, true);
+                                $creditmemo->save();
+                        }
 
         		//Try the invoice
         		try {
@@ -340,6 +368,21 @@ class Radial_Tax_Model_Cron
                 {
                         $order = $creditmemo->getOrder();
                         $type = "RETURN";
+
+			if( $order->getData('radial_tax_transmit') != -1 ) 
+			{
+				$comment = "Tax Invoice For Creditmemo: ". $creditmemo->getIncrementId . " Not Submitted - Order: ". $order->getIncrementId() . " Has No Tax Quotation";
+				//Mark the invoice comments as sent.
+                            	$history = Mage::getModel('sales/order_status_history')
+                                        ->setStatus($order->getStatus())
+                                        ->setComment($comment)
+                                        ->setEntityName('order');
+                            	$order->addStatusHistory($history);
+                            	$order->save();
+
+				$creditmemo->addComment($comment, false, true);
+                                $creditmemo->save();
+			}
 
                         //Try the invoice
                         try {
