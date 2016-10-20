@@ -25,7 +25,10 @@ class Radial_Tax_Model_Adminhtml_System_Config_Backend_Nummaxretry extends Mage_
 	$pendingInvoicesSize = Mage::getModel('sales/order_invoice')->getCollection()
 			->addFieldToFilter('radial_tax_transmit', $maxretries)->getSize();
 
-	$objectCollectionSize = $pendingCreditMemoSize + $pendingInvoicesSize;
+	$pendingInvoiceQuotationSize = Mage::getModel('sales/order')->getCollection()
+                        ->addFieldToFilter('radial_tax_transmit', $maxretries)->getSize();
+
+	$objectCollectionSize = $pendingCreditMemoSize + $pendingInvoicesSize + $pendingInvoiceQuotationSize;
 
         $publicDisplay = '# of Tax Messages At Max Transmission Retries: '. $objectCollectionSize;
 

@@ -27,7 +27,11 @@ class Radial_Tax_Model_Adminhtml_System_Config_Backend_Totalnumretry extends Mag
 			->addFieldToFilter('radial_tax_transmit', array('lt' => $maxretries))
 			->addFieldToFilter('radial_tax_transmit', array('neq' => -1))->getSize();
 
-        $objectCollectionSize = $pendingCreditMemoSize + $pendingInvoicesSize;	
+	$pendingInvoiceQuoteSize = Mage::getResourceModel('sales/order_collection')
+                        ->addFieldToFilter('radial_tax_transmit', array('lt' => $maxretries))
+                        ->addFieldToFilter('radial_tax_transmit', array('neq' => -1))->getSize();
+
+        $objectCollectionSize = $pendingCreditMemoSize + $pendingInvoicesSize + $pendingInvoiceQuoteSize;
 	
 	$publicDisplay = '# of Tax Messages Waiting For Transmission Retry: '. $objectCollectionSize;
 

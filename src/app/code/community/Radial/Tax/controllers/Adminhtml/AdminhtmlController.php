@@ -63,6 +63,28 @@ class Radial_Tax_Adminhtml_AdminhtmlController extends Mage_Adminhtml_Controller
                 $objectCollection->clear();
         } while ($currentPage <= $pages);
 
+        $objectCollection= Mage::getResourceModel('sales/order_collection')
+                        ->addFieldToFilter('radial_tax_transmit', array('eq' => $maxretries))
+                        ->setPageSize(100);
+
+        $pages = $objectCollection->getLastPageNumber();
+        $currentPage = 1;
+
+        do
+        {
+                $objectCollection->setCurPage($currentPage);
+                $objectCollection->load();
+
+                foreach($objectCollection as $object)
+                {
+                        $object->setRadialTaxTransmit(0);
+                        $object->save();
+                }
+
+                $currentPage++;
+                $objectCollection->clear();
+        } while ($currentPage <= $pages);
+
         $this->_redirect('adminhtml/system_config/edit/section/radial_core');
     }
 
@@ -97,6 +119,28 @@ class Radial_Tax_Adminhtml_AdminhtmlController extends Mage_Adminhtml_Controller
         } while ($currentPage <= $pages);
 
         $objectCollection= Mage::getResourceModel('sales/order_creditmemo_collection')
+                        ->addFieldToFilter('radial_tax_transmit', array('neq' => -1))
+                        ->setPageSize(100);
+
+        $pages = $objectCollection->getLastPageNumber();
+        $currentPage = 1;
+
+        do
+        {
+                $objectCollection->setCurPage($currentPage);
+                $objectCollection->load();
+
+                foreach($objectCollection as $object)
+                {
+                        $object->setRadialTaxTransmit(-1);
+                        $object->save();
+                }
+
+                $currentPage++;
+                $objectCollection->clear();
+        } while ($currentPage <= $pages);
+
+	$objectCollection= Mage::getResourceModel('sales/order_collection')
                         ->addFieldToFilter('radial_tax_transmit', array('neq' => -1))
                         ->setPageSize(100);
 
