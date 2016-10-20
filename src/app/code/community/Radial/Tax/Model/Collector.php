@@ -310,7 +310,11 @@ class Radial_Tax_Model_Collector
         $order->setData("radial_tax_duties", serialize($taxResults->getTaxDuties()));
         $order->setData("radial_tax_fees", serialize($taxResults->getTaxFees()));
 	$order->setData("radial_tax_transmit", -1);
-        $order->save();
+
+	$order->getResource()->saveAttribute($order, 'radial_tax_taxrecords');
+	$order->getResource()->saveAttribute($order, 'radial_tax_duties');
+	$order->getResource()->saveAttribute($order, 'radial_tax_fees');
+	$order->getResource()->saveAttribute($order, 'radial_tax_transmit');
 
         return $this;
     }
