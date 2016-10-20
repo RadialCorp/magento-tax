@@ -21,7 +21,7 @@ class Radial_Tax_Model_Cron
     protected $taxCollector;
     /** @var Radial_Core_Model_Session */
     protected $coreSession;
-    /** @var Radial_Core_Helper_Data */
+    /** @var Radial_Tax_Helper_Data */
     protected $helper;
     /** @var EbayEnterprise_MageLog_Helper_Data */
     protected $logger;
@@ -44,7 +44,7 @@ class Radial_Tax_Model_Cron
             $this->nullCoalesce($args, 'core_session', null),
             $this->nullCoalesce($args, 'logger', Mage::helper('ebayenterprise_magelog')),
             $this->nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context')),
-	    $this->nullCoalesce($args, 'helper', Mage::helper('radial_core'))
+	    $this->nullCoalesce($args, 'helper', Mage::helper('radial_tax'))
         );
     }
 
@@ -55,7 +55,7 @@ class Radial_Tax_Model_Cron
      * @param Radial_Tax_Model_Session
      * @param EbayEnterprise_MageLog_Helper_Data
      * @param EbayEnterprise_MageLog_Helper_Context
-     * @param Radial_Core_Helper_Data
+     * @param Radial_Tax_Helper_Data
      * @return array
      */
     protected function checkTypes(
@@ -63,7 +63,7 @@ class Radial_Tax_Model_Cron
         Radial_Core_Model_Session $coreSession = null,
         EbayEnterprise_MageLog_Helper_Data $logger,
         EbayEnterprise_MageLog_Helper_Context $logContext,
-	Radial_Core_Helper_Data $helper
+	Radial_Tax_Helper_Data $helper
     ) {
         return func_get_args();
     }
