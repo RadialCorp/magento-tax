@@ -241,13 +241,11 @@ class Radial_Tax_Model_Observer
      */
     public function copyFromQuoteToOrder(Varien_Event_Observer $observer)
     {
-	$enabled = $this->helper->getConfigModel()->enabled;
-	if( !$enabled )
-	{
-		return $this;
-	}
-
 	$quote = $observer->getEvent()->getQuote();
+	$taxTransmit = $quote->getData('radial_tax_transmit');
+	
+	$enabled = $this->helper->getConfigModel()->enabled;
+
 	$taxFees = unserialize($quote->getData('radial_tax_fees'));
 	$taxDuties = unserialize($quote->getData('radial_tax_duties'));
 	$taxRecords = unserialize($quote->getData('radial_tax_taxrecords'));
@@ -258,6 +256,22 @@ class Radial_Tax_Model_Observer
 
 	foreach( $orderC as $order )
 	{
+		$order->setData('radial_tax_transmit', $taxTransmit);
+		$order->getResource()->saveAttribute($order, 'radial_tax_transmit');
+
+		if( !$enabled )
+        	{
+			$order->addStatusHistoryComment('Warning: Tax's Not Collected for Order: '. $order->getIncrementId() . ' Tax Module is Disabled!');
+			$order->save();
+			continue;
+        	}
+
+		if( $taxTransmit != -1 )
+		{
+			$order->addStatusHistoryComment('Warning: Tax's Not Collected for Order: '. $order->getIncrementId() . ' Error with Tax Quotation - Contact Radial Support');
+                        $order->save();
+		}
+
 		$taxTotal = 0;
 
 		if( count($taxRecords) > 0 )
