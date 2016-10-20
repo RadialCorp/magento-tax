@@ -260,17 +260,17 @@ class Radial_Tax_Model_Observer
 		$order->getResource()->saveAttribute($order, 'radial_tax_transmit');
 
 		if( !$enabled )
-        	{
-			$order->addStatusHistoryComment('Warning: Tax's Not Collected for Order: '. $order->getIncrementId() . ' Tax Module is Disabled!');
-			$order->save();
-			continue;
-        	}
-
-		if( $taxTransmit != -1 )
-		{
-			$order->addStatusHistoryComment('Warning: Tax's Not Collected for Order: '. $order->getIncrementId() . ' Error with Tax Quotation - Contact Radial Support');
+                {
+                        $order->addStatusHistoryComment("Warning: Tax's Not Collected for Order: ". $order->getIncrementId() . " Tax Module is Disabled!");
                         $order->save();
-		}
+                        continue;
+                }
+
+                if( $taxTransmit != -1 )
+                {
+                        $order->addStatusHistoryComment("Warning: Tax's Not Collected for Order: ". $order->getIncrementId() . " Error with Tax Quotation - Contact Radial Support");
+                        $order->save();
+                }
 
 		$taxTotal = 0;
 
