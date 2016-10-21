@@ -118,12 +118,10 @@ class Radial_Tax_Model_Cron
                 {
 			try
 			{
-				$requestBody = $this->taxCollector->collectTaxesForOrder($order);
+				$result = $this->taxCollector->collectTaxesForOrder($order);
 
-				if( $order->getData('radial_tax_transmit') === -1 )
+				if( $result === -1 )
                         	{
-					$this->updateOrderTotals($order);
-
                                 	$comment = "Tax Quotation on Order Retry Successful For - Order: ". $order->getIncrementId();
                                 	//Mark the invoice comments as sent.
                                 	$history = Mage::getModel('sales/order_status_history')
@@ -132,6 +130,8 @@ class Radial_Tax_Model_Cron
                                 	        ->setEntityName('order');
                                 	$order->addStatusHistory($history);
                                 	$order->save();
+
+					$this->updateOrderTotals($order);
                         	}
 			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Quote is not valid.', $this->logContext->getMetaData(__CLASS__));
@@ -701,7 +701,7 @@ class Radial_Tax_Model_Cron
 	$newTotal = $order->getData('grand_total') + $taxTotal;
 	$newDue = $order->getData('total_due') + $taxTotal;
 
-	$order->setData('tax_amount', $newTotal);
+	$order->setData('tax_amount', $taxTotal);
 	$order->setData('base_grand_total', $newTotal);
 	$order->setData('grand_total', $newTotal);
 	$order->setData('total_due', $newDue);

@@ -316,7 +316,7 @@ class Radial_Tax_Model_Collector
 	$order->getResource()->saveAttribute($order, 'radial_tax_fees');
 	$order->getResource()->saveAttribute($order, 'radial_tax_transmit');
 
-        return $this;
+        return -1;
     }
 
     /**
