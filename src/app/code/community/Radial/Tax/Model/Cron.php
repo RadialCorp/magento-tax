@@ -198,6 +198,74 @@ class Radial_Tax_Model_Cron
 
                 				$transactionSave->save();
         				}
+
+					$creditmemoCol = Mage::getResourceModel('sales/order_creditmemo_collection')->addAttributeToSort('increment_id', 'ASC')
+                                                ->addAttributeToFilter('order_id', $order->getId());
+
+					// If there are credit memo's without a tax transmission
+					if( $creditmemoCol->getSize() > 0 )
+                                        {
+                                                $creditmemoTaxTotal = 0;
+
+                                                foreach( $creditmemoCol as $creditmemo )
+                                                {
+                                                        if( $creditmemo->getData('radial_tax_transmit') !== -1 )
+                                                        {
+                                                                if( $creditmemo->getShippingAmount() )
+                                                                {
+                                                                        $creditmemoTaxTotal += $order->getShippingTaxAmount();
+                                                                }
+
+                                                                if( $creditmemo->getGwPrice() )
+                                                                {
+                                                                        $creditmemoTaxTotal += $order->getGwTaxAmount();
+                                                                }
+
+                                                                if( $creditmemo->getGwItemsPrice() )
+                                                                {
+                                                                        $creditmemoTaxTotal += $order->getGwItemsTaxAmount();
+                                                                }
+
+                                                                foreach( $creditmemo->getAllItems() as $creditmemoItem )
+                                                                {
+                                                                        $itemC = Mage::getModel('sales/order_item')->getCollection()
+                                                                                ->addFieldToFilter('item_id', array('eq' => $creditmemoItem->getOrderItemId()))
+                                                                                ->addFieldToFilter('order_id', array('eq' => $order->getId()));
+
+                                                                        if( $itemC->getSize() > 0 )
+                                                                        {
+                                                                                $item = $itemC->getFirstItem();
+                                                                                $creditmemoTaxTotal += $item->getTaxAmount();
+                                                                                $gwTax = $item->getGwTaxAmount();
+                                                                                $creditmemoTaxTotal += $gwTax * $creditmemoItem->getQty();
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+
+                                                foreach( $order->getAllItems() as $orderItem )
+                                                {
+                                                        $orderItemArray[$orderItem->getId()] = 0;
+                                                }
+
+                                                /** @var Mage_Sales_Model_Service_Order $orderService */
+                                                $orderService = Mage::getModel('sales/service_order', $order);
+                                                $creditmemo = $orderService->prepareCreditmemo($orderItemArray);
+
+                                                $creditmemo->setRequestedCaptureCase(Mage_Sales_Model_Order_Creditmemo::STATE_OPEN);
+
+                                                $creditmemo->setTaxAmount($invoiceTaxTotal);
+                                                $creditmemo->setBaseTaxAmount($invoiceTaxTotal);
+                                                $creditmemo->setGrandTotal($invoiceTaxTotal);
+                                                $creditmemo->setBaseGrandTotal($invoiceTaxTotal);
+                                                $creditmemo->register()->capture();
+
+                                                $transactionSave = Mage::getModel('core/resource_transaction')
+                                                                ->addObject($creditmemo)
+                                                                ->addObject($creditmemo->getOrder());
+
+                                                $transactionSave->save();
+					}
                         	}
 			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Quote is not valid.', $this->logContext->getMetaData(__CLASS__));
