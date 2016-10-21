@@ -167,7 +167,7 @@ class Radial_Tax_Model_Cron
 									if( $itemC->getSize() > 0 )
 									{
 										$item = $itemC->getFirstItem();
-										$invoiceTaxTotal += $item->getTaxAmount() * $invoiceItem->getQty();
+										$invoiceTaxTotal += $item->getTaxAmount();
                                 						$gwTax = $item->getGwTaxAmount();
 										$invoiceTaxTotal += $gwTax * $invoiceItem->getQty();
 									}
@@ -190,8 +190,6 @@ class Radial_Tax_Model_Cron
 						$invoice->setBaseTaxAmount($invoiceTaxTotal);
 						$invoice->setGrandTotal($invoiceTaxTotal);
 						$invoice->setBaseGrandTotal($invoiceTaxTotal);
-						$invoice->save();
-
                 				$invoice->register()->capture();
 
                 				$transactionSave = Mage::getModel('core/resource_transaction')
