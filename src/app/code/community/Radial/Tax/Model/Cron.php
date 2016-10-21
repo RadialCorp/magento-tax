@@ -132,6 +132,74 @@ class Radial_Tax_Model_Cron
                                 	$order->save();
 
 					$this->updateOrderTotals($order);
+
+					// If the order has invoices, create a new invoice for just the tax. 
+
+        				if( $order->getTotalDue() > 0 && $order->getInvoiceCollection()->getSize() > 0 )
+        				{
+						$invoiceTaxTotal = 0;
+
+						foreach( $order->getInvoiceCollection() as $invoice )
+						{
+							if( $invoice->getData('radial_tax_transmit') !== -1 )
+							{
+								if( $invoice->getShippingAmount() )
+								{
+									$invoiceTaxTotal += $order->getShippingTaxAmount();
+								}
+
+								if( $invoice->getGwPrice() )
+								{
+									$invoiceTaxTotal += $order->getGwTaxAmount();
+								}
+
+								if( $invoice->getGwItemsPrice() )
+								{
+									$invoiceTaxTotal += $order->getGwItemsTaxAmount();
+								}
+
+								foreach( $invoice->getAllItems() as $invoiceItem )
+								{
+									$itemC = Mage::getModel('sales/order_item')->getCollection()
+                                                				->addFieldToFilter('item_id', array('eq' => $invoiceItem->getOrderItemId()))
+                                                				->addFieldToFilter('order_id', array('eq' => $order->getId()));
+
+									if( $itemC->getSize() > 0 )
+									{
+										$item = $itemC->getFirstItem();
+										$invoiceTaxTotal += $item->getTaxAmount() * $invoiceItem->getQty();
+                                						$gwTax = $item->getGwTaxAmount();
+										$invoiceTaxTotal += $gwTax * $invoiceItem->getQty();
+									}
+								}
+							}
+						}
+
+                				foreach( $order->getAllItems() as $orderItem )
+                				{
+                        				$orderItemArray[$orderItem->getId()] = 0;
+                				}
+
+                				/** @var Mage_Sales_Model_Service_Order $orderService */
+                				$orderService = Mage::getModel('sales/service_order', $order);
+                				$invoice = $orderService->prepareInvoice($orderItemArray);
+
+                				$invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::NOT_CAPTURE);
+
+						$invoice->setTaxAmount($invoiceTaxTotal);
+						$invoice->setBaseTaxAmount($invoiceTaxTotal);
+						$invoice->setGrandTotal($invoiceTaxTotal);
+						$invoice->setBaseGrandTotal($invoiceTaxTotal);
+						$invoice->save();
+
+                				$invoice->register()->capture();
+
+                				$transactionSave = Mage::getModel('core/resource_transaction')
+                                				->addObject($invoice)
+                                				->addObject($invoice->getOrder());
+
+                				$transactionSave->save();
+        				}
                         	}
 			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Quote is not valid.', $this->logContext->getMetaData(__CLASS__));
