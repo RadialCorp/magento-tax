@@ -375,7 +375,7 @@ class Radial_Tax_Model_Cron
 
 			if( $order->getData('radial_tax_transmit') != -1 ) 
                         {
-                                $comment = "Tax Invoice: ". $invoice->getIncrementId . " Not Submitted - Order: ". $order->getIncrementId() . " Has No Tax Quotation";
+                                $comment = "Tax Invoice: ". $invoice->getIncrementId() . " Not Submitted - Order: ". $order->getIncrementId() . " Has No Tax Quotation";
                                 //Mark the invoice comments as sent.
                                 $history = Mage::getModel('sales/order_status_history')
                                         ->setStatus($order->getStatus())
@@ -392,6 +392,30 @@ class Radial_Tax_Model_Cron
 
         		//Try the invoice
         		try {
+			    $qty = 0;
+
+			    foreach( $invoice->getAllItems() as $invoiceItem )
+			    {
+				$qty += $invoiceItem->getQty();
+			    }
+
+			    if( !$qty )
+			    {
+				$comment = "Tax Invoice: ". $invoice->getIncrementId() . " not submitted, need atleast 1 item";
+				//Mark the invoice comments as sent.
+                                $history = Mage::getModel('sales/order_status_history')
+                                        ->setStatus($order->getStatus())
+                                        ->setComment($comment)
+                                        ->setEntityName('order');
+                                $order->addStatusHistory($history);
+                                $order->save();
+
+				$invoice->addComment($comment, false, true);
+                                $invoice->save();
+
+                                continue;
+			    }
+
         		    $requestBody = $this->taxCollector->collectTaxesForInvoice($order, $invoice, $type);
 			    $comment = "Tax Invoice Successfully Submitted for Invoice: ". $invoice->getIncrementId();
 
@@ -514,7 +538,7 @@ class Radial_Tax_Model_Cron
 
 			if( $order->getData('radial_tax_transmit') != -1 ) 
 			{
-				$comment = "Tax Invoice For Creditmemo: ". $creditmemo->getIncrementId . " Not Submitted - Order: ". $order->getIncrementId() . " Has No Tax Quotation";
+				$comment = "Tax Invoice For Creditmemo: ". $creditmemo->getIncrementId() . " Not Submitted - Order: ". $order->getIncrementId() . " Has No Tax Quotation";
 				//Mark the invoice comments as sent.
                             	$history = Mage::getModel('sales/order_status_history')
                                         ->setStatus($order->getStatus())
