@@ -440,12 +440,22 @@ class Radial_Tax_Model_Request_Builder_Item
 			$this->_orderItem->setInvoicePricing($invoicePricing);
 		}
 	    } else {
-		$shippingPricing = $this->_orderItem->getEmptyShippingPriceGroup()
-                	->setAmount($this->_address->getShippingAmount())
-                	->setTaxClass($this->_taxConfig->shippingTaxClass);
-                $this->_addShippingDiscount($shippingPricing);
+		if( $this->_invoice instanceof Mage_Sales_Model_Order )
+		{
+			$shippingPricing = $this->_orderItem->getEmptyShippingPriceGroup()
+                                ->setAmount($this->_invoice->getShippingAmount())
+                                ->setTaxClass($this->_taxConfig->shippingTaxClass);
+                        $this->_addShippingDiscount($shippingPricing);
 
-            	$this->_orderItem->setShippingPricing($shippingPricing);
+                        $this->_orderItem->setShippingPricing($shippingPricing);
+		} else {
+			$shippingPricing = $this->_orderItem->getEmptyShippingPriceGroup()
+                		->setAmount($this->_address->getShippingAmount())
+                		->setTaxClass($this->_taxConfig->shippingTaxClass);
+                	$this->_addShippingDiscount($shippingPricing);
+
+            		$this->_orderItem->setShippingPricing($shippingPricing);
+		}
 	    }
         }
 
