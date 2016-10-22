@@ -178,29 +178,34 @@ class Radial_Tax_Model_Cron
 							}
 						}
 
-                				foreach( $order->getAllItems() as $orderItem )
-                				{
-                        				$orderItemArray[$orderItem->getId()] = 0;
-                				}
+						if( $invoiceTaxTotal > 0 )
+						{
+							$orderItemAray = array();
 
-                				/** @var Mage_Sales_Model_Service_Order $orderService */
-                				$orderService = Mage::getModel('sales/service_order', $order);
-                				$invoice = $orderService->prepareInvoice($orderItemArray);
+                					foreach( $order->getAllItems() as $orderItem )
+                					{
+                        					$orderItemArray[$orderItem->getId()] = 0;
+                					}
 
-                				$invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::NOT_CAPTURE);
+                					/** @var Mage_Sales_Model_Service_Order $orderService */
+                					$orderService = Mage::getModel('sales/service_order', $order);
+                					$invoice = $orderService->prepareInvoice($orderItemArray);
 
-						$invoice->setTaxAmount($invoiceTaxTotal);
-						$invoice->setBaseTaxAmount($invoiceTaxTotal);
-						$invoice->setGrandTotal($invoiceTaxTotal);
-						$invoice->setBaseGrandTotal($invoiceTaxTotal);
-						$invoice->setRadialTaxTransmit(-1);
-                				$invoice->register()->capture();
+                					$invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::NOT_CAPTURE);
 
-                				$transactionSave = Mage::getModel('core/resource_transaction')
+							$invoice->setTaxAmount($invoiceTaxTotal);
+							$invoice->setBaseTaxAmount($invoiceTaxTotal);
+							$invoice->setGrandTotal($invoiceTaxTotal);
+							$invoice->setBaseGrandTotal($invoiceTaxTotal);
+							$invoice->setRadialTaxTransmit(-1);
+                					$invoice->register()->capture();
+
+                					$transactionSave = Mage::getModel('core/resource_transaction')
                                 				->addObject($invoice)
                                 				->addObject($invoice->getOrder());
 
-                				$transactionSave->save();
+                					$transactionSave->save();
+						}
         				}
 
 					$creditmemoCol = Mage::getResourceModel('sales/order_creditmemo_collection')->addAttributeToSort('increment_id', 'ASC')
@@ -250,29 +255,33 @@ class Radial_Tax_Model_Cron
                                                         }
                                                 }
 
-                                                foreach( $order->getAllItems() as $orderItem )
+						if( $creditmemoTaxTotal > 0 )
                                                 {
-                                                        $orderItemArray[$orderItem->getId()] = 0;
-                                                }
+                                                        $orderItemAray = array();
+                                                	foreach( $order->getAllItems() as $orderItem )
+                                                	{
+                                                        	$orderItemArray[$orderItem->getId()] = 0;
+                                                	}
 
-                                                /** @var Mage_Sales_Model_Service_Order $orderService */
-                                                $orderService = Mage::getModel('sales/service_order', $order);
-                                                $creditmemo = $orderService->prepareCreditmemo($orderItemArray);
+                                                	/** @var Mage_Sales_Model_Service_Order $orderService */
+                                                	$orderService = Mage::getModel('sales/service_order', $order);
+                                                	$creditmemo = $orderService->prepareCreditmemo($orderItemArray);
 
-                                                $creditmemo->setRequestedCaptureCase(Mage_Sales_Model_Order_Creditmemo::STATE_OPEN);
+                                                	$creditmemo->setRequestedCaptureCase(Mage_Sales_Model_Order_Creditmemo::STATE_OPEN);
 
-                                                $creditmemo->setTaxAmount($invoiceTaxTotal);
-                                                $creditmemo->setBaseTaxAmount($invoiceTaxTotal);
-                                                $creditmemo->setGrandTotal($invoiceTaxTotal);
-                                                $creditmemo->setBaseGrandTotal($invoiceTaxTotal);
-						$creditmemo->setRadialTaxTransmit(-1);
-                                                $creditmemo->register()->refund();
+                                                	$creditmemo->setTaxAmount($invoiceTaxTotal);
+                                                	$creditmemo->setBaseTaxAmount($invoiceTaxTotal);
+                                                	$creditmemo->setGrandTotal($invoiceTaxTotal);
+                                                	$creditmemo->setBaseGrandTotal($invoiceTaxTotal);
+							$creditmemo->setRadialTaxTransmit(-1);
+                                                	$creditmemo->register()->refund();
 
-                                                $transactionSave = Mage::getModel('core/resource_transaction')
+                                                	$transactionSave = Mage::getModel('core/resource_transaction')
                                                                 ->addObject($creditmemo)
                                                                 ->addObject($creditmemo->getOrder());
 
-                                                $transactionSave->save();
+                                                	$transactionSave->save();
+						}
 					}
                         	}
 			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
