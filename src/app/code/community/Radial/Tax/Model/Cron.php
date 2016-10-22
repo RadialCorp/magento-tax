@@ -172,6 +172,9 @@ class Radial_Tax_Model_Cron
 										$invoiceTaxTotal += $gwTax * $invoiceItem->getQty();
 									}
 								}
+
+								$invoice->setData('radial_tax_transmit', 0);
+								$invoice->getResource()->saveAttribute($invoice, 'radial_tax_transmit');
 							}
 						}
 
@@ -190,6 +193,7 @@ class Radial_Tax_Model_Cron
 						$invoice->setBaseTaxAmount($invoiceTaxTotal);
 						$invoice->setGrandTotal($invoiceTaxTotal);
 						$invoice->setBaseGrandTotal($invoiceTaxTotal);
+						$invoice->setRadialTaxTransmit(-1);
                 				$invoice->register()->capture();
 
                 				$transactionSave = Mage::getModel('core/resource_transaction')
@@ -240,6 +244,9 @@ class Radial_Tax_Model_Cron
                                                                                 $creditmemoTaxTotal += $gwTax * $creditmemoItem->getQty();
                                                                         }
                                                                 }
+
+								$creditmemo->setData('radial_tax_transmit', 0);
+                                                                $creditmemo->getResource()->saveAttribute($creditmemo, 'radial_tax_transmit');
                                                         }
                                                 }
 
@@ -258,6 +265,7 @@ class Radial_Tax_Model_Cron
                                                 $creditmemo->setBaseTaxAmount($invoiceTaxTotal);
                                                 $creditmemo->setGrandTotal($invoiceTaxTotal);
                                                 $creditmemo->setBaseGrandTotal($invoiceTaxTotal);
+						$creditmemo->setRadialTaxTransmit(-1);
                                                 $creditmemo->register()->capture();
 
                                                 $transactionSave = Mage::getModel('core/resource_transaction')

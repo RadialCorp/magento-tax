@@ -179,21 +179,26 @@ class Radial_Tax_Model_Observer
 	if( $enabled )
 	{
 		$invoice = $observer->getEvent()->getInvoice();
-		$order = $invoice->getOrder();
+		$transmitFlag = $invoice->getRadialTaxTransmit();
 
-		$comment = "Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId();
+		if( $transmitFlag !== -1 )
+		{
+			$order = $invoice->getOrder();
 
-		$invoice->setData('radial_tax_transmit', 0);
-		$invoice->addComment($comment, false, true);
-		$invoice->save();
+			$comment = "Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId();
 
-		//Mark the invoice comments as sent.
-        	$history = Mage::getModel('sales/order_status_history')
-                      ->setStatus($order->getStatus())
-                      ->setComment("Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId())
-                      ->setEntityName('order');
-        	$order->addStatusHistory($history);
-		$order->save();	
+			$invoice->setData('radial_tax_transmit', 0);
+			$invoice->addComment($comment, false, true);
+			$invoice->save();
+
+			//Mark the invoice comments as sent.
+        		$history = Mage::getModel('sales/order_status_history')
+                	      ->setStatus($order->getStatus())
+                	      ->setComment("Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId())
+                	      ->setEntityName('order');
+        		$order->addStatusHistory($history);
+			$order->save();	
+		}
 	}
 
         return $this;
@@ -216,20 +221,25 @@ class Radial_Tax_Model_Observer
 	if( $enabled )
 	{
         	$creditmemo = $observer->getEvent()->getCreditmemo();
-		$order = $creditmemo->getOrder();
+		$transmitFlag = $creditmemo->getRadialTaxTransmit();
 
-        	$creditmemo->setData('radial_tax_transmit', 0);
-		$comment = "Tax Invoice Successfully Queued for Creditmemo: ". $creditmemo->getIncrementId();
-		$creditmemo->addComment($comment, false, true);
-        	$creditmemo->save();
+		if( $transmitFlag !== -1 )
+		{
+			$order = $creditmemo->getOrder();
 
-		//Mark the invoice comments as sent.
-        	$history = Mage::getModel('sales/order_status_history')
-                       ->setStatus($order->getStatus())
-                       ->setComment($comment)
-                       ->setEntityName('order');
-        	$order->addStatusHistory($history);
-		$order->save();
+        		$creditmemo->setData('radial_tax_transmit', 0);
+			$comment = "Tax Invoice Successfully Queued for Creditmemo: ". $creditmemo->getIncrementId();
+			$creditmemo->addComment($comment, false, true);
+        		$creditmemo->save();
+
+			//Mark the invoice comments as sent.
+        		$history = Mage::getModel('sales/order_status_history')
+                       		->setStatus($order->getStatus())
+                       		->setComment($comment)
+                       		->setEntityName('order');
+        		$order->addStatusHistory($history);
+			$order->save();
+		}
 	}
 
         return $this;
