@@ -134,6 +134,7 @@ class Radial_Tax_Model_Cron
 					$this->updateOrderTotals($order);
 
 					// If the order has invoices, create a new invoice for just the tax. 
+					$transactionSave = Mage::getModel('core/resource_transaction');
 
         				if( $order->getTotalDue() > 0 && $order->getInvoiceCollection()->getSize() > 0 )
         				{
@@ -200,11 +201,8 @@ class Radial_Tax_Model_Cron
 							$invoice->setRadialTaxTransmit(-1);
                 					$invoice->register()->capture();
 
-                					$transactionSave = Mage::getModel('core/resource_transaction')
-                                				->addObject($invoice)
-                                				->addObject($invoice->getOrder());
-
-                					$transactionSave->save();
+                                			$transactionSave->addObject($invoice)
+                                					->addObject($invoice->getOrder());
 						}
         				}
 
@@ -276,13 +274,13 @@ class Radial_Tax_Model_Cron
 							$creditmemo->setRadialTaxTransmit(-1);
                                                 	$creditmemo->register()->refund();
 
-                                                	$transactionSave = Mage::getModel('core/resource_transaction')
-                                                                ->addObject($creditmemo)
+                                                	$transactionSave->addObject($creditmemo)
                                                                 ->addObject($creditmemo->getOrder());
 
-                                                	$transactionSave->save();
 						}
 					}
+
+					$transactionSave->save();
                         	}
 			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Quote is not valid.', $this->logContext->getMetaData(__CLASS__));
