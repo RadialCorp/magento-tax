@@ -266,7 +266,7 @@ class Radial_Tax_Model_Cron
                                                 $creditmemo->setGrandTotal($invoiceTaxTotal);
                                                 $creditmemo->setBaseGrandTotal($invoiceTaxTotal);
 						$creditmemo->setRadialTaxTransmit(-1);
-                                                $creditmemo->register()->capture();
+                                                $creditmemo->register()->refund();
 
                                                 $transactionSave = Mage::getModel('core/resource_transaction')
                                                                 ->addObject($creditmemo)
