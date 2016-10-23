@@ -203,7 +203,7 @@ class Radial_Tax_Model_Request_Builder_Address
 			if ($this->_invoice->getGwId() && $this->_invoice->getGwPrice())
                         {
                              $obj = new Varien_Object;
-                             $this->_payloadHelper->giftingItemToGiftingPayloadOrder($this->_invoice, $this->_shipGroup, $obj, 0);
+                             $this->_payloadHelper->giftingItemToGiftingPayload($this->_invoice, $this->_shipGroup);
                         }
 		} else {
             		if ($this->_checkAddressHasGifting()) {

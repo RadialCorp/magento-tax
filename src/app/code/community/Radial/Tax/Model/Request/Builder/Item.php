@@ -339,13 +339,24 @@ class Radial_Tax_Model_Request_Builder_Item
                         }
                 }
 	} else {
-                if( $this->_address->getGwAddCard() && $this->_address->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore && $this->_first)
-                {
-			$customizations = $this->_orderItem->getCustomizations();
-                        $customization = $this->_payloadHelper->transferGwPrintedCard($this->_item, $customizations);
-			$customizations[$customization] = $customization;
-			$this->_orderItem->setCustomizations($customizations);
-                }
+		if( $this->_invoice instanceof Mage_Sales_Model_Order )
+		{
+			if( $this->_invoice->getGwAddCard() && $this->_invoice->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore )
+			{
+				$customizations = $this->_orderItem->getCustomizations();
+                                $customization = $this->_payloadHelper->transferGwPrintedCard($this->_item, $customizations);
+                                $customizations[$customization] = $customization;
+                                $this->_orderItem->setCustomizations($customizations);
+			}
+		} else {
+        	        if( $this->_address->getGwAddCard() && $this->_address->getGwCardPrice() && $gwCardSku && $gwCardTaxClass && $gwCardPriceStore )
+        	        {
+				$customizations = $this->_orderItem->getCustomizations();
+        	                $customization = $this->_payloadHelper->transferGwPrintedCard($this->_item, $customizations);
+				$customizations[$customization] = $customization;
+				$this->_orderItem->setCustomizations($customizations);
+        	        }
+		}
 	}
     }
 
@@ -401,13 +412,24 @@ class Radial_Tax_Model_Request_Builder_Item
 
 		$this->_orderItem->setMerchandisePricing($merchandiseInvoicePricing);
 	} else {
-        	$merchandisePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
-        	    ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
-        	    ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
-        	    ->setTaxClass($this->_itemProduct->getTaxCode());
-        	if ($canIncludeAmounts) {
-        	    $this->_discountHelper->transferTaxDiscounts($this->_item, $merchandisePricing);
-        	}
+		if( $this->_invoice instanceof Mage_Sales_Model_Order )
+		{
+			$merchandisePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
+                            ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
+                            ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
+                            ->setTaxClass($this->_itemProduct->getTaxCode());
+                        if ($canIncludeAmounts) {
+                            $this->_discountHelper->transferOrderTaxDiscounts($this->_item, $merchandisePricing);
+                        }
+		} else {
+        		$merchandisePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
+        		    ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
+        		    ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
+        		    ->setTaxClass($this->_itemProduct->getTaxCode());
+        		if ($canIncludeAmounts) {
+        		    $this->_discountHelper->transferTaxDiscounts($this->_item, $merchandisePricing);
+        		}
+		}
 
         	$this->_orderItem->setMerchandisePricing($merchandisePricing);
 	}
