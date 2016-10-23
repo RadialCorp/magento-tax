@@ -195,7 +195,12 @@ class Radial_Tax_Model_Request_Builder_Item
 
 	if((int)$this->_item->getTotalQty() === 0 )
 	{
-		$this->_orderItem->setQuantity((int) $this->_item->getQty());
+		if( (int) $this->_item->getQty() === 0 )
+		{
+			$this->_orderItem->setQuantity((int) $this->_item->getQtyOrdered());
+		} else {
+			$this->_orderItem->setQuantity((int) $this->_item->getQty());
+		}
 	}
 
 	return $this;

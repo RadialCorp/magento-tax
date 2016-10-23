@@ -122,11 +122,17 @@ class Radial_Tax_Helper_Payload
             // For addresses (which will have no quantity), gift wrapping price
             // on the address will be the price for wrapping all items for that
             // address, so total is just amount (1 * amount).
-            $giftQty = $giftItem->getQty() ?: 1;
             // Add pricing data for gift wrapping - does not include discounts
             // as Magento does not support applying discounts to gift wrapping
             // out-of-the-box.
-            
+           
+	    if( $giftItem instanceof Mage_Sales_Model_Order_Item )
+	    {
+		$giftQty = $giftItem->getQtyOrdered();
+	    } else {
+		$giftQty = $giftItem->getQty() ?: 1;
+	    }
+ 
 	    if( $giftItem && $giftItem->getGwPrice())
             {
                 $giftPricing->setUnitPrice($giftItem->getGwPrice())
