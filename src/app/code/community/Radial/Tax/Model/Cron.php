@@ -136,24 +136,28 @@ class Radial_Tax_Model_Cron
         				if( $order->getTotalDue() > 0 && $order->getInvoiceCollection()->getSize() > 0 )
         				{
 						$invoiceTaxTotal = 0;
+						$invoiceCol = $order->getInvoiceCollection()->addAttributeToSort('increment_id', 'ASC');
 
 						foreach( $order->getInvoiceCollection() as $invoice )
 						{
 							if( $invoice->getData('radial_tax_transmit') !== -1 )
 							{
-								if( $invoice->getShippingAmount() )
-								{
-									$invoiceTaxTotal += $order->getShippingTaxAmount();
-								}
+								if( strcmp($invoiceCol->getFirstItem()->getIncrementId(), $invoice->getIncrementId()) === 0 )
+                                                        	{
+									if( $invoice->getShippingAmount() )
+									{
+										$invoiceTaxTotal += $order->getShippingTaxAmount();
+									}
 
-								if( $invoice->getGwPrice() )
-								{
-									$invoiceTaxTotal += $order->getGwTaxAmount();
-								}
+									if( $invoice->getGwPrice() )
+									{
+										$invoiceTaxTotal += $order->getGwTaxAmount();
+									}
 
-								if( $invoice->getGwCardPrice() )
-								{
-									$invoiceTaxTotal += $order->getGwCardTaxAmount();
+									if( $invoice->getGwCardPrice() )
+									{
+										$invoiceTaxTotal += $order->getGwCardTaxAmount();
+									}
 								}
 
 								foreach( $invoice->getAllItems() as $invoiceItem )
@@ -207,25 +211,29 @@ class Radial_Tax_Model_Cron
 					if( $creditmemoCol->getSize() > 0 )
                                         {
                                                 $creditmemoTaxTotal = 0;
+						$creditmemoCol = Mage::getResourceModel('sales/order_creditmemo_collection')->addAttributeToSort('increment_id', 'ASC'); 
 
                                                 foreach( $creditmemoCol as $creditmemo )
                                                 {
                                                         if( $creditmemo->getData('radial_tax_transmit') !== -1 )
                                                         {
-                                                                if( $creditmemo->getShippingAmount() )
-                                                                {
-                                                                        $creditmemoTaxTotal += $order->getShippingTaxAmount();
-                                                                }
+								if( strcmp($creditmemoCol->getFirstItem()->getIncrementId(), $creditmemo->getIncrementId()) === 0 )
+								{
+                                                                	if( $creditmemo->getShippingAmount() )
+                                                                	{
+                                                                        	$creditmemoTaxTotal += $order->getShippingTaxAmount();
+                                                                	}
 
-                                                                if( $creditmemo->getGwPrice() )
-                                                                {
-                                                                        $creditmemoTaxTotal += $order->getGwTaxAmount();
-                                                                }
+                                                                	if( $creditmemo->getGwPrice() )
+                                                                	{
+                                                                        	$creditmemoTaxTotal += $order->getGwTaxAmount();
+                                                                	}
 
-								if( $creditmemo->getGwCardPrice() )
-                                                                {
-                                                                        $invoiceTaxTotal += $order->getGwCardTaxAmount();
-                                                                }
+									if( $creditmemo->getGwCardPrice() )
+                                                                	{
+                                                                        	$invoiceTaxTotal += $order->getGwCardTaxAmount();
+                                                                	}
+								}
 
                                                                 foreach( $creditmemo->getAllItems() as $creditmemoItem )
                                                                 {
