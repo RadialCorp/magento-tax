@@ -151,9 +151,9 @@ class Radial_Tax_Model_Cron
 									$invoiceTaxTotal += $order->getGwTaxAmount();
 								}
 
-								if( $invoice->getGwItemsPrice() )
+								if( $invoice->getGwCardPrice() )
 								{
-									$invoiceTaxTotal += $order->getGwItemsTaxAmount();
+									$invoiceTaxTotal += $order->getGwCardTaxAmount();
 								}
 
 								foreach( $invoice->getAllItems() as $invoiceItem )
@@ -222,9 +222,9 @@ class Radial_Tax_Model_Cron
                                                                         $creditmemoTaxTotal += $order->getGwTaxAmount();
                                                                 }
 
-                                                                if( $creditmemo->getGwItemsPrice() )
+								if( $creditmemo->getGwCardPrice() )
                                                                 {
-                                                                        $creditmemoTaxTotal += $order->getGwItemsTaxAmount();
+                                                                        $invoiceTaxTotal += $order->getGwCardTaxAmount();
                                                                 }
 
                                                                 foreach( $creditmemo->getAllItems() as $creditmemoItem )
