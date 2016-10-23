@@ -133,9 +133,6 @@ class Radial_Tax_Model_Cron
 
 					$this->updateOrderTotals($order);
 
-					// If the order has invoices, create a new invoice for just the tax. 
-					$transactionSave = Mage::getModel('core/resource_transaction');
-
         				if( $order->getTotalDue() > 0 && $order->getInvoiceCollection()->getSize() > 0 )
         				{
 						$invoiceTaxTotal = 0;
@@ -168,7 +165,7 @@ class Radial_Tax_Model_Cron
 									if( $itemC->getSize() > 0 )
 									{
 										$item = $itemC->getFirstItem();
-										$invoiceTaxTotal += $item->getTaxAmount();
+										$invoiceTaxTotal += ($item->getTaxAmount() / $item->getQtyOrdered()) * $invoiceItem->getQty();
                                 						$gwTax = $item->getGwTaxAmount();
 										$invoiceTaxTotal += $gwTax * $invoiceItem->getQty();
 									}
@@ -200,9 +197,6 @@ class Radial_Tax_Model_Cron
 							$invoice->setBaseGrandTotal($invoiceTaxTotal);
 							$invoice->setRadialTaxTransmit(-1);
                 					$invoice->register()->capture();
-
-                                			$transactionSave->addObject($invoice)
-                                					->addObject($invoice->getOrder());
 						}
         				}
 
@@ -242,7 +236,7 @@ class Radial_Tax_Model_Cron
                                                                         if( $itemC->getSize() > 0 )
                                                                         {
                                                                                 $item = $itemC->getFirstItem();
-                                                                                $creditmemoTaxTotal += $item->getTaxAmount();
+                                                                                $creditmemoTaxTotal += ($item->getTaxAmount() / $item->getQtyOrdered()) * $creditmemoItem->getQty();
                                                                                 $gwTax = $item->getGwTaxAmount();
                                                                                 $creditmemoTaxTotal += $gwTax * $creditmemoItem->getQty();
                                                                         }
@@ -255,32 +249,20 @@ class Radial_Tax_Model_Cron
 
 						if( $creditmemoTaxTotal > 0 )
                                                 {
-                                                        $orderItemAray = array();
-                                                	foreach( $order->getAllItems() as $orderItem )
-                                                	{
-                                                        	$orderItemArray[$orderItem->getId()] = 0;
-                                                	}
-
                                                 	/** @var Mage_Sales_Model_Service_Order $orderService */
                                                 	$orderService = Mage::getModel('sales/service_order', $order);
-                                                	$creditmemo = $orderService->prepareCreditmemo($orderItemArray);
+                                                	$creditmemo = $orderService->prepareInvoiceCreditmemo($invoice);
+
+							$creditmemo->setTaxAmount($creditmemoTaxTotal);
+                                                	$creditmemo->setBaseTaxAmount($creditmemoTaxTotal);
+                                                	$creditmemo->setGrandTotal($creditmemoTaxTotal);
+                                                	$creditmemo->setBaseGrandTotal($creditmemoTaxTotal);
 
                                                 	$creditmemo->setRequestedCaptureCase(Mage_Sales_Model_Order_Creditmemo::STATE_OPEN);
-
-                                                	$creditmemo->setTaxAmount($invoiceTaxTotal);
-                                                	$creditmemo->setBaseTaxAmount($invoiceTaxTotal);
-                                                	$creditmemo->setGrandTotal($invoiceTaxTotal);
-                                                	$creditmemo->setBaseGrandTotal($invoiceTaxTotal);
 							$creditmemo->setRadialTaxTransmit(-1);
-                                                	$creditmemo->register()->refund();
-
-                                                	$transactionSave->addObject($creditmemo)
-                                                                ->addObject($creditmemo->getOrder());
-
+                                                	$creditmemo->register();
 						}
 					}
-
-					$transactionSave->save();
                         	}
 			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Quote is not valid.', $this->logContext->getMetaData(__CLASS__));
@@ -568,23 +550,33 @@ class Radial_Tax_Model_Cron
 				continue;
 			}
 
-                        //Try the invoice
+                        //Try the Creditmemo Tax Invoice
                         try {
-                            $requestBody = $this->taxCollector->collectTaxesForInvoice($order, $creditmemo, $type);
+			    $qty = 0;
 
-			    $comment = "Tax Invoice Successfully Submitted for Creditmemo: ". $creditmemo->getIncrementId();
+                            foreach( $creditmemo->getAllItems() as $creditmemoItem )
+                            {
+                                $qty += $creditmemoItem->getQty();
+                            }
 
-			    //Mark the invoice comments as sent.
-                            $history = Mage::getModel('sales/order_status_history')
+                            if( !$qty )
+                            {
+                            	$requestBody = $this->taxCollector->collectTaxesForInvoice($order, $creditmemo, $type);
+
+			    	$comment = "Tax Invoice Successfully Submitted for Creditmemo: ". $creditmemo->getIncrementId();
+
+			    	//Mark the invoice comments as sent.
+                            	$history = Mage::getModel('sales/order_status_history')
                                         ->setStatus($order->getStatus())
                                         ->setComment($comment)
                                         ->setEntityName('order');
-                            $order->addStatusHistory($history);
-			    $order->save();
+                            	$order->addStatusHistory($history);
+			    	$order->save();
 
-			    $creditmemo->addComment($comment, false, true);
-			    $creditmemo->setData('radial_tax_transmit', -1);
-			    $creditmemo->save();
+			    	$creditmemo->addComment($comment, false, true);
+			    	$creditmemo->setData('radial_tax_transmit', -1);
+			    	$creditmemo->save();
+			     }
                         } catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Invoice is not valid.', $this->logContext->getMetaData(__CLASS__));
                             throw $e;
