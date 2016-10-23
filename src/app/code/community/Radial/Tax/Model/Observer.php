@@ -111,10 +111,11 @@ class Radial_Tax_Model_Observer
     public function handleSalesQuoteCollectTotalsAfter(Varien_Event_Observer $observer)
     {
         $coreSession = $this->getCoreSession();
-	$enabled = $this->helper->getConfigModel()->enabled;
 
 	/** @var Mage_Sales_Model_Quote */
         $quote = $observer->getEvent()->getQuote();
+
+	$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $quote->getStoreId());
 
 	if( !$enabled )
 	{
@@ -175,7 +176,10 @@ class Radial_Tax_Model_Observer
      */
     public function processTaxInvoiceForInvoice(Varien_Event_Observer $observer)
     {
-	$enabled = $this->helper->getConfigModel()->enabled;
+	$invoice = $observer->getEvent()->getInvoice();
+	$order = $invoice->getOrder();
+	$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
+
 	if( $enabled )
 	{
 		$invoice = $observer->getEvent()->getInvoice();
@@ -230,10 +234,11 @@ class Radial_Tax_Model_Observer
      */
     public function processTaxInvoiceForCreditmemo(Varien_Event_Observer $observer)
     {
-	$enabled = $this->helper->getConfigModel()->enabled;
+	$creditmemo = $observer->getEvent()->getCreditmemo();
+        $order = $creditmemo->getOrder();
+        $enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
 	if( $enabled )
 	{
-        	$creditmemo = $observer->getEvent()->getCreditmemo();
 		$transmitFlag = $creditmemo->getRadialTaxTransmit();
 
 		if( $transmitFlag !== -1 )
@@ -280,7 +285,7 @@ class Radial_Tax_Model_Observer
 	$quote = $observer->getEvent()->getQuote();
 	$taxTransmit = $quote->getData('radial_tax_transmit');
 	
-	$enabled = $this->helper->getConfigModel()->enabled;
+        $enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $quote->getStoreId());
 
 	$taxFees = unserialize($quote->getData('radial_tax_fees'));
 	$taxDuties = unserialize($quote->getData('radial_tax_duties'));

@@ -94,13 +94,6 @@ class Radial_Tax_Model_Cron
     public function cronOrderTaxQuoteRetry()
     {
         $maxretries = Mage::getStoreConfig('radial_core/radial_tax_core/maxretries');
-        $enabled = $this->helper->getConfigModel()->enabled;
-
-        if(!$enabled)
-        {
-                return $this;
-        }
-
         $collection= Mage::getResourceModel('sales/order_collection')
                         ->addFieldToFilter('radial_tax_transmit', array('lt' => $maxretries))
                         ->addFieldToFilter('radial_tax_transmit', array('neq' => -1))
@@ -116,6 +109,13 @@ class Radial_Tax_Model_Cron
 
                 foreach( $collection as $order )
                 {
+			$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
+
+			if( !$enabled)
+			{
+				continue;
+			}
+
 			try
 			{
 				$result = $this->taxCollector->collectTaxesForOrder($order);
@@ -345,13 +345,6 @@ class Radial_Tax_Model_Cron
     public function cronTaxInvoiceForInvoice()
     {
 	$maxretries = Mage::getStoreConfig('radial_core/radial_tax_core/maxretries');
-	$enabled = $this->helper->getConfigModel()->enabled;
-
-        if(!$enabled)
-        {
-                return $this;
-        }
-
 	$collection= Mage::getResourceModel('sales/order_invoice_collection')
 			->addFieldToFilter('radial_tax_transmit', array('lt' => $maxretries))
 			->addFieldToFilter('radial_tax_transmit', array('neq' => -1))
@@ -369,6 +362,13 @@ class Radial_Tax_Model_Cron
 		{
         		$order = $invoice->getOrder();
         		$type = "SALE";
+
+			$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
+
+                        if( !$enabled)
+                        {
+                                continue;
+                        }
 
 			if( $order->getData('radial_tax_transmit') != -1 ) 
                         {
@@ -508,13 +508,6 @@ class Radial_Tax_Model_Cron
     public function cronTaxInvoiceForCreditmemo()
     {
 	$maxretries = Mage::getStoreConfig('radial_core/radial_tax_core/maxretries');
-	$enabled = $this->helper->getConfigModel()->enabled;
-
-        if(!$enabled)
-        {
-                return $this;
-        }
-
 	$collection= Mage::getResourceModel('sales/order_creditmemo_collection')
                         ->addFieldToFilter('radial_tax_transmit', array('lt' => $maxretries))
 			->addFieldToFilter('radial_tax_transmit', array('neq' => -1))
@@ -532,6 +525,13 @@ class Radial_Tax_Model_Cron
                 {
                         $order = $creditmemo->getOrder();
                         $type = "RETURN";
+
+			$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
+
+                        if( !$enabled)
+                        {
+                                continue;
+                        }
 
 			if( $order->getData('radial_tax_transmit') != -1 ) 
 			{
