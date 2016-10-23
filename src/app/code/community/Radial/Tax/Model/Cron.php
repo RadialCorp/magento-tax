@@ -193,7 +193,8 @@ class Radial_Tax_Model_Cron
                 					$orderService = Mage::getModel('sales/service_order', $order);
                 					$invoice = $orderService->prepareInvoice($orderItemArray);
 
-                					$invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE);
+                					$invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::NOT_CAPTURE);
+							$invoice->setState(Mage_Sales_Model_Order_Invoice::STATE_PAID);
 
 							$invoice->setTaxAmount($invoiceTaxTotal);
 							$invoice->setBaseTaxAmount($invoiceTaxTotal);
