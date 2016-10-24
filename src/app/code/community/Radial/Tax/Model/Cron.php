@@ -212,29 +212,25 @@ class Radial_Tax_Model_Cron
 					if( $creditmemoCol->getSize() > 0 )
                                         {
                                                 $creditmemoTaxTotal = 0;
-						$creditmemoCol = Mage::getResourceModel('sales/order_creditmemo_collection')->addAttributeToSort('increment_id', 'ASC'); 
 
                                                 foreach( $creditmemoCol as $creditmemo )
                                                 {
                                                         if( $creditmemo->getData('radial_tax_transmit') !== -1 )
                                                         {
-								if( strcmp($creditmemoCol->getFirstItem()->getIncrementId(), $creditmemo->getIncrementId()) === 0 )
-								{
-                                                                	if( $creditmemo->getShippingAmount() )
-                                                                	{
-                                                                        	$creditmemoTaxTotal += $order->getShippingTaxAmount();
-                                                                	}
+                                                                if( $creditmemo->getShippingAmount() > 0 )
+                                                                {
+                                                                       	$creditmemoTaxTotal += $order->getShippingTaxAmount();
+                                                                }
 
-                                                                	if( $creditmemo->getGwPrice() )
-                                                                	{
-                                                                        	$creditmemoTaxTotal += $order->getGwTaxAmount();
-                                                                	}
+                                                                if( $creditmemo->getGwPrice() > 0 )
+                                                                {
+                                                                       	$creditmemoTaxTotal += $order->getGwTaxAmount();
+                                                                }
 
-									if( $creditmemo->getGwCardPrice() )
-                                                                	{
-                                                                        	$invoiceTaxTotal += $order->getGwCardTaxAmount();
-                                                                	}
-								}
+								if( $creditmemo->getGwCardPrice() > 0)
+                                                                {
+                                                                       	$invoiceTaxTotal += $order->getGwCardTaxAmount();
+                                                                }
 
                                                                 foreach( $creditmemo->getAllItems() as $creditmemoItem )
                                                                 {
