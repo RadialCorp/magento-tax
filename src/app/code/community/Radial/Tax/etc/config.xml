@@ -193,6 +193,8 @@ http://opensource.org/licenses/osl-3.0.php
                         <maxretries>3</maxretries>
                         <responsetimeout>20000</responsetimeout>
 			<printedcardtaxclass>18451</printedcardtaxclass>
+			<displayfees>0</displayfees>
+			<displayduties>0</displayduties>
                 </radial_tax_core>
         </radial_core>
     </default>

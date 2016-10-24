@@ -19,7 +19,11 @@
 class Radial_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Abstract
 {
     const TAX_LABEL = 'Radial_Tax_Order_Total_Tax_Title';
+    const TAX_LABEL_FEES = 'Radial_Tax_Order_Total_Tax_Title_Fees';
+    const TAX_LABEL_DUTIES = 'Radial_Tax_Order_Total_Tax_Title_Duties';
     const TOTAL_CODE = 'radial_tax';
+    const TOTAL_CODE_FEES = 'radial_tax_fees';
+    const TOTAL_CODE_DUTIES = 'radial_tax_duties';
 
     /** @var Radial_Tax_Model_Collector */
     protected $taxCollector;
@@ -79,31 +83,100 @@ class Radial_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Abstract
     {
         $parent = $this->getParentBlock();
 
-        $taxAmount = $this->totalTaxAmount();
-        $parent->addTotal(
-            new Varien_Object([
-                'code' => self::TOTAL_CODE,
-                'value' => $taxAmount,
-                'base_value' => $taxAmount,
-                'label' => $this->helper->__(self::TAX_LABEL),
-            ]),
-            'discount'
-        );
+	$toggleFees = Mage::getStoreConfig('radial_core/radial_tax_core/displayfees', Mage::app()->getStore()->getStoreId());
+	$toggleDuties = Mage::getStoreConfig('radial_core/radial_tax_core/displayduties', Mage::app()->getStore()->getStoreId());
 
-        return $this;
-    }
-
-    /**
-     * Total all taxes associated with the current order.
-     *
-     * @return float
-     */
-    protected function totalTaxAmount()
-    {
-        $records = array_reduce($this->taxCollector->getTaxRecords(), function ($total, $item) { return $total + $item->getCalculatedTax(); }, 0.00);
+	$records = array_reduce($this->taxCollector->getTaxRecords(), function ($total, $item) { return $total + $item->getCalculatedTax(); }, 0.00);
         $duties = array_reduce($this->taxCollector->getTaxDuties(), function ($total, $item) { return $total + $item->getAmount(); }, 0.00);
         $fees = array_reduce($this->taxCollector->getTaxFees(), function ($total, $item) { return $total + $item->getAmount(); }, 0.00);
 
-        return $records + $duties + $fees;
+	if($toggleFees && $toggleDuties )
+	{
+		$parent->addTotal(
+	            new Varien_Object([
+	                'code' => self::TOTAL_CODE,
+	                'value' => $records,
+	                'base_value' => $records,
+	                'label' => $this->helper->__(self::TAX_LABEL),
+                    ]),
+                   'discount'
+                );
+
+		$parent->addTotal(
+                    new Varien_Object([
+                        'code' => self::TOTAL_CODE_DUTIES,
+                        'value' => $duties,
+                        'base_value' => $duties,
+                        'label' => $this->helper->__(self::TAX_LABEL_DUTIES),
+                    ]),
+                   'discount'
+                );		
+
+		$parent->addTotal(
+                    new Varien_Object([
+                        'code' => self::TOTAL_CODE_FEES,
+                        'value' => $fees,
+                        'base_value' => $fees,
+                        'label' => $this->helper->__(self::TAX_LABEL_FEES),
+                    ]),
+                   'discount'
+                );
+	} else if ($toggleFees && !$toggleDuties) {
+		$taxAmount = $records + $duties;
+		$parent->addTotal(
+                    new Varien_Object([
+                        'code' => self::TOTAL_CODE,
+                        'value' => $taxAmount,
+                        'base_value' => $taxAmount,
+                        'label' => $this->helper->__(self::TAX_LABEL),
+                    ]),
+                   'discount'
+                );
+
+		$parent->addTotal(
+                    new Varien_Object([
+                        'code' => self::TOTAL_CODE_FEES,
+                        'value' => $fees,
+                        'base_value' => $fees,
+                        'label' => $this->helper->__(self::TAX_LABEL_FEES),
+                    ]),
+                   'discount'
+                );
+	} else if (!$toggleFees && $toggleDuties ) {
+		$taxAmount = $records + $fees;
+
+		$parent->addTotal(
+                    new Varien_Object([
+                        'code' => self::TOTAL_CODE,
+                        'value' => $taxAmount,
+                        'base_value' => $taxAmount,
+                        'label' => $this->helper->__(self::TAX_LABEL),
+                    ]),
+                   'discount'
+                );
+
+                $parent->addTotal(
+                    new Varien_Object([
+                        'code' => self::TOTAL_CODE_DUTIES,
+                        'value' => $duties,
+                        'base_value' => $duties,
+                        'label' => $this->helper->__(self::TAX_LABEL_DUTIES),
+                    ]),
+                   'discount'
+                );
+	} else {
+        	$taxAmount = $records + $duties + $fees;
+        	$parent->addTotal(
+        	        new Varien_Object([
+        	            'code' => self::TOTAL_CODE,
+        	            'value' => $taxAmount,
+        	            'base_value' => $taxAmount,
+        	            'label' => $this->helper->__(self::TAX_LABEL),
+        	        ]),
+                    'discount'
+                );
+	}
+
+        return $this;
     }
 }

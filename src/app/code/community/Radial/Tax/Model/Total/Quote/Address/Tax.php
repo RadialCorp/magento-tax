@@ -16,6 +16,12 @@
 class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Address_Total_Abstract
 {
     const TAX_TOTAL_TITLE = 'Radial_Tax_Total_Quote_Address_Tax_Title';
+    const TAX_TOTAL_TITLE_DUTIES = 'Radial_Tax_Total_Quote_Address_Tax_Title_Duties';
+    const TAX_TOTAL_TITLE_FEES = 'Radial_Tax_Total_Quote_Address_Tax_Title_Fees';
+
+    const TOTAL_CODE = 'radial_tax';
+    const TOTAL_CODE_FEES = 'radial_tax_fees';
+    const TOTAL_CODE_DUTIES = 'radial_tax_duties';
 
     /**
      * Code used to determine the block renderer for the address line.
@@ -99,14 +105,127 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
-        $total = $address->getTotalAmount($this->getCode());
-        if ($total) {
-            $address->addTotal([
-                'code' => $this->getCode(),
-                'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
-                'value' => $total
-            ]);
-        }
+	$toggleFees = Mage::getStoreConfig('radial_core/radial_tax_core/displayfees', Mage::app()->getStore()->getStoreId());
+	$toggleDuties = Mage::getStoreConfig('radial_core/radial_tax_core/displayduties', Mage::app()->getStore()->getStoreId());
+
+        $addressId = $address->getId();
+        $records = $this->_totalTaxRecordsCalculatedTaxes($this->_taxCollector->getTaxRecordsByAddressId($addressId));
+        $duties = $this->_totalDuties($this->_taxCollector->getTaxDutiesByAddressId($addressId));
+        $fees = $this->_totalFees($this->_taxCollector->getTaxFeesByAddressId($addressId));
+
+	if($toggleFees && $toggleDuties )
+	{
+		if( $records )
+		{
+			$parent->addTotal(
+	        	    new Varien_Object([
+	        	        'code' => self::TOTAL_CODE,
+	        	        'value' => $records,
+	        	        'base_value' => $records,
+	        	        'label' => $this->helper->__(self::TAX_TOTAL_TITLE),
+                	    ]),
+                	   'discount'
+                	);
+		}
+
+		if( $duties )
+		{
+			$parent->addTotal(
+                	    new Varien_Object([
+                	        'code' => self::TOTAL_CODE_DUTIES,
+                	        'value' => $duties,
+                	        'base_value' => $duties,
+                	        'label' => $this->helper->__(self::TAX_TOTAL_TITLE_DUTIES),
+                	    ]),
+                	   'discount'
+                	);	
+		}	
+
+		if ($fees )
+		{
+			$parent->addTotal(
+                	    new Varien_Object([
+               		         'code' => self::TOTAL_CODE_FEES,
+                	        'value' => $fees,
+                	        'base_value' => $fees,
+               	        	 'label' => $this->helper->__(self::TAX_TOTAL_TITLE_FEES),
+               			     ]),
+                	   	'discount'
+                	);
+		}
+	} else if ($toggleFees && !$toggleDuties) {
+		$taxAmount = $records + $duties;
+
+		if( $taxAmount )
+		{
+			$parent->addTotal(
+                	    new Varien_Object([
+                	        'code' => self::TOTAL_CODE,
+                	        'value' => $taxAmount,
+                	        'base_value' => $taxAmount,
+                	        'label' => $this->helper->__(self::TAX_TOTAL_TITLE),
+                	    ]),
+                   	'discount'
+                	);
+		}
+
+		if( $fees )
+		{
+			$parent->addTotal(
+                	    new Varien_Object([
+                	        'code' => self::TOTAL_CODE_FEES,
+                	        'value' => $fees,
+                	        'base_value' => $fees,
+                	        'label' => $this->helper->__(self::TAX_TOTAL_TITLE_FEES),
+                	    ]),
+                	   'discount'
+                	);
+		}
+	} else if (!$toggleFees && $toggleDuties ) {
+		$taxAmount = $records + $fees;
+
+		if( $taxAmount )
+		{
+			$parent->addTotal(
+                	    new Varien_Object([
+                	        'code' => self::TOTAL_CODE,
+                	        'value' => $taxAmount,
+                	        'base_value' => $taxAmount,
+                	        'label' => $this->helper->__(self::TAX_TOTAL_TITLE),
+                	    ]),
+                	   'discount'
+                	);
+		}
+
+		if( $duties )
+		{
+                	$parent->addTotal(
+                	    new Varien_Object([
+                	        'code' => self::TOTAL_CODE_DUTIES,
+                	        'value' => $duties,
+                	        'base_value' => $duties,
+                	        'label' => $this->helper->__(self::TAX_TOTAL_TITLE_DUTIES),
+                	    ]),
+                	   'discount'
+                	);
+		}
+	} else {
+        	$taxAmount = $records + $duties + $fees;
+
+		if($taxAmount)
+		{
+        		$parent->addTotal(
+        		        new Varien_Object([
+        		            'code' => self::TOTAL_CODE,
+        		            'value' => $taxAmount,
+        		            'base_value' => $taxAmount,
+        		            'label' => $this->helper->__(self::TAX_TOTAL_TITLE),
+        		        ]),
+                	    'discount'
+                	);
+		}
+	}
+
         return $this;
     }
 
