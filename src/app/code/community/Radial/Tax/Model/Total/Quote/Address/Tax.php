@@ -210,16 +210,20 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
     {
         // Necessary for inherited `self::_setAmount` and `self::_setBaseAmount` to behave.
         $this->_setAddress($address);
-        $addressId = $address->getId();
-        $taxTotal = $this->_totalTaxRecordsCalculatedTaxes($this->_taxCollector->getTaxRecordsByAddressId($addressId));
-        $dutyTotal = $this->_totalDuties($this->_taxCollector->getTaxDutiesByAddressId($addressId));
-        $feeTotal = $this->_totalFees($this->_taxCollector->getTaxFeesByAddressId($addressId));
-        $total = $taxTotal + $dutyTotal + $feeTotal;
-        $this->_logger->debug("Collected tax totals of: tax - $taxTotal, duty - $dutyTotal, fee - $feeTotal, total - $total.", $this->_logContext->getMetaData(__CLASS__, ['address_type' => $address->getAddressType()]));
-        // Always overwrite amounts for this total. The total calculated from
-        // the collector's tax records will be the complete tax amount for
-        // the address.
-        $this->_setAmount($total)->_setBaseAmount($total);
+
+	if( $address->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_SHIPPING )
+        {
+        	$addressId = $address->getId();
+        	$taxTotal = $this->_totalTaxRecordsCalculatedTaxes($this->_taxCollector->getTaxRecordsByAddressId($addressId));
+        	$dutyTotal = $this->_totalDuties($this->_taxCollector->getTaxDutiesByAddressId($addressId));
+        	$feeTotal = $this->_totalFees($this->_taxCollector->getTaxFeesByAddressId($addressId));
+        	$total = $taxTotal + $dutyTotal + $feeTotal;
+        	$this->_logger->debug("Collected tax totals of: tax - $taxTotal, duty - $dutyTotal, fee - $feeTotal, total - $total.", $this->_logContext->getMetaData(__CLASS__, ['address_type' => $address->getAddressType()]));
+        	// Always overwrite amounts for this total. The total calculated from
+        	// the collector's tax records will be the complete tax amount for
+        	// the address.
+        	$this->_setAmount($total)->_setBaseAmount($total);
+	}
 
         return $this;
     }
