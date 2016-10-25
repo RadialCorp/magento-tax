@@ -213,6 +213,8 @@ class Radial_Tax_Model_Request_Builder_Item
      */
     protected function _injectOriginData()
     {
+	$regionModel = Mage::getModel('directory/region')->loadByCode($this->_taxConfig->adminOriginMainDivision, $this->_taxConfig->adminOriginCountryCode);
+
         // Admin origin set in configuration.
         $adminOrigin = Mage::getModel('customer/address', [
             'street' => rtrim(
@@ -225,7 +227,7 @@ class Radial_Tax_Model_Request_Builder_Item
                 "\n"
             ),
             'city' => $this->_taxConfig->adminOriginCity,
-            'region_id' => $this->_taxConfig->adminOriginMainDivision,
+            'region_id' => $regionModel->getId(),
             'country_id' => $this->_taxConfig->adminOriginCountryCode,
             'postcode' => $this->_taxConfig->adminOriginPostalCode,
         ]);
