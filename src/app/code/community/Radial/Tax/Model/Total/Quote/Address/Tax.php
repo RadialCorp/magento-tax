@@ -105,92 +105,95 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
      */
     public function fetch(Mage_Sales_Model_Quote_Address $address)
     {
-	$toggleFees = Mage::getStoreConfig('radial_core/radial_tax_core/displayfees', Mage::app()->getStore()->getStoreId());
-	$toggleDuties = Mage::getStoreConfig('radial_core/radial_tax_core/displayduties', Mage::app()->getStore()->getStoreId());
-
-        $addressId = $address->getId();
-        $records = $this->_totalTaxRecordsCalculatedTaxes($this->_taxCollector->getTaxRecordsByAddressId($addressId));
-        $duties = $this->_totalDuties($this->_taxCollector->getTaxDutiesByAddressId($addressId));
-        $fees = $this->_totalFees($this->_taxCollector->getTaxFeesByAddressId($addressId));
-
-	if($toggleFees && $toggleDuties )
+	if( $address->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_SHIPPING )
 	{
-		if( $records )
-		{
-			$address->addTotal([
-	        	        'code' => self::TOTAL_CODE,
-	        	        'value' => $records,
-	        	        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
-                	]);
-		}
+		$toggleFees = Mage::getStoreConfig('radial_core/radial_tax_core/displayfees', Mage::app()->getStore()->getStoreId());
+		$toggleDuties = Mage::getStoreConfig('radial_core/radial_tax_core/displayduties', Mage::app()->getStore()->getStoreId());
 
-		if( $duties )
-		{
-			$address->addTotal([
-                	        'code' => self::TOTAL_CODE_DUTIES,
-                	        'value' => $duties,
-                	        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE_DUTIES),
-                	]);
-		}	
+        	$addressId = $address->getId();
+        	$records = $this->_totalTaxRecordsCalculatedTaxes($this->_taxCollector->getTaxRecordsByAddressId($addressId));
+        	$duties = $this->_totalDuties($this->_taxCollector->getTaxDutiesByAddressId($addressId));
+        	$fees = $this->_totalFees($this->_taxCollector->getTaxFeesByAddressId($addressId));
 
-		if ($fees )
+		if($toggleFees && $toggleDuties )
 		{
-			$address->addTotal([
-               		        'code' => self::TOTAL_CODE_FEES,
-                	        'value' => $fees,
-               	        	'title' => $this->_helper->__(self::TAX_TOTAL_TITLE_FEES),
-                	]);
-		}
-	} else if ($toggleFees && !$toggleDuties) {
-		$taxAmount = $records + $duties;
+			if( $records )
+			{
+				$address->addTotal([
+	        		        'code' => self::TOTAL_CODE,
+	        		        'value' => $records,
+	        		        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
+                		]);
+			}
 
-		if( $taxAmount )
-		{
-			$address->addTotal([
-                	        'code' => self::TOTAL_CODE,
-                	        'value' => $taxAmount,
-                	        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
-                	]);
-		}
+			if( $duties )
+			{
+				$address->addTotal([
+                		        'code' => self::TOTAL_CODE_DUTIES,
+                		        'value' => $duties,
+                		        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE_DUTIES),
+                		]);
+			}	
 
-		if( $fees )
-		{
-			$address->addTotal([
-                	        'code' => self::TOTAL_CODE_FEES,
-                	        'value' => $fees,
-                	        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE_FEES),
-                	]);
-		}
-	} else if (!$toggleFees && $toggleDuties ) {
-		$taxAmount = $records + $fees;
+			if ($fees )
+			{
+				$address->addTotal([
+               			        'code' => self::TOTAL_CODE_FEES,
+                		        'value' => $fees,
+               		        	'title' => $this->_helper->__(self::TAX_TOTAL_TITLE_FEES),
+                		]);
+			}
+		} else if ($toggleFees && !$toggleDuties) {
+			$taxAmount = $records + $duties;
 
-		if( $taxAmount )
-		{
-			$address->addTotal([
-                	        'code' => self::TOTAL_CODE,
-                	        'value' => $taxAmount,
-                	        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
-                	]);
-		}
+			if( $taxAmount )
+			{
+				$address->addTotal([
+                		        'code' => self::TOTAL_CODE,
+                		        'value' => $taxAmount,
+                		        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
+                		]);
+			}
 
-		if( $duties )
-		{
-                	$address->addTotal([
-                	        'code' => self::TOTAL_CODE_DUTIES,
-                	        'value' => $duties,
-                	        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE_DUTIES),
-                	]);
-		}
-	} else {
-        	$taxAmount = $records + $duties + $fees;
+			if( $fees )
+			{
+				$address->addTotal([
+                		        'code' => self::TOTAL_CODE_FEES,
+                		        'value' => $fees,
+                		        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE_FEES),
+                		]);
+			}
+		} else if (!$toggleFees && $toggleDuties ) {
+			$taxAmount = $records + $fees;
 
-		if($taxAmount)
-		{
-        		$address->addTotal([
-        		            'code' => self::TOTAL_CODE,
-        		            'value' => $taxAmount,
-        		            'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
-        	        ]);
+			if( $taxAmount )
+			{
+				$address->addTotal([
+                		        'code' => self::TOTAL_CODE,
+                		        'value' => $taxAmount,
+                		        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
+                		]);
+			}
+
+			if( $duties )
+			{
+                		$address->addTotal([
+                		        'code' => self::TOTAL_CODE_DUTIES,
+                		        'value' => $duties,
+                		        'title' => $this->_helper->__(self::TAX_TOTAL_TITLE_DUTIES),
+                		]);
+			}
+		} else {
+        		$taxAmount = $records + $duties + $fees;
+
+			if($taxAmount)
+			{
+        			$address->addTotal([
+        			            'code' => self::TOTAL_CODE,
+        			            'value' => $taxAmount,
+        			            'title' => $this->_helper->__(self::TAX_TOTAL_TITLE),
+        	        	]);
+			}
 		}
 	}
 
@@ -217,6 +220,12 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
         // the collector's tax records will be the complete tax amount for
         // the address.
         $this->_setAmount($total)->_setBaseAmount($total);
+
+        Mage::Log("Address ID: ". $addressId );
+        Mage::Log("Records: ". $taxTotal);
+        Mage::Log("Duties: ". $dutyTotal);
+        Mage::Log("Fees: ". $feeTotal);
+
         return $this;
     }
 

@@ -127,6 +127,16 @@ http://opensource.org/licenses/osl-3.0.php
                         <before>grand_total</before>
                         <class>radial_tax/total_quote_address_tax</class>
                     </radial_tax>
+		    <radial_tax_fees>
+			<after>radial_tax</after>
+                        <before>grand_total</before>
+                        <class>radial_tax/total_quote_address_tax</class>
+		    </radial_tax_fees>
+		    <radial_tax_duties>
+			<after>radial_tax_fees</after>
+                        <before>grand_total</before>
+                        <class>radial_tax/total_quote_address_tax</class>
+		    </radial_tax_duties>
                 </totals>
                 <item>
                     <!--
