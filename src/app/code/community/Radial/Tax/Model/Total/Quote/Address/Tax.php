@@ -221,11 +221,6 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
         // the address.
         $this->_setAmount($total)->_setBaseAmount($total);
 
-        Mage::Log("Address ID: ". $addressId );
-        Mage::Log("Records: ". $taxTotal);
-        Mage::Log("Duties: ". $dutyTotal);
-        Mage::Log("Fees: ". $feeTotal);
-
         return $this;
     }
 
