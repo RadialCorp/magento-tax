@@ -1,3 +1,7 @@
 "Radial_Tax_Total_Quote_Address_Tax_Title", "Tax"
+"Radial_Tax_Total_Quote_Address_Tax_Title_Fees", "Fees"
+"Radial_Tax_Total_Quote_Address_Tax_Title_Duties", "Duties"
 "Radial_Tax_Order_Total_Tax_Title", "Tax"
+"Radial_Tax_Order_Total_Tax_Title_Fees", "Fees"
+"Radial_Tax_Order_Total_Tax_Title_Duties", "Duties"
 "Radial_Tax_Request_Failed", "Unable to collect taxes."
