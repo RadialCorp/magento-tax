@@ -268,6 +268,12 @@ class Radial_Tax_Model_Cron
                                                 	$creditmemo->register();
 						}
 					}
+
+					// Finally kick off fraud for re-evaluation
+					if( Mage::getStoreConfig('radial_core/fraud/enabledmod', $order->getStoreId()))
+					{
+						Mage::dispatchEvent('radial_eb2cfraud_risk_assessment_tax_retry', array( 'modified_by' => 'TAX RETRY - TaxDutyQuote Failure', 'order' => $order));
+					}
                         	}
 			} catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Quote is not valid.', $this->logContext->getMetaData(__CLASS__));
