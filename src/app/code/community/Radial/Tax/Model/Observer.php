@@ -184,9 +184,9 @@ class Radial_Tax_Model_Observer
 	{
 		$transmitFlag = $invoice->getRadialTaxTransmit();
 
-		if( $transmitFlag !== -1 )
+		if( $transmitFlag != -1 )
 		{
-			if( $order->getRadialTaxTransmit() === -1 )
+			if( $order->getRadialTaxTransmit() == -1 )
 			{
 				$qty = 0;
 
@@ -238,9 +238,9 @@ class Radial_Tax_Model_Observer
 	{
 		$transmitFlag = $creditmemo->getRadialTaxTransmit();
 
-		if( $transmitFlag !== -1 )
+		if( $transmitFlag != -1 )
 		{
-			if( $order->getRadialTaxTransmit() === -1 )
+			if( $order->getRadialTaxTransmit() == -1 )
 			{                        
 				$qty = 0;
 
