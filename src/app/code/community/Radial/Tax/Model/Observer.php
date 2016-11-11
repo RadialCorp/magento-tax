@@ -182,13 +182,10 @@ class Radial_Tax_Model_Observer
 
 	if( $enabled )
 	{
-		$invoice = $observer->getEvent()->getInvoice();
 		$transmitFlag = $invoice->getRadialTaxTransmit();
 
 		if( $transmitFlag !== -1 )
 		{
-			$order = $invoice->getOrder();
-			
 			if( $order->getRadialTaxTransmit() === -1 )
 			{
 				$qty = 0;
@@ -198,7 +195,7 @@ class Radial_Tax_Model_Observer
                                 	$qty += $invoiceItem->getQty();
                                 }
 
-                                if( !$qty )
+                                if( $qty )
                                 {
 					$comment = "Tax Invoice Successfully Queued for Invoice: ". $invoice->getIncrementId();
 
@@ -243,8 +240,6 @@ class Radial_Tax_Model_Observer
 
 		if( $transmitFlag !== -1 )
 		{
-			$order = $creditmemo->getOrder();
-
 			if( $order->getRadialTaxTransmit() === -1 )
 			{                        
 				$qty = 0;
@@ -254,7 +249,7 @@ class Radial_Tax_Model_Observer
                                 	$qty += $creditmemoItem->getQty();
                             	}
 
-                                if( !$qty )
+                                if( $qty )
                                 {
         				$creditmemo->setData('radial_tax_transmit', 0);
 					$comment = "Tax Invoice Successfully Queued for Creditmemo: ". $creditmemo->getIncrementId();
