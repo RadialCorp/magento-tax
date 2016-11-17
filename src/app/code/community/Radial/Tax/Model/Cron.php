@@ -418,6 +418,7 @@ class Radial_Tax_Model_Cron
                                 $order->addStatusHistory($history);
                                 $order->save();
 
+				$invoice->setData('radial_tax_transmit', -1);
 				$invoice->addComment($comment, false, true);
                                 $invoice->save();
 
@@ -570,24 +571,39 @@ class Radial_Tax_Model_Cron
                                 $qty += $creditmemoItem->getQty();
                             }
 
-                            if( !$qty )
+			    if( !$qty )
                             {
-                            	$requestBody = $this->taxCollector->collectTaxesForInvoice($order, $creditmemo, $type);
-
-			    	$comment = "Tax Invoice Successfully Submitted for Creditmemo: ". $creditmemo->getIncrementId();
-
-			    	//Mark the invoice comments as sent.
-                            	$history = Mage::getModel('sales/order_status_history')
+                                $comment = "Tax Creditmemo: ". $creditmemo->getIncrementId() . " not submitted, need atleast 1 item";
+                                //Mark the invoice comments as sent.
+                                $history = Mage::getModel('sales/order_status_history')
                                         ->setStatus($order->getStatus())
                                         ->setComment($comment)
                                         ->setEntityName('order');
-                            	$order->addStatusHistory($history);
-			    	$order->save();
+                                $order->addStatusHistory($history);
+                                $order->save();
 
-			    	$creditmemo->addComment($comment, false, true);
-			    	$creditmemo->setData('radial_tax_transmit', -1);
-			    	$creditmemo->save();
-			     }
+                                $creditmemo->setData('radial_tax_transmit', -1);
+                                $creditmemo->addComment($comment, false, true);
+                                $creditmemo->save();
+
+                                continue;
+                            }
+
+                            $requestBody = $this->taxCollector->collectTaxesForInvoice($order, $creditmemo, $type);
+                            $comment = "Tax Invoice Successfully Submitted for Creditmemo: ". $creditmemo->getIncrementId();
+
+                            //Mark the invoice comments as sent.
+                            $history = Mage::getModel('sales/order_status_history')
+                                        ->setStatus($order->getStatus())
+                                        ->setComment($comment)
+                                        ->setEntityName('order');
+                            $order->addStatusHistory($history);
+                            $order->save();
+
+                            $creditmemo->setData('radial_tax_transmit', -1);
+                            $creditmemo->addComment($comment, false, true);
+                            $creditmemo->save();
+
                         } catch (Radial_Tax_Exception_Collector_InvalidInvoice_Exception $e) {
                             $this->logger->debug('Tax Invoice is not valid.', $this->logContext->getMetaData(__CLASS__));
                             throw $e;
