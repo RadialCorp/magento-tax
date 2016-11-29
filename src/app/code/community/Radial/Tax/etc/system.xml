@@ -215,21 +215,21 @@ http://opensource.org/licenses/osl-3.0.php
 			<effectivefrom translate="label">
            			<label>Radial Taxes Effective From</label>
            			<frontend_type>text</frontend_type> <!-- Use text instead of "myDateSelection" -->
-           			<frontend_model>module/adminhtml_system_config_date</frontend_model> <!-- Call a module specific renderer model -->
+           			<frontend_model>radial_tax/adminhtml_system_config_date</frontend_model> <!-- Call a module specific renderer model -->
            			<sort_order>15</sort_order>
            			<show_in_default>1</show_in_default>
            			<show_in_website>1</show_in_website>
            			<show_in_store>1</show_in_store>
           		</effectivefrom>
-			<effectivefrom translate="label">
+			<effectiveto translate="label">
                                 <label>Radial Taxes Effective To</label>
                                 <frontend_type>text</frontend_type> <!-- Use text instead of "myDateSelection" -->
-                                <frontend_model>module/adminhtml_system_config_date</frontend_model> <!-- Call a module specific renderer model -->
+                                <frontend_model>radial_tax/adminhtml_system_config_date</frontend_model> <!-- Call a module specific renderer model -->
                                 <sort_order>16</sort_order>
                                 <show_in_default>1</show_in_default>
                                 <show_in_website>1</show_in_website>
                                 <show_in_store>1</show_in_store>
-                        </effectivefrom>
+                        </effectiveto>
 		    </fields>
 		</radial_tax_core>
             </groups>
