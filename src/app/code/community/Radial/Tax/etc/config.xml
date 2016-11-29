@@ -15,7 +15,7 @@ http://opensource.org/licenses/osl-3.0.php
 <config>
     <modules>
         <Radial_Tax>
-            <version>1.6.3</version>
+            <version>1.6.4</version>
         </Radial_Tax>
     </modules>
     <global>
@@ -199,7 +199,7 @@ http://opensource.org/licenses/osl-3.0.php
         </radial_tax>
 	<radial_core>
                 <radial_tax_core>
-			<enabledmod>1</enabledmod>
+			<enabledmod>0</enabledmod>
                         <maxretries>3</maxretries>
                         <responsetimeout>20000</responsetimeout>
 			<printedcardtaxclass>18451</printedcardtaxclass>
