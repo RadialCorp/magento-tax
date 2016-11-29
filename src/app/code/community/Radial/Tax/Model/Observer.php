@@ -117,11 +117,27 @@ class Radial_Tax_Model_Observer
 
 	$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $quote->getStoreId());
 
+        $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', $quote->getStoreId());
+        $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $quote->getStoreId());
+        $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
+
+        if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        {
+		  $this->logger->debug('Tax Calculation Occured Before the Radial Tax Effective From Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
+                  return $this;
+        }
+
+        if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        {
+		  $this->logger->debug('Tax Calculation Occured After the Radial Tax Effective To Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
+                  return $this;
+        }
+
 	if( !$enabled )
-	{
-		$quote->setData('radial_tax_transmit', 0);
-            	$quote->save();
-	}
+        {
+                $quote->setData('radial_tax_transmit', 0);
+                $quote->save();
+        }
 
         if ($coreSession->isTaxUpdateRequired() && $enabled) {
             try {
@@ -178,7 +194,24 @@ class Radial_Tax_Model_Observer
     {
 	$invoice = $observer->getEvent()->getInvoice();
 	$order = $invoice->getOrder();
+
 	$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
+
+        $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', $order->getStoreId());
+        $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
+        $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
+
+        if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        {
+                  $this->logger->debug('Tax Invoice Calculation Occured Before the Radial Tax Effective From Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
+                  return $this;
+        }
+
+        if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        {
+                  $this->logger->debug('Tax Invoice Calculation Occured After the Radial Tax Effective To Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
+                  return $this;
+        }
 
 	if( $enabled )
 	{
@@ -233,7 +266,25 @@ class Radial_Tax_Model_Observer
     {
 	$creditmemo = $observer->getEvent()->getCreditmemo();
         $order = $creditmemo->getOrder();
-        $enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
+	
+	$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
+
+        $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', $order->getStoreId());
+        $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
+        $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
+
+        if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        {
+                  $this->logger->debug('Tax Invoice Creditmemo - Calculation Occured Before the Radial Tax Effective From Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
+                  return $this;
+        }
+
+        if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        {
+                  $this->logger->debug('Tax Invoice Creditmemo - Calculation Occured After the Radial Tax Effective To Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
+                  return $this;
+        }
+
 	if( $enabled )
 	{
 		$transmitFlag = $creditmemo->getRadialTaxTransmit();
