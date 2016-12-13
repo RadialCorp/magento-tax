@@ -147,9 +147,24 @@ class Radial_Tax_Model_Request_Builder_Invoice
 
 	//Do not use the order address when computing Tax Invoice. Use the addresses used at Cart. MPTF-285
 
-	$quote = Mage::getModel('sales/quote')->load($this->_order->getQuoteId());
+	$radial_tax_taxrecords = deserialize($this->_order->getData('radial_tax_taxrecords'));
 
-        foreach ($quote->getAddressesCollection() as $address) {
+	$taxQuoteAddresses = array();
+	$addressIds = array();
+
+	foreach( $taxRecords as $taxRecord )
+	{
+		$addressIds[]= $taxRecord->getAddressId();
+	}
+
+	$addressIds = array_values(array_unique($addressIds));
+
+	foreach( $addressIds as $addressId )
+	{
+		$taxQuoteAdresses[] = Mage::getModel('sales/quote_address')->load($addressId);
+	}
+
+        foreach ($taxQuoteAddresses as $address) {
 	    $addressId = $address->getId();
 
             // Defer responsibility for building ship group and destination
@@ -168,10 +183,10 @@ class Radial_Tax_Model_Request_Builder_Invoice
             // to the ship group for the billing address. E.g. a billing address
             // is still a destination so the returned payload will still have a
             // destination but may not be a valid ship group (checked separately).
-            if ($addressId == $this->_order->getBillingAddress()->getId()) {
+            if ($address->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_BILLING) {
                 $this->_payload->setBillingInformation($destinationPayload);
             }
-            $shipGroupPayload = $addressBuilder->getShipGroupPayload();
+	    $shipGroupPayload = $addressBuilder->getShipGroupPayload();
             if ($shipGroupPayload) {
                 $shipGroupIterable[$shipGroupPayload] = $shipGroupPayload;
             }
