@@ -290,23 +290,8 @@ class Radial_Tax_Model_Request_Builder_Address
      */
     protected function _validateAddressIsDestination()
     {
-	if( $this->_invoice->getId())
-	{
-		if( $this->_invoice instanceof Mage_Sales_Model_Order )
-                {
-                        $order = $this->_invoice;
-                } else {
-                        $order = $this->_invoice->getOrder();
-                }
-
-		$address = $order->getBillingAddress();
-		$shipAddress = $order->getShippingAddress();
-
-		return $this->_address->getId() === $address->getId() || $this->_validateAddressIsShipGroup();
-	} else {
-        	return $this->_address->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_BILLING
-        	    || $this->_validateAddressIsShipGroup();
-        }
+        return $this->_address->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_BILLING
+            || $this->_validateAddressIsShipGroup();
     }
 
     /**
@@ -316,29 +301,10 @@ class Radial_Tax_Model_Request_Builder_Address
      */
     protected function _validateAddressIsShipGroup()
     {
-	if( $this->_invoice->getId())
-	{
-		if( $this->_invoice instanceof Mage_Sales_Model_Order )
-		{
-			$order = $this->_invoice;
-		} else {
-			$order = $this->_invoice->getOrder();
-		}
-
-		$shipAddress = $order->getShippingAddress();
-
-		if ( $shipAddress->getId() === $this->_address->getId() )
-		{
-			return (bool) count($this->_invoice->getAllItems());
-		} else {
-			return false;
-		}
-	} else {
-        	// This assume that the address is in a valid state to be
-        	// included and does not check for individual data constraints
-        	// to be met.
-        	return (bool) count($this->_address->getAllItems());
-	}
+        // This assume that the address is in a valid state to be
+        // included and does not check for individual data constraints
+        // to be met.
+        return (bool) count($this->_address->getAllItems());
     }
 
     /**
