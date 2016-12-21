@@ -145,7 +145,10 @@ class Radial_Tax_Model_Request_Builder_Invoice
         $destinationIterable = $this->_payload->getDestinations();
         $shipGroupIterable = $this->_payload->getShipGroups();
 
-	$quote = Mage::getModel('sales/quote')->load($this->_order->getQuoteId());
+	$quote = Mage::getModel('sales/quote')->getCollection()
+                ->addFieldToFilter('entity_id', $this->_order->getQuoteId())
+		->addFieldToFilter('store_id', $this->_order->getStoreId())
+                ->getFirstItem();
 
 	foreach ($quote->getAddressesCollection() as $address) {
 	    $addressId = $address->getId();
