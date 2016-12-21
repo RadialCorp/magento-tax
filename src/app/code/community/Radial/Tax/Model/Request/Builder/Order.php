@@ -124,42 +124,39 @@ class Radial_Tax_Model_Request_Builder_Order
         $destinationIterable = $this->_payload->getDestinations();
         $shipGroupIterable = $this->_payload->getShipGroups();
 
-	$billingAddress = $this->_order->getBillingAddress();
-	$shippingAddress = $this->_order->getShippingAddress();
+	$quote = Mage::getModel('sales/quote')->getCollection()
+                ->addFieldToFilter('entity_id', $this->_order->getQuoteId())
+                ->addFieldToFilter('store_id', $this->_order->getStoreId())
+                ->getFirstItem();
 
-	$addressBuilder = $this->_taxFactory->createRequestBuilderAddress(
+        foreach ($quote->getAddressesCollection() as $address) {
+            $addressId = $address->getId();
+
+            // Defer responsibility for building ship group and destination
+            // payloads to address request builders.
+            $addressBuilder = $this->_taxFactory->createRequestBuilderAddress(
                 $shipGroupIterable,
                 $destinationIterable,
-                $billingAddress,
+                $address,
                 $this->_order
-        );
+            );
 
-	$destinationPayload = $addressBuilder->getDestinationPayload();
-        // Billing addresses need to be set separately in the request payload.
-        // The addres request builder should have created the destination
-        // for the billing address, even if there were no items to add to
-        // to the ship group for the billing address. E.g. a billing address
-        // is still a destination so the returned payload will still have a
-        // destination but may not be a valid ship group (checked separately).
-        $this->_payload->setBillingInformation($destinationPayload);
-        $shipGroupPayload = $addressBuilder->getShipGroupPayload();
-        if ($shipGroupPayload) {
-            $shipGroupIterable[$shipGroupPayload] = $shipGroupPayload;
+            $destinationPayload = $addressBuilder->getDestinationPayload();
+            // Billing addresses need to be set separately in the request payload.
+            // The addres request builder should have created the destination
+            // for the billing address, even if there were no items to add to
+            // to the ship group for the billing address. E.g. a billing address
+            // is still a destination so the returned payload will still have a
+            // destination but may not be a valid ship group (checked separately).
+            if ($address->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_BILLING) {
+                $this->_payload->setBillingInformation($destinationPayload);
+            }
+            $shipGroupPayload = $addressBuilder->getShipGroupPayload();
+            if ($shipGroupPayload) {
+                $shipGroupIterable[$shipGroupPayload] = $shipGroupPayload;
+            }
         }
-
-	$addressBuilder = $this->_taxFactory->createRequestBuilderAddress(
-                $shipGroupIterable,
-                $destinationIterable,
-                $shippingAddress,
-                $this->_order
-        );
-	$shipGroupPayload = $addressBuilder->getShipGroupPayload();
-        if ($shipGroupPayload) {
-            $shipGroupIterable[$shipGroupPayload] = $shipGroupPayload;
-        }
-
         $this->_payload->setShipGroups($shipGroupIterable);
-
         return $this;
     }
 }
