@@ -396,8 +396,6 @@ class Radial_Tax_Model_Cron
                         $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
                         $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
-                        DateTime::createFromFormat('Y-m-d H:i:s', Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', $storeId));
-
                         if( !$enabled)
                         {
                                 continue;
