@@ -145,26 +145,9 @@ class Radial_Tax_Model_Request_Builder_Invoice
         $destinationIterable = $this->_payload->getDestinations();
         $shipGroupIterable = $this->_payload->getShipGroups();
 
-	//Do not use the order address when computing Tax Invoice. Use the addresses used at Cart. MPTF-285
+	$quote = Mage::getModel('sales/quote')->load($this->_order->getQuoteId());
 
-	$radial_tax_taxrecords = deserialize($this->_order->getData('radial_tax_taxrecords'));
-
-	$taxQuoteAddresses = array();
-	$addressIds = array();
-
-	foreach( $taxRecords as $taxRecord )
-	{
-		$addressIds[]= $taxRecord->getAddressId();
-	}
-
-	$addressIds = array_values(array_unique($addressIds));
-
-	foreach( $addressIds as $addressId )
-	{
-		$taxQuoteAdresses[] = Mage::getModel('sales/quote_address')->load($addressId);
-	}
-
-        foreach ($taxQuoteAddresses as $address) {
+	foreach ($quote->getAddressesCollection() as $address) {
 	    $addressId = $address->getId();
 
             // Defer responsibility for building ship group and destination
