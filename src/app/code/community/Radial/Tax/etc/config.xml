@@ -15,7 +15,7 @@ http://opensource.org/licenses/osl-3.0.php
 <config>
     <modules>
         <Radial_Tax>
-            <version>1.6.4</version>
+            <version>1.6.5</version>
         </Radial_Tax>
     </modules>
     <global>
@@ -53,36 +53,40 @@ http://opensource.org/licenses/osl-3.0.php
                 </email>
         </template>
 	<fieldsets>
-    		<sales_convert_quote>
-        		<radial_tax_taxrecords>
-		            <to_order_item>*</to_order_item>
-        		</radial_tax_taxrecords>
-    		</sales_convert_quote>
     		<sales_convert_order>
         		<radial_tax_taxrecords>
             			<to_quote_item>*</to_quote_item>
         		</radial_tax_taxrecords>
-    		</sales_convert_order>
-		<sales_convert_quote>
-                        <radial_tax_duties>
-                            <to_order_item>*</to_order_item>
-                        </radial_tax_duties>
-                </sales_convert_quote>
-                <sales_convert_order>
                         <radial_tax_duties>
                                 <to_quote_item>*</to_quote_item>
                         </radial_tax_duties>
-                </sales_convert_order>
-		<sales_convert_quote>
-                        <radial_tax_fees>
-                            <to_order_item>*</to_order_item>
-                        </radial_tax_fees>
-                </sales_convert_quote>
-                <sales_convert_order>
                         <radial_tax_fees>
                                 <to_quote_item>*</to_quote_item>
                         </radial_tax_fees>
                 </sales_convert_order>
+		<sales_convert_quote>
+			<radial_tax_taxrecords>
+                            <to_order_item>*</to_order_item>
+                        </radial_tax_taxrecords>
+			<radial_tax_duties>
+                            <to_order_item>*</to_order_item>
+                        </radial_tax_duties>
+			<radial_tax_fees>
+                            <to_order_item>*</to_order_item>
+                        </radial_tax_fees>
+			<radial_hts_code>
+				<to_order_item>*</to_order_item>
+			</radial_hts_code>
+			<radial_screensize>
+				<to_order_item>*</to_order_item>
+			</radial_screensize>
+			<radial_manufacturing_country_code>
+				<to_order_item>*</to_order_item>
+			</radial_manufacturing_country_code>
+			<radial_tax_class>
+				<to_order_item>*</to_order_item>
+			</radial_tax_class>
+		</sales_convert_quote>
 	</fieldsets>
         <events>
             <!-- Taxes requested from the tax service in this event -->
