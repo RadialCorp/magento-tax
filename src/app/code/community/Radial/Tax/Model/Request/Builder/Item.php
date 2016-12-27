@@ -218,14 +218,14 @@ class Radial_Tax_Model_Request_Builder_Item
                 	{
                 	        $mCountryCode = $this->_itemProduct->getCountryOfManufacture();
                 	} else {
-                	        $mCountryCode = $this->_item->getRadialManufacturingCountryCode();
+                	        $mCountryCode = $itemC->getFirstItem()->getRadialManufacturingCountryCode();
                 	}       
 
                 	if( !$itemC->getFirstItem()->getRadialScreenSize() )
                 	{
                 	        $screenSize = $this->_itemProduct->getScreenSize();
                 	} else {
-                	        $screenSize = $this->_item->getRadialScreenSize();
+                	        $screenSize = $itemC->getFirstItem()->getRadialScreenSize();
                 	}
                 } else {
         		$htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
