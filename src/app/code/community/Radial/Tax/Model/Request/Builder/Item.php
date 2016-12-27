@@ -200,23 +200,64 @@ class Radial_Tax_Model_Request_Builder_Item
 		}
 	}
 
-	if( !$this->_item->getRadialHtsCode())
+	if( $this->_invoice->getId() && !$this->_invoice instanceof Mage_Sales_Model_Order )
 	{
-		$htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
-		$this->_orderItem->setHtsCode($htsCode);
+		$itemC = Mage::getModel('sales/order_item')->getCollection()
+                                ->addFieldToFilter('item_id', array('eq' => $this->_item->getData('order_item_id')));
+
+                if( $itemC->getSize() > 0 )
+                {
+                	if( !$itemC->getFirstItem()->getRadialHtsCode())
+                        {
+                                $htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
+                        } else {
+                                $htsCode = $itemC->getFirstItem()->getRadialHtsCode();
+                        }
+
+			if( !$itemC->getFirstItem()->getRadialManufacturingCountryCode())
+                	{
+                	        $mCountryCode = $this->_itemProduct->getCountryOfManufacture();
+                	} else {
+                	        $mCountryCode = $this->_item->getRadialManufacturingCountryCode();
+                	}       
+
+                	if( !$itemC->getFirstItem()->getRadialScreenSize() )
+                	{
+                	        $screenSize = $this->_itemProduct->getScreenSize();
+                	} else {
+                	        $screenSize = $this->_item->getRadialScreenSize();
+                	}
+                } else {
+        		$htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
+			$mCountryCode = $this->_itemProduct->getCountryOfManufacture();
+			$screenSize = $this->_itemProduct->getScreenSize();
+		}
+	} else {
+		if( !$this->_item->getRadialHtsCode())
+		{
+			$htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
+		} else {
+			$htsCode = $this->_item->getRadialHtsCode();
+		}
+
+		if( !$this->_item->getRadialManufacturingCountryCode())
+		{
+			$mCountryCode = $this->_itemProduct->getCountryOfManufacture();
+		} else {
+			$mCountryCode = $this->_item->getRadialManufacturingCountryCode();
+		}
+
+		if( !$this->_item->getRadialScreenSize() )
+		{
+			$screenSize = $this->_itemProduct->getScreenSize();
+		} else {
+			$screenSize = $this->_item->getRadialScreenSize();
+		}
 	}
 
-	if( !$this->_item->getRadialManufacturingCountryCode())
-	{
-		$mCountryCode = $this->_itemProduct->getCountryOfManufacture();
-		$this->_orderItem->setManufacturingCountryCode($mCountryCode);
-	}
-
-	if( !$this->_item->getRadialScreenSize() )
-	{
-		$screenSize = $this->_itemProduct->getScreenSize();
-		$this->_orderItem->setScreenSize($screenSize);
-	}
+	$this->_orderItem->setHtsCode($htsCode);
+	$this->_orderItem->setManufacturingCountryCode($mCountryCode);
+	$this->_orderItem->setScreenSize($screenSize);
 
 	return $this;
     }
@@ -416,18 +457,20 @@ class Radial_Tax_Model_Request_Builder_Item
                 	        	    }
                 	    		}
                 		}
+
+				if( !$itemC->getFirstItem()->getRadialTaxCode())
+                        	{
+                                	$taxCode = $this->_itemProduct->getTaxCode();
+                        	} else {
+                        	        $taxCode = $itemC->getFirstItem()->getRadialTaxCode();
+                        	}
+			} else {
+				$taxCode = $this->_itemProduct->getTaxCode();
 			}
 
 			$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
 			    ->setUnitPrice($canIncludeAmounts ? -$this->_item->getPrice() : 0)
                 	    ->setAmount($canIncludeAmounts ? $subtotal : 0);
-
-			if( !$this->_item->getRadialTaxCode())
-			{
-				$taxCode = $this->_itemProduct->getTaxCode();
-			} else {
-				$taxCode = $this->_item->getRadialTaxCode();
-			}
 
 			$merchandiseInvoicePricing->setTaxClass($taxCode);
 		} else {
@@ -435,12 +478,20 @@ class Radial_Tax_Model_Request_Builder_Item
                             ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
                             ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0);
                         
-			if( !$this->_item->getRadialTaxCode())
-                        {
-                                $taxCode = $this->_itemProduct->getTaxCode();
-                        } else {
-                                $taxCode = $this->_item->getRadialTaxCode();
-                        }
+			$itemC = Mage::getModel('sales/order_item')->getCollection()
+                                ->addFieldToFilter('item_id', array('eq' => $this->_item->getData('order_item_id')));
+
+			if( $itemC->getSize() > 0 )
+			{ 
+				if( !$itemC->getFirstItem()->getRadialTaxCode())
+                        	{
+                        	        $taxCode = $this->_itemProduct->getTaxCode();
+                        	} else {
+                        	        $taxCode = $itemC->getFirstItem()->getRadialTaxCode();
+                        	}
+			} else {
+				$taxCode = $this->_itemProduct->getTaxCode();
+			}
 
                         $merchandiseInvoicePricing->setTaxClass($taxCode);
 
