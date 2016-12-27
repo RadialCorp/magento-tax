@@ -176,8 +176,20 @@ class Radial_Tax_Helper_Payload
 
 		$customizationData['unit_price'] = $order->getGwCardPrice(); 
         	$customizationData['amount'] = $order->getGwCardPrice();
-		$customizationData['tax_class'] = $order->getRadialGwPrintedCardTaxClass();
-        	$customizationData['item_id'] = $order->getRadialGwPrintedCardSku(); 
+	
+		if( !$order->getRadialGwPrintedCardTaxClass() )
+        	{
+                	$customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
+        	} else {
+                	$customizationData['tax_class'] = $order->getRadialGwPrintedCardTaxClass();
+       	 	}
+
+        	if( !$order->getRadialGwPrintedCardSku())
+        	{
+                	$customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
+        	} else {
+        	        $customizationData['item_id'] = $order->getRadialGwPrintedCardSku();
+        	}
 	} else {
 		$customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
         	$customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
@@ -205,7 +217,11 @@ class Radial_Tax_Helper_Payload
         /** @var ITaxedCustomization $printCardCustomization */
         $printCardCustomization = $customizations->getEmptyCustomization();
 
-	$order = Mage::getModel('sales/order')->load($salesObject->getOrderId());
+	$item = Mage::getModel('sales/order_item')->getCollection()
+                                 ->addFieldToFilter('item_id', array('eq' => $salesObject->getOrderItemId()))
+				 ->getFirstItem();
+
+	$order = Mage::getModel('sales/order')->load($item->getOrderId());
 
         /* Printed Card Data */
         $customizationData = array();
@@ -219,8 +235,19 @@ class Radial_Tax_Helper_Payload
                 $customizationData['amount'] = $order->getGwCardPrice();
 	}
 
-        $customizationData['tax_class'] = $order->getRadialGwPrintedCardTaxClass();
-        $customizationData['item_id'] = $order->getRadialGwPrintedCardSku();
+	if( !$order->getRadialGwPrintedCardTaxClass() )
+	{
+		$customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
+	} else {
+		$customizationData['tax_class'] = $order->getRadialGwPrintedCardTaxClass();
+	}
+
+	if( !$order->getRadialGwPrintedCardSku())
+	{
+		$customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
+	} else {
+		$customizationData['item_id'] = $order->getRadialGwPrintedCardSku();
+	}
         $customizationData['description'] = "MAGE Printed Card";
 
         $printCardCustomization = $this->_fillOutCustomizationInvoice($printCardCustomization, $customizationData);
