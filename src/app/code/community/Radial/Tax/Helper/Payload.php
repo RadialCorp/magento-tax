@@ -167,10 +167,19 @@ class Radial_Tax_Helper_Payload
        
 	$quote = Mage::getModel('sales/quote')->load($salesObject->getQuoteId());
 
+	if( $salesObject instanceof Mage_Sales_Model_Order_Item )
+	{
+		$order = Mage::getModel('sales/order')->load($salesObject->getOrderId());
+
+		$customizationData['unit_price'] = $order->getGwCardPrice(); 
+        	$customizationData['amount'] = $order->getGwCardPrice(); 
+	} else {
+		$customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+        	$customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+	}
+
 	/* Printed Card Data */
 	$customizationData = array();
-	$customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
-	$customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
 	$customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
 	$customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
 	$customizationData['description'] = "MAGE Printed Card";
@@ -200,11 +209,11 @@ class Radial_Tax_Helper_Payload
 
 	if( $salesObject instanceof Mage_Sales_Model_Order_Creditmemo_Item )
 	{
-        	$customizationData['unit_price'] = -Mage::getStoreConfig('sales/gift_options/printed_card_price');
-        	$customizationData['amount'] = -Mage::getStoreConfig('sales/gift_options/printed_card_price');
+        	$customizationData['unit_price'] = -$order->getGwCardPrice();
+        	$customizationData['amount'] = -$order->getGwCardPrice();
 	} else {
-		$customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
-                $customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+		$customizationData['unit_price'] = $order->getGwCardPrice();
+                $customizationData['amount'] = $order->getGwCardPrice();
 	}
 
         $customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
