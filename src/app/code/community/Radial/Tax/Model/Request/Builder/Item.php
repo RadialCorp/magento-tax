@@ -188,10 +188,7 @@ class Radial_Tax_Model_Request_Builder_Item
             ->setLineNumber($this->_item->getId())
             ->setItemId($this->_item->getSku())
             ->setQuantity((int) $this->_item->getTotalQty())
-            ->setDescription($this->_item->getName())
-            ->setHtsCode($this->_item->getRadialHtsCode())
-            ->setManufacturingCountryCode($this->_item->getRadialManufacturingCountryCode())
-            ->setScreenSize($this->_item->getRadialScreenSize());
+            ->setDescription($this->_item->getName());
 
 	if((int)$this->_item->getTotalQty() === 0 )
 	{
@@ -201,6 +198,24 @@ class Radial_Tax_Model_Request_Builder_Item
 		} else {
 			$this->_orderItem->setQuantity((int) $this->_item->getQty());
 		}
+	}
+
+	if( !$this->_item->getRadialHtsCode())
+	{
+		$htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
+		$this->_orderItem->setHtsCode($htsCode);
+	}
+
+	if( !$this->_item->getRadialManufacturingCountryCode())
+	{
+		$mCountryCode = $this->_itemProduct->getCountryOfManufacture();
+		$this->_orderItem->setManufacturingCountryCode($mCountryCode);
+	}
+
+	if( !$this->_item->getRadialScreenSize() )
+	{
+		$screenSize = $this->_itemProduct->getScreenSize();
+		$this->_orderItem->setScreenSize($screenSize);
 	}
 
 	return $this;
@@ -405,14 +420,31 @@ class Radial_Tax_Model_Request_Builder_Item
 
 			$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
 			    ->setUnitPrice($canIncludeAmounts ? -$this->_item->getPrice() : 0)
-                	    ->setAmount($canIncludeAmounts ? $subtotal : 0)
-			    ->setTaxClass($this->_item->getRadialTaxCode());
+                	    ->setAmount($canIncludeAmounts ? $subtotal : 0);
+
+			if( !$this->_item->getRadialTaxCode())
+			{
+				$taxCode = $this->_itemProduct->getTaxCode();
+			} else {
+				$taxCode = $this->_item->getRadialTaxCode();
+			}
+
+			$merchandiseInvoicePricing->setTaxClass($taxCode);
 		} else {
 			$merchandiseInvoicePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
                             ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
-                            ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
-                            ->setTaxClass($this->_item->getRadialTaxCode());
-                        if ($canIncludeAmounts) {
+                            ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0);
+                        
+			if( !$this->_item->getRadialTaxCode())
+                        {
+                                $taxCode = $this->_itemProduct->getTaxCode();
+                        } else {
+                                $taxCode = $this->_item->getRadialTaxCode();
+                        }
+
+                        $merchandiseInvoicePricing->setTaxClass($taxCode);
+
+			if ($canIncludeAmounts) {
                             $this->_discountHelper->transferInvoiceTaxDiscounts($this->_item, $merchandiseInvoicePricing);
                         }
 		}
@@ -423,17 +455,35 @@ class Radial_Tax_Model_Request_Builder_Item
 		{
 			$merchandisePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
                             ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
-                            ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
-                            ->setTaxClass($this->_item->getRadialTaxCode());
-                        if ($canIncludeAmounts) {
+                            ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0);
+                        
+			if( !$this->_item->getRadialTaxCode())
+                        {
+                                $taxCode = $this->_itemProduct->getTaxCode();
+                        } else {
+                                $taxCode = $this->_item->getRadialTaxCode();
+                        }
+
+                        $merchandisePricing->setTaxClass($taxCode);
+
+			if ($canIncludeAmounts) {
                             $this->_discountHelper->transferOrderTaxDiscounts($this->_item, $merchandisePricing);
                         }
 		} else {
         		$merchandisePricing = $this->_orderItem->getEmptyMerchandisePriceGroup()
         		    ->setUnitPrice($canIncludeAmounts ? $this->_item->getPrice() : 0)
-        		    ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0)
-        		    ->setTaxClass($this->_item->getRadialTaxCode());
-        		if ($canIncludeAmounts) {
+        		    ->setAmount($canIncludeAmounts ? $this->_item->getRowTotal() : 0);
+        		
+			if( !$this->_item->getRadialTaxCode())
+                        {
+                                $taxCode = $this->_itemProduct->getTaxCode();
+                        } else {
+                                $taxCode = $this->_item->getRadialTaxCode();
+                        }
+
+                        $merchandisePricing->setTaxClass($taxCode);
+
+			if ($canIncludeAmounts) {
         		    $this->_discountHelper->transferTaxDiscounts($this->_item, $merchandisePricing);
         		}
 		}

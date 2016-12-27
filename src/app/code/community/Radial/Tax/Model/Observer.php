@@ -347,10 +347,10 @@ class Radial_Tax_Model_Observer
 		{
 			$product = Mage::getModel('catalog/product')->load($orderItem->getProductId());
 
-			$orderItem->setData('radial_hts_code', $this->_taxHelper->getProductHtsCodeByCountry($product, $order->getShippingAddress()->getCountryId()));
+			$orderItem->setData('radial_hts_code', $this->helper->getProductHtsCodeByCountry($product, $order->getShippingAddress()->getCountryId()));
 			$orderItem->setData('radial_screen_size', $product->getScreenSize());
 			$orderItem->setData('radial_manufacturing_country_code', $product->getCountryOfManufacture());
-			$orderItem->setData('radial_tax_class', $product->getTaxCode());
+			$orderItem->setData('radial_tax_code', $product->getTaxCode());
 
 			$orderItem->save();
 		}
