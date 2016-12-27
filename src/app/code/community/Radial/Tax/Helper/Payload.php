@@ -167,21 +167,24 @@ class Radial_Tax_Helper_Payload
        
 	$quote = Mage::getModel('sales/quote')->load($salesObject->getQuoteId());
 
+	/* Printed Card Data */
+        $customizationData = array();
+
 	if( $salesObject instanceof Mage_Sales_Model_Order_Item )
 	{
 		$order = Mage::getModel('sales/order')->load($salesObject->getOrderId());
 
 		$customizationData['unit_price'] = $order->getGwCardPrice(); 
-        	$customizationData['amount'] = $order->getGwCardPrice(); 
+        	$customizationData['amount'] = $order->getGwCardPrice();
+		$customizationData['tax_class'] = $order->getRadialGwPrintedCardTaxClass();
+        	$customizationData['item_id'] = $order->getRadialGwPrintedCardSku(); 
 	} else {
 		$customizationData['unit_price'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
         	$customizationData['amount'] = Mage::getStoreConfig('sales/gift_options/printed_card_price');
+		$customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
+        	$customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
 	}
 
-	/* Printed Card Data */
-	$customizationData = array();
-	$customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
-	$customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
 	$customizationData['description'] = "MAGE Printed Card";
 
 	$printCardCustomization = $this->_fillOutCustomization($printCardCustomization, $customizationData);
@@ -216,8 +219,8 @@ class Radial_Tax_Helper_Payload
                 $customizationData['amount'] = $order->getGwCardPrice();
 	}
 
-        $customizationData['tax_class'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
-        $customizationData['item_id'] = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
+        $customizationData['tax_class'] = $order->getRadialGwPrintedCardTaxClass();
+        $customizationData['item_id'] = $order->getRadialGwPrintedCardSku();
         $customizationData['description'] = "MAGE Printed Card";
 
         $printCardCustomization = $this->_fillOutCustomizationInvoice($printCardCustomization, $customizationData);

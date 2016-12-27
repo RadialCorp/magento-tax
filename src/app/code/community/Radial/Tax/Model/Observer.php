@@ -616,6 +616,13 @@ class Radial_Tax_Model_Observer
                 $order->getResource()->saveAttribute($order, 'radial_tax_duties');
                 $order->getResource()->saveAttribute($order, 'radial_tax_taxrecords');
                 $order->getResource()->saveAttribute($order, 'radial_tax_transaction_id');
+
+		/* MPTF-281 - Set GW Card Sku / Tax Class to Order Table */
+		$order->setData('radial_gw_printed_card_tax_class', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass'));
+		$order->setData('radial_gw_printed_card_sku', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku'));
+
+		$order->getResource()->saveAttribute($order, 'radial_gw_printed_card_tax_class');
+		$order->getResource()->saveAttribute($order, 'radial_gw_printed_card_sku');
 	}
 
 	return $this;
