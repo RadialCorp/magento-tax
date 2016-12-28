@@ -100,7 +100,7 @@ class Radial_Tax_Model_Response_Parser_Quote extends Radial_Tax_Model_Response_P
                 $duties[] = $addressParser->getTaxDuties();
                 $fees[] = $addressParser->getTaxFees();
             } else {
-                $this->_logger->warn(
+                $this->_logger->warning(
                     'Tax response ship group does not relate to any known address.',
                     $this->_logContext->getMetaData(__CLASS__, ['rom_response_body' => $shipGroup->serialize()])
                 );

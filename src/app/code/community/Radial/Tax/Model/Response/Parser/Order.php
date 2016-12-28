@@ -95,12 +95,12 @@ class Radial_Tax_Model_Response_Parser_Order extends Radial_Tax_Model_Response_P
         foreach ($this->_taxResponse->getShipGroups() as $shipGroup) {
             $address = $this->_getQuoteAddressForShipGroup($shipGroup);
             if ($address) {
-                $addressParser = $this->_taxFactory->createResponseAddressParserOrder($shipGroup, $address, $this->_order);
+                $addressParser = $this->_taxFactory->createResponseAddressParser($shipGroup, $address);
                 $taxRecords[] = $addressParser->getTaxRecords();
                 $duties[] = $addressParser->getTaxDuties();
                 $fees[] = $addressParser->getTaxFees();
             } else {
-                $this->_logger->warn(
+                $this->_logger->warning(
                     'Tax response ship group does not relate to any known address.',
                     $this->_logContext->getMetaData(__CLASS__, ['rom_response_body' => $shipGroup->serialize()])
                 );
