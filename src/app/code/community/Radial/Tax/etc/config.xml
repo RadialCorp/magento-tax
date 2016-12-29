@@ -123,6 +123,18 @@ http://opensource.org/licenses/osl-3.0.php
 		</observers>
             </checkout_submit_all_after>
         </events>
+        <blocks>
+            <tax>
+                <rewrite>
+                    <checkout_grandtotal>Radial_Tax_Block_Tax_Checkout_Grandtotal</checkout_grandtotal>
+                </rewrite>
+            </tax>
+            <adminhtml>
+                <rewrite>
+                    <sales_order_create_totals_grandtotal>Radial_Tax_Block_Adminhtml_Sales_Order_Create_Totals_Grandtotal</sales_order_create_totals_grandtotal>
+                </rewrite>
+            </adminhtml>
+        </blocks>
         <sales>
             <quote>
                 <totals>
