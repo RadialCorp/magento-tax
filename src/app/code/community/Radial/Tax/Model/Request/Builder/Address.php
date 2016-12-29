@@ -161,6 +161,10 @@ class Radial_Tax_Model_Request_Builder_Address
             // address object so it can be metched up to the destination in
             // the response payloads.
             $this->_address->setDestinationId($this->_destination->getId());
+
+	    $this->_address->setRadialDestinationId($this->_destination->getId());
+	    $this->_address->save();
+	    //$this->_address->getResource()->saveAttribute($this->_address, 'radial_destination_id');
         }
 
         if ($this->_validateAddressIsShipGroup()) {

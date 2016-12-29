@@ -185,10 +185,26 @@ class Radial_Tax_Model_Request_Builder_Item
     protected function _injectItemData()
     {
         $this->_orderItem
-            ->setLineNumber($this->_item->getId())
             ->setItemId($this->_item->getSku())
             ->setQuantity((int) $this->_item->getTotalQty())
             ->setDescription($this->_item->getName());
+
+	if( $this->_item instanceof Mage_Sales_Model_Order_Item )
+	{
+		$quote = Mage::getModel('sales/quote')->getCollection()
+                        ->addFieldToFilter('entity_id', $this->_invoice->getQuoteId())
+                        ->getFirstItem();
+
+		$itemC = Mage::getModel('sales/quote_item')->getCollection()
+				       ->setQuote($quote)
+                                       ->addFieldToFilter('item_id', array('eq' => $this->_item->getQuoteItemId()))
+                                       ->addFieldToFilter('quote_id', array('eq' => $this->_invoice->getQuoteId()))
+				       ->getFirstItem();
+
+		$this->_orderItem->setLineNumber($itemC->getId());
+	} else {
+		$this->_orderItem->setLineNumber($this->_item->getId());
+	}
 
 	if((int)$this->_item->getTotalQty() === 0 )
 	{

@@ -62,7 +62,7 @@ class Radial_Tax_Model_Response_Parser_Addressorder extends Radial_Tax_Model_Res
 	    $args['order']
         );
         $this->_addressId = $this->_address->getId();
-        $this->_quoteId = $this->_order->getId();
+        $this->_quoteId = $this->_order->getQuoteId();
     }
 
     /**
@@ -156,7 +156,11 @@ class Radial_Tax_Model_Response_Parser_Addressorder extends Radial_Tax_Model_Res
      */
     protected function _getItemForItemPayload(ITaxedOrderItem $itemPayload)
     {
-        foreach ($this->_order->getAllItems() as $item) {
+	$quote = Mage::getModel('sales/quote')->getCollection()
+                        ->addFieldToFilter('entity_id', $this->_order->getQuoteId())
+                        ->getFirstItem();
+
+        foreach ($quote->getAllItems() as $item) {
             if ($item->getId() === $itemPayload->getLineNumber()) {
                 return $item;
             }

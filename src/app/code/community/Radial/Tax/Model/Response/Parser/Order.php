@@ -95,7 +95,7 @@ class Radial_Tax_Model_Response_Parser_Order extends Radial_Tax_Model_Response_P
         foreach ($this->_taxResponse->getShipGroups() as $shipGroup) {
             $address = $this->_getQuoteAddressForShipGroup($shipGroup);
             if ($address) {
-                $addressParser = $this->_taxFactory->createResponseAddressParser($shipGroup, $address);
+                $addressParser = $this->_taxFactory->createResponseAddressParserOrder($shipGroup, $address, $this->_order);
                 $taxRecords[] = $addressParser->getTaxRecords();
                 $duties[] = $addressParser->getTaxDuties();
                 $fees[] = $addressParser->getTaxFees();
@@ -127,6 +127,17 @@ class Radial_Tax_Model_Response_Parser_Order extends Radial_Tax_Model_Response_P
         // If the destination id can be guaranteed to match between request and
         // response, the id generated for the request could be captured with the
         // address to link the destination payload back up with the order address.
-        return $this->_order->getAddressesCollection()->getItemByColumnValue('destination_id', $shipGroup->getDestination()->getId());
+
+	$quote = Mage::getModel('sales/quote')->getCollection()
+    			->addFieldToFilter('entity_id', $this->_order->getQuoteId())
+    			->getFirstItem();	
+
+	foreach( $quote->getAllAddresses() as $address )
+	{
+		if( strcmp($address->getRadialDestinationId(), $shipGroup->getDestination()->getId()) === 0 )
+		{
+			return $address;
+		}
+	}
     }
 }
