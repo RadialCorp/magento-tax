@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout version="0.1.0">
+    <!-- New order email totals -->
+    <sales_email_order_items>
+    	    <reference name="order_totals">
+    	    	<block type="radial_tax/sales_order_tax" name="radial_tax_total" />
+    	        <!-- Remove Vanilla Magento Tax, it will be replaced with ROM Tax -->
+            	<remove name="tax"/>
+             </reference>
+    </sales_email_order_items>
+</layout>
