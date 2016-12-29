@@ -727,7 +727,7 @@ class Radial_Tax_Model_Observer
     {
     	$_invoice = $observer->getEvent()->getInvoice();
 	$_order = $_invoice->getOrder();
-	if ($_invoice->getUpdatedAt() == $_invoice->getCreatedAt()) 
+	if ($_invoice->getUpdatedAt() == $_invoice->getCreatedAt() && ($_invoice->getGwItemsPrice() || $_invoice->getGwPrice())) 
 	{
 		$subtotalTax = 0;			
 		$taxAmt = 0;
@@ -816,7 +816,7 @@ class Radial_Tax_Model_Observer
     {
         $_creditmemo = $observer->getEvent()->getCreditmemo();
         $_order = $_creditmemo->getOrder();
-        if ($_creditmemo->getUpdatedAt() == $_creditmemo->getCreatedAt())
+        if ($_creditmemo->getUpdatedAt() == $_creditmemo->getCreatedAt() && ($_creditmemo->getGwItemsPrice() || $_creditmemo->getGwPrice()))
         {
 	    $subtotalTax = 0;
             $taxAmt = 0;
