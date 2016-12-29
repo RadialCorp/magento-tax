@@ -439,10 +439,10 @@ class Radial_Tax_Model_Collector
     }
 
     /**
-     * @param    Mage_Sales_Model_Quote, Radial_Tax_Model_Fee, Radial_Tax_Model_Duty, Radial_Tax_Model_Record
+     * @param    Mage_Sales_Model_Quote, array Radial_Tax_Model_Fee, array Radial_Tax_Model_Duty, array Radial_Tax_Model_Record
      * @return   self
      */
-    public function updateQuoteTotals(Mage_Sales_Model_Quote $quote, Radial_Tax_Model_Fee $taxFees, Radial_Tax_Model_Duty $taxDuties, Radial_Tax_Model_Record $taxRecords)
+    public function updateQuoteTotals(Mage_Sales_Model_Quote $quote, array $taxFees, array $taxDuties, array $taxRecords)
     {
 	$taxTotal = 0;
 
@@ -491,7 +491,7 @@ class Radial_Tax_Model_Collector
 							$prev = 0;
 						}	
 
-						$div = $prev + ($taxRecord->getCalculatedTax() / $item->getQtyOrdered());
+						$div = $prev + ($taxRecord->getCalculatedTax() / $item->getQty());
 						$new = $div;
 
                              	        	$item->setData('gw_base_tax_amount', $new);
@@ -523,7 +523,7 @@ class Radial_Tax_Model_Collector
 						$new = $prev + $taxRecord->getCalculatedTax();
 						$item->setTaxAmount($new);
 
-						$new = $taxRecord->getCalculatedTax() / $item->getQtyOrdered();
+						$new = $taxRecord->getCalculatedTax() / $item->getQty();
 
 						$newP = $new + $item->getPriceInclTax();
 
@@ -572,7 +572,7 @@ class Radial_Tax_Model_Collector
                         		$new = $prev + $taxDuty->getAmount();
                         		$item->setTaxAmount($new);
 
-					$newD = $taxDuty->getAmount() / $item->getQtyOrdered();
+					$newD = $taxDuty->getAmount() / $item->getQty();
                                     	$newP = $newD + $item->getPriceInclTax();
 
                                        	$item->setPriceInclTax($newP);
@@ -618,7 +618,7 @@ class Radial_Tax_Model_Collector
                                 	$new = $prev + $taxFee->getAmount();
                                 	$item->setTaxAmount($new);
 		
-					$div = $taxFee->getAmount() / $item->getQtyOrdered();	
+					$div = $taxFee->getAmount() / $item->getQty();	
 					$newP = $div + $item->getPriceInclTax();
 
                                    	$item->setPriceInclTax($newP);
