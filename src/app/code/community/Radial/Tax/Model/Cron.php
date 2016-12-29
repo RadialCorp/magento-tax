@@ -757,7 +757,7 @@ class Radial_Tax_Model_Cron
 				}
 
 				$itemC = Mage::getModel('sales/order_item')->getCollection()
-   						->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
+   						->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
 						->addFieldToFilter('order_id', array('eq' => $order->getId()));
 	
 				if( $itemC->getSize() > 0 )
@@ -848,7 +848,7 @@ class Radial_Tax_Model_Cron
 			if( $taxDuty->getAmount() > 0 )
 			{
                         	$itemC = Mage::getModel('sales/order_item')->getCollection()
-                        	        ->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
+                        	        ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
                         	        ->addFieldToFilter('order_id', array('eq' => $order->getId()));
 				if( $itemC->getSize() > 0 )
                 		{
@@ -894,7 +894,7 @@ class Radial_Tax_Model_Cron
 			if( $taxFee->getAmount() > 0 )
 			{
                         	$itemC = Mage::getModel('sales/order_item')->getCollection()
-                        		        ->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
+                        		        ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
                         		        ->addFieldToFilter('order_id', array('eq' => $order->getId()));
         			if( $itemC->getSize() > 0 )
                         	{
