@@ -373,19 +373,13 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
             throw $this->_failTaxCollection();
         }
 	
-	$taxTransactionId = $responseBody->getTaxTransactionId();
-	if($taxTransactionId)
-	{
-		$quote->setData('radial_tax_transaction_id', $taxTransactionId);
-		$quote->save();
-	}
-
         $responseParser = $this->taxFactory
             ->createResponseQuoteParser($responseBody, $quote);
         return $this->taxFactory->createTaxResults(
             $responseParser->getTaxRecords(),
             $responseParser->getTaxDuties(),
-            $responseParser->getTaxFees()
+            $responseParser->getTaxFees(),
+	    $responseBody->getTaxTransactionId()
         );
     }
 
@@ -427,7 +421,8 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
         return $this->taxFactory->createTaxResults(
             $responseParser->getTaxRecords(),
             $responseParser->getTaxDuties(),
-            $responseParser->getTaxFees()
+            $responseParser->getTaxFees(),
+	    $taxTransactionId
         );
     }
 

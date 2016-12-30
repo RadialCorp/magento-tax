@@ -173,8 +173,6 @@ class Radial_Tax_Model_Observer
             // dependent upon tax totals - like grand total - should update
             // to include the tax totals.
             $this->recollectTotals($quote);
-            $quote->setData('radial_tax_transmit', -1);
-            $quote->save();
 	}
         return $this;
     }

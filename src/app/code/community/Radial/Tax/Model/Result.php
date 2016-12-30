@@ -21,17 +21,21 @@ class Radial_Tax_Model_Result
     protected $_duties;
     /** @var Radial_Tax_Model_Fee[] */
     protected $_fees;
+    /** @string Tax Transaction Id */
+    protected $_taxTransactionId;
 
     public function __construct(array $args = [])
     {
         list(
             $this->_taxRecords,
             $this->_duties,
-            $this->_fees
+            $this->_fees,
+	    $this->_taxTransactionId
         ) = $this->_checkTypes(
             $args['tax_records'],
             $args['duties'],
-            $args['fees']
+            $args['fees'],
+	    $args['tax_transaction_id']
         );
     }
 
@@ -41,14 +45,16 @@ class Radial_Tax_Model_Result
      * @param Radial_Tax_Model_Record[]
      * @param Radial_Tax_Model_Duty[]
      * @param Radial_Tax_Model_Fee[]
+     * @param String
      * @return array
      */
     protected function _checkTypes(
         array $taxRecords,
         array $duties,
-        array $fees
+        array $fees,
+	$taxTransactionId
     ) {
-        return [$taxRecords, $duties, $fees];
+        return [$taxRecords, $duties, $fees, $taxTransactionId];
     }
 
     /**
@@ -73,5 +79,10 @@ class Radial_Tax_Model_Result
     public function getTaxFees()
     {
         return (array) $this->_fees;
+    }
+
+    public function getTaxTransactionId()
+    {
+	return $this->_taxTransactionId;
     }
 }

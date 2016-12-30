@@ -372,13 +372,14 @@ class Radial_Tax_Helper_Factory
      * @param Radial_Tax_Model_Record[]
      * @param Radial_Tax_Model_Duty[]
      * @param Radial_Tax_Model_Fee[]
+     * @param String (Tax Transaction Id)
      * @return Radial_Tax_Model_Result
      */
-    public function createTaxResults(array $records, array $duties, array $fees)
+    public function createTaxResults(array $records, array $duties, array $fees, $taxTransactionId)
     {
         return Mage::getModel(
             'radial_tax/result',
-            ['tax_records' => $records, 'duties' => $duties, 'fees' => $fees]
+            ['tax_records' => $records, 'duties' => $duties, 'fees' => $fees, 'tax_transaction_id' => $taxTransactionId]
         );
     }
 }

@@ -354,7 +354,7 @@ class Radial_Tax_Model_Collector
             ->setTaxFees($taxResults->getTaxFees())
             ->setTaxRequestSuccess(true);
 
-	$this->updateQuoteTotals($quote, $taxResults->getTaxFees(), $taxResults->getTaxDuties(), $taxResults->getTaxRecords());
+	$this->updateQuoteTotals($quote, $taxResults->getTaxFees(), $taxResults->getTaxDuties(), $taxResults->getTaxRecords(), $taxResults->getTaxTransactionId());
 
         return $this;
     }
@@ -439,11 +439,15 @@ class Radial_Tax_Model_Collector
     }
 
     /**
-     * @param    Mage_Sales_Model_Quote, array Radial_Tax_Model_Fee, array Radial_Tax_Model_Duty, array Radial_Tax_Model_Record
+     * @param    Mage_Sales_Model_Quote 
+     * @param    array Radial_Tax_Model_Fee
+     * @param    array Radial_Tax_Model_Duty
+     * @param    array Radial_Tax_Model_Record
      * @return   self
      */
-    public function updateQuoteTotals(Mage_Sales_Model_Quote $quote, array $taxFees, array $taxDuties, array $taxRecords)
+    public function updateQuoteTotals(Mage_Sales_Model_Quote $quote, array $taxFees, array $taxDuties, array $taxRecords, $taxTransactionId)
     {
+	$updateRequired = false;
 	$taxTotal = 0;
 
 	if( count($taxRecords) > 0 )
@@ -452,6 +456,8 @@ class Radial_Tax_Model_Collector
 		{
 			if( $taxRecord->getCalculatedTax() > 0 )
 			{
+				$updateRequired = true;
+
 				$taxTotal += $taxRecord->getCalculatedTax();
 
 				// Tabulate Address Level Gifting Outside of Item Level Stuff
@@ -472,17 +478,13 @@ class Radial_Tax_Model_Collector
 					continue;
 				}
 
-				//$itemC = Mage::getModel('sales/quote_item')->getCollection()
-				//		->setQuote($quote)
-   				//		->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
-				//		->addFieldToFilter('quote_id', array('eq' => $quote->getId()));
-
-				$cart=Mage::getSingleton('checkout/cart');
-				$item = $cart->getQuote()->getItemById($taxRecord->getItemId());
+				$itemC = $quote->getItemsCollection()
+   						->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
+						->addFieldToFilter('quote_id', array('eq' => $quote->getId()));
 	
-				//if( $itemC->getSize() > 0 )
-				//{
-					//$item = $itemC->getFirstItem();
+				if( $itemC->getSize() > 0 )
+				{
+					$item = $itemC->getFirstItem();
 
 					if( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING )
 					{
@@ -499,7 +501,6 @@ class Radial_Tax_Model_Collector
 
                              	        	$item->setData('gw_base_tax_amount', $new);
                                 	       	$item->setData('gw_tax_amount', $new);
-						$item->save();
 
 						$prevTotal = $quote->getGwItemsTaxAmount();
 						$quote->setData('gw_items_base_tax_amount', $prevTotal + $taxRecord->getCalculatedTax());
@@ -509,7 +510,7 @@ class Radial_Tax_Model_Collector
 
 						$quote->setData('base_shipping_tax_amount', $prev + $taxRecord->getCalculatedTax());
 						$quote->setData('shipping_tax_amount', $prev + $taxRecord->getCalculatedTax());
-
+						
 						$prev = $quote->getShippingInclTax();	
 						$quote->setData('shipping_incl_tax', $prev + $taxRecord->getCalculatedTax());
 						$quote->setData('base_shipping_incl_tax', $prev + $taxRecord->getCalculatedTax());
@@ -537,12 +538,6 @@ class Radial_Tax_Model_Collector
 						$item->setRowTotalInclTax($newS);
 						$item->setBaseRowTotalInclTax($newS);
 
-						Mage::Log("Before Quote Item: ". print_r($item->debug(), true));
-
-						$item->save();
-
-						Mage::Log("After Quote Item Save: ". print_r($item->debug(), true));
-	
 						// Update Order Record
 						$prev = $quote->getSubtotalInclTax();
 						$quote->setData('base_subtotal_incl_tax', $prev + $taxRecord->getCalculatedTax());
@@ -551,7 +546,7 @@ class Radial_Tax_Model_Collector
 						// Customizations
 						Mage::Log("Outlier Tax Records: ". print_r($taxRecord, true));
 					}
-				//}
+				}
 			}
 		}
 	}
@@ -562,17 +557,15 @@ class Radial_Tax_Model_Collector
 		{
 			if( $taxDuty->getAmount() > 0 )
 			{
-                        	//$itemC = Mage::getModel('sales/quote_item')->getCollection()
-				//	->setQuote($quote)
-                        	//        ->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
-                        	//        ->addFieldToFilter('quote_id', array('eq' => $quote->getId()));
+				$updateRequired = true;
 
-				$cart=Mage::getSingleton('checkout/cart');
-                                $item = $cart->getQuote()->getItemById($taxDuty->getItemId());
+                        	$itemC = $quote->getItemsCollection() 
+                        	        ->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
+                        	        ->addFieldToFilter('quote_id', array('eq' => $quote->getId()));
 
-				//if( $itemC->getSize() > 0 )
-                		//{
-                        	//	$item = $itemC->getFirstItem();
+				if( $itemC->getSize() > 0 )
+                		{
+                        		$item = $itemC->getFirstItem();
                         		if( $item->getTaxAmount())
                         		{
                                 		$prev = $item->getTaxAmount();
@@ -591,7 +584,6 @@ class Radial_Tax_Model_Collector
                                        	$newS = $taxDuty->getAmount() + $item->getRowTotalInclTax();
                                        	$item->setRowTotalInclTax($newS);
                                        	$item->setBaseRowTotalInclTax($newS);
-                        		$item->save();
 
 					// Update Order Record
                                        	$prev = $quote->getSubtotalInclTax();
@@ -599,7 +591,7 @@ class Radial_Tax_Model_Collector
                                        	$quote->setData('subtotal_incl_tax', $prev + $taxDuty->getAmount());
 
 					$taxTotal += $taxDuty->getAmount();
-				//}
+				}
 				
 			}
 		}
@@ -611,17 +603,15 @@ class Radial_Tax_Model_Collector
         	{
 			if( $taxFee->getAmount() > 0 )
 			{
-                        	//$itemC = Mage::getModel('sales/quote_item')->getCollection()
-				//		->setQuote($quote)
-                        	//	        ->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
-                        	//	        ->addFieldToFilter('quote_id', array('eq' => $quote->getId()));
+				$updateRequired = true;
 
-				$cart=Mage::getSingleton('checkout/cart');
-                                $item = $cart->getQuote()->getItemById($taxFee->getItemId());
+                        	$itemC = $quote->getItemsCollection() 
+                        		        ->addFieldToFilter('item_id', array('eq' => $taxRecord->getItemId()))
+                        		        ->addFieldToFilter('quote_id', array('eq' => $quote->getId()));
 
-        			//if( $itemC->getSize() > 0 )
-                        	//{
-                        	//        $item = $itemC->getFirstItem();
+        			if( $itemC->getSize() > 0 )
+                        	{
+                        	        $item = $itemC->getFirstItem();
                         	        if( $item->getTaxAmount())
                                 	{
                                         	$prev = $item->getTaxAmount();
@@ -640,7 +630,6 @@ class Radial_Tax_Model_Collector
                                         $newS = $taxFee->getAmount() + $item->getRowTotalInclTax();
                                         $item->setRowTotalInclTax($newS);
                                         $item->setBaseRowTotalInclTax($newS);
-                                       	$item->save();
 
                                         // Update Order Record
                                         $prev = $quote->getSubtotalInclTax();
@@ -648,7 +637,7 @@ class Radial_Tax_Model_Collector
                                         $quote->setData('subtotal_incl_tax', $prev + $taxFee->getAmount());
 
 					$taxTotal += $taxFee->getAmount();
-				//}
+				}
 			}
 		}
 	}
@@ -665,8 +654,15 @@ class Radial_Tax_Model_Collector
 	$quote->setData("radial_tax_taxrecords", serialize($taxRecords));
         $quote->setData("radial_tax_duties", serialize($taxDuties));
         $quote->setData("radial_tax_fees", serialize($taxFees));
+	$quote->setData("radial_tax_transaction_id", $taxTransactionId);
+	$quote->setData('radial_tax_transmit', -1);
 
-	$quote->save();
+	if( $updateRequired )
+	{
+		$quote->save();
+	} else {
+		Mage::Log("Taxes For Quote ID: ". $quote->getId() . " had 0 tax records over $0.00, NOTE: Some Tax Calculations May Return This Due to Incomplete Information (Such as Invalid Shipping Address ... Please Consult Radial Tax Helper Guide");
+	}
 
 	return $this;
     }
