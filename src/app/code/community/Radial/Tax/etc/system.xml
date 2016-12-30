@@ -32,6 +32,7 @@ http://opensource.org/licenses/osl-3.0.php
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+			    <validate>required-entry</validate>
                         </admin_origin_line1>
                         <admin_origin_line2 translate="label">
                             <label>Line2</label>
@@ -77,6 +78,7 @@ http://opensource.org/licenses/osl-3.0.php
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+			    <validate>required-entry</validate>
                         </admin_origin_main_division>
                         <admin_origin_country_code translate="label">
                             <label>Country Code</label>
@@ -87,6 +89,7 @@ http://opensource.org/licenses/osl-3.0.php
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+			    <validate>required-entry</validate>
                         </admin_origin_country_code>
                         <admin_origin_postal_code translate="label">
                             <label>Postal Code</label>
@@ -96,6 +99,7 @@ http://opensource.org/licenses/osl-3.0.php
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
+			    <validate>required-entry</validate>
                         </admin_origin_postal_code>
                     </fields>
                 </radial_tax>
