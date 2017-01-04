@@ -156,7 +156,7 @@ class Radial_Tax_Model_Total_Quote_Address_Subtotal extends Mage_Tax_Model_Sales
 
         foreach( $taxRecords as $taxRecord )
         {
-        	if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT && $taxRecord->getItemId() == $item->getItemId() )
+        	if (($taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT) && $taxRecord->getItemId() == $item->getItemId() )
                 {
                 	$merchItemTaxTotal += ($taxRecord->getCalculatedTax() / $item->getQty());
                 } 
