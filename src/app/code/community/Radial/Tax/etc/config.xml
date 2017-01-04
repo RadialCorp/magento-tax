@@ -173,7 +173,6 @@ http://opensource.org/licenses/osl-3.0.php
             <tax>
                 <rewrite>
                     <checkout_grandtotal>Radial_Tax_Block_Tax_Checkout_Grandtotal</checkout_grandtotal>
-		    <sales_order_tax>Radial_Tax_Block_Tax_Sales_Order_Tax</sales_order_tax>
                 </rewrite>
             </tax>
             <adminhtml>
