@@ -142,15 +142,6 @@ http://opensource.org/licenses/osl-3.0.php
                     </radial_tax_creditmemo_tax>
                 </observers>
             </sales_order_creditmemo_refund>
-            <sales_order_creditmemo_save_after>
-                <observers>
-                    <radial_tax_creditmemo_transfer_gw>
-            		<type>model</type>
-            		<class>radial_tax/observer</class>
-            		<method>transferRemainingGwPricesCreditMemo</method>
-            	    </radial_tax_creditmemo_transfer_gw>
-            	</observers>
-            </sales_order_creditmemo_save_after>
             <sales_order_invoice_save_after>
                 <observers>
                     <radial_tax_invoice_transfer_gw>
