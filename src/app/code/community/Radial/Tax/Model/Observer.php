@@ -136,7 +136,6 @@ class Radial_Tax_Model_Observer
 	if( !$enabled )
         {
                 $quote->setData('radial_tax_transmit', 0);
-                $quote->save();
         }
 
         if ($coreSession->isTaxUpdateRequired() && $enabled) {
@@ -173,6 +172,15 @@ class Radial_Tax_Model_Observer
             // dependent upon tax totals - like grand total - should update
             // to include the tax totals.
             $this->recollectTotals($quote);
+
+	    foreach( $quote->getAllItems() as $quoteItem )
+	    {
+		$product = Mage::getModel('catalog/product')->load($quoteItem->getProductId());
+		$quoteItem->setData('radial_hts_code', $this->helper->getProductHtsCodeByCountry($product, $quote->getShippingAddress()->getCountryId()));
+		$quoteItem->setData('radial_screen_size', $product->getScreenSize());
+		$quoteItem->setData('radial_manufacturing_country_code', $product->getCountryOfManufacture());
+		$quoteItem->setData('radial_tax_code', $product->getTaxCode());
+	    } 
 	}
         return $this;
     }
@@ -321,312 +329,6 @@ class Radial_Tax_Model_Observer
     }
 
     /**
-     * @param    Varien_Event_Observer
-     * @return   self
-     */
-    public function copyFromQuoteToOrder(Varien_Event_Observer $observer)
-    {
-	$quote = $observer->getEvent()->getQuote();
-	$taxTransmit = $quote->getData('radial_tax_transmit');
-	
-        $enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $quote->getStoreId());
-
-	$taxFees = unserialize($quote->getData('radial_tax_fees'));
-	$taxDuties = unserialize($quote->getData('radial_tax_duties'));
-	$taxRecords = unserialize($quote->getData('radial_tax_taxrecords'));
-	$taxTransactionId = $quote->getData('radial_tax_transaction_id');
-
-	$orderC = Mage::getModel('sales/order')->getCollection()
-                                        ->addFieldToFilter('quote_id', array('eq' => $quote->getId()));
-
-	foreach( $orderC as $order )
-	{
-		foreach( $order->getAllItems() as $orderItem )
-		{
-			$product = Mage::getModel('catalog/product')->load($orderItem->getProductId());
-
-			$orderItem->setData('radial_hts_code', $this->helper->getProductHtsCodeByCountry($product, $order->getShippingAddress()->getCountryId()));
-			$orderItem->setData('radial_screen_size', $product->getScreenSize());
-			$orderItem->setData('radial_manufacturing_country_code', $product->getCountryOfManufacture());
-			$orderItem->setData('radial_tax_code', $product->getTaxCode());
-
-			$orderItem->save();
-		}
-
-		$order->setData('radial_tax_transmit', $taxTransmit);
-		$order->getResource()->saveAttribute($order, 'radial_tax_transmit');
-
-		if( !$enabled )
-                {
-                        $order->addStatusHistoryComment("Warning: Tax's Not Collected for Order: ". $order->getIncrementId() . " Tax Module is Disabled!");
-                        $order->save();
-                        continue;
-                }
-
-                if( $taxTransmit != -1 )
-                {
-                        $order->addStatusHistoryComment("Warning: Tax's Not Collected for Order: ". $order->getIncrementId() . " Error with Tax Quotation - Contact Radial Support");
-                        $order->save();
-                }
-
-		$taxTotal = 0;
-
-		if( count($taxRecords) > 0 )
-		{
-			foreach( $taxRecords as $taxRecord )
-			{
-				if( $taxRecord->getCalculatedTax() > 0 )
-				{
-					$quoteAddress = Mage::getModel('sales/quote_address')->load($taxRecord->getAddressId());
-					$orderAddress = $order->getShippingAddress();
-
-					$quoteData = $this->serializeAddress($quoteAddress);
-     					$orderData = $this->serializeAddress($orderAddress);
-
-     					if (strcmp($orderData, $quoteData) === 0) 
-					{
-						$taxTotal += $taxRecord->getCalculatedTax();
-
-						// Tabulate Address Level Gifting Outside of Item Level Stuff
-						if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ADDRESS_GIFTING && $order->getGwId() && $order->getGwPrice()) 
-						{
-							$prev = $order->getGwTaxAmount();
-                                        		$order->setData('gw_base_tax_amount', $prev + $taxRecord->getCalculatedTax());
-                                        		$order->setData('gw_tax_amount', $prev + $taxRecord->getCalculatedTax());
-                                        		$order->getResource()->saveAttribute($order, 'gw_tax_amount');
-                                        		$order->getResource()->saveAttribute($order, 'gw_base_tax_amount');
-							continue;
-                                		}
-
-						// If its a customizable feature / base its most likely related to print cards
-						if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_CUSTOMIZATION_BASE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_CUSTOMIZATION_FEATURE && $order->getGwCardPrice() && $order->getGwAddCard())
-						{
-							$prev = $order->getGwCardTaxAmount();
-							$order->setData('gw_card_tax_amount', $prev + $taxRecord->getCalculatedTax());
-							$order->setData('gw_card_base_tax_amount', $prev + $taxRecord->getCalculatedTax());
-							$order->getResource()->saveAttribute($order, 'gw_card_base_tax_amount');
-							$order->getResource()->saveAttribute($order, 'gw_card_tax_amount');
-							continue;
-						}
-
-						$itemC = Mage::getModel('sales/order_item')->getCollection()
-   							->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
-							->addFieldToFilter('order_id', array('eq' => $order->getId()));
-	
-						if( $itemC->getSize() > 0 )
-						{
-							$item = $itemC->getFirstItem();
-
-							if( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING )
-							{
-								$prev = $item->getGwTaxAmount();
-								if( $prev )
-								{
-									$prev = $item->getGwTaxAmount();
-								} else {
-									$prev = 0;
-								}	
-
-								$div = $prev + ($taxRecord->getCalculatedTax() / $item->getQtyOrdered());
-								$new = $div;
-
-                                	        		$item->setData('gw_base_tax_amount', $new);
-                                	        		$item->setData('gw_tax_amount', $new);
-								$item->save();
-
-								$prevTotal = $order->getGwItemsTaxAmount();
-								$order->setData('gw_items_base_tax_amount', $prevTotal + $taxRecord->getCalculatedTax());
-								$order->setData('gw_items_tax_amount', $prevTotal + $taxRecord->getCalculatedTax());
-								$order->getResource()->saveAttribute($order, 'gw_items_base_tax_amount');
-								$order->getResource()->saveAttribute($order, 'gw_items_tax_amount');
-							} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_SHIPPING || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_SHIPPING_DISCOUNT ) {
-								$prev = $order->getShippingTaxAmount();
-		
-								$order->setData('base_shipping_tax_amount', $prev + $taxRecord->getCalculatedTax());
-								$order->setData('shipping_tax_amount', $prev + $taxRecord->getCalculatedTax());
-						
-								$prev = $order->getShippingInclTax();	
-								$order->setData('shipping_incl_tax', $prev + $taxRecord->getCalculatedTax());
-								$order->setData('base_shipping_incl_tax', $prev + $taxRecord->getCalculatedTax());
-
-								$order->getResource()->saveAttribute($order, 'shipping_incl_tax');
-								$order->getResource()->saveAttribute($order, 'base_shipping_incl_tax');
-								$order->getResource()->saveAttribute($order, 'base_shipping_tax_amount');
-								$order->getResource()->saveAttribute($order, 'shipping_tax_amount');
-							} else if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT ) {
-								// Update Item Record
-	
-								if( $item->getTaxAmount())
-								{
-									$prev = $item->getTaxAmount();
-								} else {
-									$prev = 0;
-								}
-
-								$new = $prev + $taxRecord->getCalculatedTax();
-								$item->setTaxAmount($new);
-
-								$new = $taxRecord->getCalculatedTax() / $item->getQtyOrdered();
-
-								$newP = $new + $item->getPriceInclTax();
-
-								$item->setPriceInclTax($newP);
-								$item->setBasePriceInclTax($newP);				
-
-								$newS = $taxRecord->getCalculatedTax() + $item->getRowTotalInclTax();
-								$item->setRowTotalInclTax($newS);
-								$item->setBaseRowTotalInclTax($newS);
-
-								$item->save();
-	
-								// Update Order Record
-								$prev = $order->getSubtotalInclTax();
-								$order->setData('base_subtotal_incl_tax', $prev + $taxRecord->getCalculatedTax());
-								$order->setData('subtotal_incl_tax', $prev + $taxRecord->getCalculatedTax());
-								$order->getResource()->saveAttribute($order, 'base_subtotal_incl_tax');
-								$order->getResource()->saveAttribute($order, 'subtotal_incl_tax');
-							} else {
-								// Customizations
-								Mage::Log("Outlier Tax Records: ". print_r($taxRecord, true));
-							}
-						}
-					}
-				}
-			}
-		}
-
-		if( count($taxDuties) > 0 )
-		{
-			foreach( $taxDuties as $taxDuty )
-			{
-				if( $taxDuty->getAmount() > 0 )
-				{
-					$quoteAddress = Mage::getModel('sales/quote_address')->load($taxRecord->getAddressId());
-                                        $orderAddress = $order->getShippingAddress();
-
-                                        $quoteData = $this->serializeAddress($quoteAddress);
-                                        $orderData = $this->serializeAddress($orderAddress);
-
-                                        if (strcmp($orderData, $quoteData) === 0)
-                                        {
-                        			$itemC = Mage::getModel('sales/order_item')->getCollection()
-                        			        ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
-                        			        ->addFieldToFilter('order_id', array('eq' => $order->getId()));
-						if( $itemC->getSize() > 0 )
-                				{
-                        				$item = $itemC->getFirstItem();
-                        				if( $item->getTaxAmount())
-                        				{
-                                				$prev = $item->getTaxAmount();
-                        				} else {
-                                				$prev = 0;
-                        				}
-                        				$new = $prev + $taxDuty->getAmount();
-                        				$item->setTaxAmount($new);
-
-							$newD = $taxDuty->getAmount() / $item->getQtyOrdered();
-                                        		$newP = $newD + $item->getPriceInclTax();
-
-                                        		$item->setPriceInclTax($newP);
-                                        		$item->setBasePriceInclTax($newP);
-
-                                        		$newS = $taxDuty->getAmount() + $item->getRowTotalInclTax();
-                                        		$item->setRowTotalInclTax($newS);
-                                        		$item->setBaseRowTotalInclTax($newS);
-                        				$item->save();
-
-							// Update Order Record
-                                        		$prev = $order->getSubtotalInclTax();
-                                        		$order->setData('base_subtotal_incl_tax', $prev + $taxDuty->getAmount());
-                                        		$order->setData('subtotal_incl_tax', $prev + $taxDuty->getAmount());
-                                        		$order->getResource()->saveAttribute($order, 'base_subtotal_incl_tax');
-                                        		$order->getResource()->saveAttribute($order, 'subtotal_incl_tax');
-
-							$taxTotal += $taxDuty->getAmount();
-						}
-					}
-				}	
-			}
-		}
-	
-		if( count($taxFees) > 0 )
-		{
-			foreach( $taxFees as $taxFee )
-        		{
-				if( $taxFee->getAmount() > 0 )
-				{
-					$quoteAddress = Mage::getModel('sales/quote_address')->load($taxRecord->getAddressId());
-                                        $orderAddress = $order->getShippingAddress();
-
-                                        $quoteData = $this->serializeAddress($quoteAddress);
-                                        $orderData = $this->serializeAddress($orderAddress);
-
-                                        if (strcmp($orderData, $quoteData) === 0)
-                                        {
-                        			$itemC = Mage::getModel('sales/order_item')->getCollection()
-                        			        ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
-                        			        ->addFieldToFilter('order_id', array('eq' => $order->getId()));
-        					if( $itemC->getSize() > 0 )
-                        			{
-                        	        		$item = $itemC->getFirstItem();
-                        	        		if( $item->getTaxAmount())
-                                			{
-                                        			$prev = $item->getTaxAmount();
-                                			} else {
-                                			        $prev = 0;
-                                			}
-                                			$new = $prev + $taxFee->getAmount();
-                                			$item->setTaxAmount($new);
-				
-							$div = $taxFee->getAmount() / $item->getQtyOrdered();	
-							$newP = $div + $item->getPriceInclTax();
-
-                                        		$item->setPriceInclTax($newP);
-                                        		$item->setBasePriceInclTax($newP);
-                        
-                                        		$newS = $taxFee->getAmount() + $item->getRowTotalInclTax();
-                                        		$item->setRowTotalInclTax($newS);
-                                        		$item->setBaseRowTotalInclTax($newS);
-                                       		 	$item->save();
-
-                                        		// Update Order Record
-                                        		$prev = $order->getSubtotalInclTax();
-                                        		$order->setData('base_subtotal_incl_tax', $prev + $taxFee->getAmount());
-                                        		$order->setData('subtotal_incl_tax', $prev + $taxFee->getAmount());
-                                        		$order->getResource()->saveAttribute($order, 'base_subtotal_incl_tax');
-                                        		$order->getResource()->saveAttribute($order, 'subtotal_incl_tax');					
-
-							$taxTotal += $taxFee->getAmount();
-                        			}
-					}
-				}
-			}
-		}
-
-		$order->setData('tax_amount', $taxTotal);
-                $order->setData('radial_tax_fees', serialize($taxFees));
-                $order->setData('radial_tax_duties', serialize($taxDuties));
-                $order->setData('radial_tax_taxrecords', serialize($taxRecords));
-                $order->setData('radial_tax_transaction_id', $taxTransactionId);
-
-                $order->getResource()->saveAttribute($order, 'tax_amount');
-                $order->getResource()->saveAttribute($order, 'radial_tax_fees');
-                $order->getResource()->saveAttribute($order, 'radial_tax_duties');
-                $order->getResource()->saveAttribute($order, 'radial_tax_taxrecords');
-                $order->getResource()->saveAttribute($order, 'radial_tax_transaction_id');
-
-		/* MPTF-281 - Set GW Card Sku / Tax Class to Order Table */
-		$order->setData('radial_gw_printed_card_tax_class', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass'));
-		$order->setData('radial_gw_printed_card_sku', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku'));
-
-		$order->getResource()->saveAttribute($order, 'radial_gw_printed_card_tax_class');
-		$order->getResource()->saveAttribute($order, 'radial_gw_printed_card_sku');
-	}
-
-	return $this;
-    }
-
-    /**
      * Recollect quote totals to update amounts based on newly received tax
      * data. This collect totals call is expected to happen recursively within
      * collect totals. The flags in radial_core/session are expected to prevent
@@ -706,6 +408,85 @@ class Radial_Tax_Model_Observer
             },
             0.00
         );
+    }
+
+    public function copyTaxAmount( Varien_Event_Observer $observer )
+    {
+	$order = $observer->getEvent()->getOrder();
+
+        $taxRecords = unserialize($order->getRadialTaxTaxrecords());
+	$taxFees = unserialize($order->getRadialTaxFees());
+	$taxDuties = unserialize($order->getRadialTaxDuties());
+	
+	$addressArray = array();
+	
+	// Build a list of Quote Addresses
+	foreach( $taxRecords as $taxRecord ) 
+	{
+		$addressArray[] = $taxRecord->getAddressId();
+	}
+
+	foreach( $taxFees as $taxFee )
+	{
+		$addressArray[] = $taxFee->getAddressId();
+	}
+
+	foreach( $taxDuties as $taxDuty )
+	{
+		$addressArray[] = $taxDuty->getAddressId();
+	}
+
+	$addressArray = array_values(array_unique($addressArray));
+	$taxTotal = false;
+
+	foreach($addressArray as $quoteAddressId )
+	{
+		$quoteAddress = Mage::getModel('sales/quote_address')->load($quoteAddressId);
+        	$orderAddress = $order->getShippingAddress();
+		$quoteData = $this->serializeAddress($quoteAddress);
+     		$orderData = $this->serializeAddress($orderAddress);
+
+		if( $quoteAddress->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_SHIPPING && strcmp($orderData, $quoteData) === 0 )
+		{
+			foreach( $taxRecords as $taxRecord )
+			{
+				if( $taxRecord->getAddressId() == $quoteAddressId )
+				{
+					$taxTotal += $taxRecord->getCalculatedTax();
+				}
+			}
+
+			foreach( $taxDuties as $taxDuty )
+			{
+				if( $taxDuty->getAddressId() == $quoteAddressId )
+				{
+					$taxTotal += $taxDuty->getAmount();
+				}
+			}
+
+			foreach( $taxFees as $taxFee )
+			{
+				if( $taxFee->getAddressId() == $quoteAddressId )
+				{
+					$taxTotal += $taxFee->getAmount();
+				}
+			}
+		}
+	 }
+
+         $order->setTaxAmount($taxTotal);
+	 $order->setBaseTaxAmount($taxTotal);
+	 $order->setData('radial_gw_printed_card_tax_class', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass'));
+         $order->setData('radial_gw_printed_card_sku', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku'));
+
+	 $order->getResource()->saveAttribute($order, "tax_amount");
+	 $order->getResource()->saveAttribute($order, "base_tax_amount");
+
+	 /* MPTF-281 - Set GW Card Sku / Tax Class to Order Table */
+	 $order->getResource()->saveAttribute($order, 'radial_gw_printed_card_tax_class');
+	 $order->getResource()->saveAttribute($order, 'radial_gw_printed_card_sku');
+
+         return $this;
     }
 
     protected function serializeAddress(Mage_Customer_Model_Address_Abstract $address)  {  

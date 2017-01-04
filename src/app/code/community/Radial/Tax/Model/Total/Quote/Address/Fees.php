@@ -12,12 +12,10 @@
  * @copyright   Copyright (c) 2013-2016 Radial Commerce Inc. (http://www.radial.com/)
  * @license     http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-
 class Radial_Tax_Model_Total_Quote_Address_Fees extends Mage_Sales_Model_Quote_Address_Total_Abstract
 {
     const TAX_TOTAL_TITLE_FEES = 'Radial_Tax_Total_Quote_Address_Tax_Title_Fees';
     const TOTAL_CODE_FEES = 'radial_tax_fees';
-
     /** @var Radial_Tax_Model_Collector */
     protected $_taxCollector;
     /** @var Radial_Tax_Helper_Data */
@@ -26,7 +24,6 @@ class Radial_Tax_Model_Total_Quote_Address_Fees extends Mage_Sales_Model_Quote_A
     protected $_logger;
     /** @var EbayEnterprise_MageLog_Helper_Context */
     protected $_logContext;
-
     /**
      * @param array $args May contain key/value for:
      *                         - _helper => Radial_Tax_Helper_Data
@@ -48,7 +45,6 @@ class Radial_Tax_Model_Total_Quote_Address_Fees extends Mage_Sales_Model_Quote_A
             $this->_nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context'))
         );
     }
-
     /**
      * Enforce type checks on constructor init params.
      *
@@ -71,7 +67,6 @@ class Radial_Tax_Model_Total_Quote_Address_Fees extends Mage_Sales_Model_Quote_A
             $logContext
         ];
     }
-
     /**
      * Fill in default values.
      *
@@ -84,7 +79,6 @@ class Radial_Tax_Model_Total_Quote_Address_Fees extends Mage_Sales_Model_Quote_A
     {
         return isset($arr[$key]) ? $arr[$key] : $default;
     }
-
     /**
      * Update the address with totals data used for display in a total line,
      * e.g. a total line in the cart.
@@ -98,10 +92,8 @@ class Radial_Tax_Model_Total_Quote_Address_Fees extends Mage_Sales_Model_Quote_A
 	{
 		$toggleFees = Mage::getStoreConfig('radial_core/radial_tax_core/displayfees', Mage::app()->getStore()->getStoreId());
 		$toggleDuties = Mage::getStoreConfig('radial_core/radial_tax_core/displayduties', Mage::app()->getStore()->getStoreId());
-
         	$addressId = $address->getId();
         	$fees = $this->_totalFees($this->_taxCollector->getTaxFeesByAddressId($addressId));
-
 		if($toggleFees )
 		{
 			if ($fees )
@@ -114,10 +106,8 @@ class Radial_Tax_Model_Total_Quote_Address_Fees extends Mage_Sales_Model_Quote_A
 			}
 		}
 	}
-
         return $this;
     }
-
     /**
      * Get the total of all fees for an address.
      *

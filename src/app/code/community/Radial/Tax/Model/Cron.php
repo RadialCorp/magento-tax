@@ -303,6 +303,7 @@ class Radial_Tax_Model_Cron
                             $retry = $order->getRadialTaxTransmit();
                             $retryN = $retry + 1;
                             $order->setRadialTaxTransmit($retryN);
+                            $order->addStatusHistoryComment("Warning: Tax's Not Collected for Order: ". $order->getIncrementId() . " Error with Tax Quotation - Contact Radial Support");
                             $order->save();
 
                             $this->logger->warning('Tax request failed.', $this->logContext->getMetaData(__CLASS__, [], $e));

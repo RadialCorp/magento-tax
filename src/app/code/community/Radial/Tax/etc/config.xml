@@ -53,40 +53,68 @@ http://opensource.org/licenses/osl-3.0.php
                 </email>
         </template>
 	<fieldsets>
-    		<sales_convert_order>
-        		<radial_tax_taxrecords>
-            			<to_quote_item>*</to_quote_item>
-        		</radial_tax_taxrecords>
-                        <radial_tax_duties>
-                                <to_quote_item>*</to_quote_item>
-                        </radial_tax_duties>
-                        <radial_tax_fees>
-                                <to_quote_item>*</to_quote_item>
-                        </radial_tax_fees>
-                </sales_convert_order>
 		<sales_convert_quote>
 			<radial_tax_taxrecords>
-                            <to_order_item>*</to_order_item>
+                            <to_order>*</to_order>
                         </radial_tax_taxrecords>
 			<radial_tax_duties>
-                            <to_order_item>*</to_order_item>
+                            <to_order>*</to_order>
                         </radial_tax_duties>
 			<radial_tax_fees>
-                            <to_order_item>*</to_order_item>
+                            <to_order>*</to_order>
                         </radial_tax_fees>
+			<radial_tax_transmit>
+			    <to_order>*</to_order>
+			</radial_tax_transmit>
+			<radial_tax_transaction_id>
+			    <to_order>*</to_order>
+			</radial_tax_transaction_id>
+	         </sales_convert_quote>
+                 <sales_convert_order>
+                        <radial_tax_taxrecords>
+                            <to_quote>*</to_quote>
+			</radial_tax_taxrecords>
+                        <radial_tax_duties>
+                            <to_quote>*</to_quote>
+			</radial_tax_duties>
+                        <radial_tax_fees>
+                            <to_quote>*</to_quote>
+			</radial_tax_fees>
+                        <radial_tax_transmit>
+                            <to_quote>*</to_quote>
+			</radial_tax_transmit>
+                        <radial_tax_transaction_id>
+                            <to_quote>*</to_quote>
+			</radial_tax_transaction_id>
+                  </sales_convert_order>
+		  <sales_convert_quote_item>
 			<radial_hts_code>
 				<to_order_item>*</to_order_item>
 			</radial_hts_code>
-			<radial_screensize>
+			<radial_screen_size>
 				<to_order_item>*</to_order_item>
-			</radial_screensize>
+			</radial_screen_size>
 			<radial_manufacturing_country_code>
 				<to_order_item>*</to_order_item>
 			</radial_manufacturing_country_code>
-			<radial_tax_class>
+			<radial_tax_code>
 				<to_order_item>*</to_order_item>
-			</radial_tax_class>
-		</sales_convert_quote>
+			</radial_tax_code>
+		  </sales_convert_quote_item>
+		  <sales_convert_order_item>
+                        <radial_hts_code>
+                                <to_quote_item>*</to_quote_item>
+                        </radial_hts_code>
+                        <radial_screen_size>
+                        	<to_quote_item>*</to_quote_item>
+			</radial_screen_size>
+                        <radial_manufacturing_country_code>
+                        	<to_quote_item>*</to_quote_item>
+			</radial_manufacturing_country_code>
+                        <radial_tax_code>
+                        	<to_quote_item>*</to_quote_item>
+			</radial_tax_code>
+                  </sales_convert_order_item>
 	</fieldsets>
         <events>
             <!-- Taxes requested from the tax service in this event -->
@@ -114,23 +142,6 @@ http://opensource.org/licenses/osl-3.0.php
                     </radial_tax_creditmemo_tax>
                 </observers>
             </sales_order_creditmemo_refund>
-	    <checkout_submit_all_after>
-                <observers>
-                    <radial_tax_copy_to_order>
-		    	<class>radial_tax/observer</class>
-			<method>copyFromQuoteToOrder</method>
-		    </radial_tax_copy_to_order>
-		</observers>
-            </checkout_submit_all_after>
-            <sales_order_invoice_save_after>
-            	<observers>
-            	    <radial_tax_invoice_transfer_gw>
-            		<type>model</type>
-            		<class>radial_tax/observer</class>
-            		<method>transferRemainingGwPrices</method>
-            	    </radial_tax_invoice_transfer_gw>
-            	</observers>
-            </sales_order_invoice_save_after>
             <sales_order_creditmemo_save_after>
                 <observers>
                     <radial_tax_creditmemo_transfer_gw>
@@ -140,11 +151,29 @@ http://opensource.org/licenses/osl-3.0.php
             	    </radial_tax_creditmemo_transfer_gw>
             	</observers>
             </sales_order_creditmemo_save_after>
+            <sales_order_invoice_save_after>
+                <observers>
+                    <radial_tax_invoice_transfer_gw>
+                        <type>model</type>
+                        <class>radial_tax/observer</class>
+                        <method>transferRemainingGwPrices</method>
+                    </radial_tax_invoice_transfer_gw>
+                </observers>
+            </sales_order_invoice_save_after>
+	    <checkout_submit_all_after>
+                <observers>
+                    <radial_tax_copy_to_order>
+		    	<class>radial_tax/observer</class>
+			<method>copyTaxAmount</method>
+		    </radial_tax_copy_to_order>
+		</observers>
+            </checkout_submit_all_after>
         </events>
         <blocks>
             <tax>
                 <rewrite>
                     <checkout_grandtotal>Radial_Tax_Block_Tax_Checkout_Grandtotal</checkout_grandtotal>
+		    <sales_order_tax>Radial_Tax_Block_Tax_Sales_Order_Tax</sales_order_tax>
                 </rewrite>
             </tax>
             <adminhtml>
@@ -156,6 +185,18 @@ http://opensource.org/licenses/osl-3.0.php
         <sales>
             <quote>
                 <totals>
+		    <tax>
+			<class>radial_tax/total_quote_address_magentotax</class>
+		    </tax>
+		    <tax_subtotal>
+                        <class>radial_tax/total_quote_address_subtotal</class>
+                    </tax_subtotal>
+		    <tax_shipping>
+                        <class>radial_tax/total_quote_address_shipping</class>
+                    </tax_shipping>
+		    <tax_giftwrapping>
+                        <class>radial_tax/total_quote_address_giftwrapping</class>
+                    </tax_giftwrapping>
                     <radial_tax>
                         <after>subtotal,shipping</after>
                         <before>grand_total</before>
