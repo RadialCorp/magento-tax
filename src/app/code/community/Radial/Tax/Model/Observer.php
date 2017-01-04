@@ -439,40 +439,60 @@ class Radial_Tax_Model_Observer
 	$addressArray = array_values(array_unique($addressArray));
 	$taxTotal = false;
 
-	foreach($addressArray as $quoteAddressId )
-	{
-		$quoteAddress = Mage::getModel('sales/quote_address')->load($quoteAddressId);
-        	$orderAddress = $order->getShippingAddress();
-		$quoteData = $this->serializeAddress($quoteAddress);
-     		$orderData = $this->serializeAddress($orderAddress);
+        foreach($addressArray as $quoteAddressId )
+        {
+                $quoteAddress = Mage::getModel('sales/quote_address')->load($quoteAddressId);
+                $orderAddress = $order->getShippingAddress();
+                $quoteData = $this->serializeAddress($quoteAddress);
+                $orderData = $this->serializeAddress($orderAddress);
 
-		if( $quoteAddress->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_SHIPPING && strcmp($orderData, $quoteData) === 0 )
-		{
-			foreach( $taxRecords as $taxRecord )
-			{
-				if( $taxRecord->getAddressId() == $quoteAddressId )
-				{
-					$taxTotal += $taxRecord->getCalculatedTax();
-				}
-			}
+                if( $quoteAddress->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_SHIPPING && strcmp($orderData, $quoteData) === 0 )
+                {
+                        $itemTaxTotal = array();
 
-			foreach( $taxDuties as $taxDuty )
-			{
-				if( $taxDuty->getAddressId() == $quoteAddressId )
-				{
-					$taxTotal += $taxDuty->getAmount();
-				}
-			}
+                        foreach( $taxRecords as $taxRecord )
+                        {
+                                if( $taxRecord->getAddressId() == $quoteAddressId )
+                                {
+                                        $item = Mage::getModel('sales/order_item')->getCollection()
+                                                        ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
+                                                        ->addFieldToFilter('order_id', array('eq' => $order->getId()))
+                                                        ->getFirstItem();
 
-			foreach( $taxFees as $taxFee )
-			{
-				if( $taxFee->getAddressId() == $quoteAddressId )
-				{
-					$taxTotal += $taxFee->getAmount();
-				}
-			}
-		}
-	 }
+                                        if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT ) {
+                                                $itemTaxTotal[$taxRecord->getItemId()] += $itemTaxTotal[$taxRecord->getItemId()] + $taxRecord->getCalculatedTax();
+                                        }
+
+                                        $taxTotal += $taxRecord->getCalculatedTax();
+                                }
+                        }
+
+                        foreach( $taxDuties as $taxDuty )
+                        {
+                                if( $taxDuty->getAddressId() == $quoteAddressId )
+                                {
+                                        $itemTaxTotal[$taxDuty->getItemId()] += $itemTaxTotal[$taxDuty->getItemId()] + $taxDuty->getAmount();
+                                        $taxTotal += $taxDuty->getAmount();
+                                }
+                        }
+
+                        foreach( $taxFees as $taxFee )
+                        {
+                                if( $taxFee->getAddressId() == $quoteAddressId )
+                                {
+                                        $itemTaxTotal[$taxDuty->getItemId()] += $itemTaxTotal[$taxFee->getItemId()] + $taxFee->getAmount();
+                                        $taxTotal += $taxFee->getAmount();
+                                }
+                        }
+                }
+         }
+
+         foreach( $order->getAllItems() as $orderItem )
+         {
+                $orderItem->setData('tax_amount', $itemTaxTotal[$orderItem->getQuoteItemId()]);
+                $orderItem->setData('base_tax_amount', $itemTaxTotal[$orderItem->getQuoteItemId()]);
+                $orderItem->save();
+         }
 
          $order->setTaxAmount($taxTotal);
 	 $order->setBaseTaxAmount($taxTotal);
