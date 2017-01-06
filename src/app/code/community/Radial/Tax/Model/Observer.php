@@ -448,21 +448,20 @@ class Radial_Tax_Model_Observer
 
                 if( $quoteAddress->getAddressType() === Mage_Sales_Model_Quote_Address::TYPE_SHIPPING && strcmp($orderData, $quoteData) === 0 )
                 {
-                        $itemTaxTotal = array();
+                	$itemTaxTotal = array();
 
                         foreach( $taxRecords as $taxRecord )
                         {
                                 if( $taxRecord->getAddressId() == $quoteAddressId )
                                 {
-                                        $item = Mage::getModel('sales/order_item')->getCollection()
-                                                        ->addFieldToFilter('quote_item_id', array('eq' => $taxRecord->getItemId()))
-                                                        ->addFieldToFilter('order_id', array('eq' => $order->getId()))
-                                                        ->getFirstItem();
-
                                         if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT ) {
-                                                $itemTaxTotal[$taxRecord->getItemId()] += $itemTaxTotal[$taxRecord->getItemId()] + $taxRecord->getCalculatedTax();
+						if( array_key_exists( $taxRecord->getItemId(), $itemTaxTotal ))
+						{
+							$itemTaxTotal[$taxRecord->getItemId()] += $taxRecord->getCalculatedTax();
+						} else {
+							$itemTaxTotal[$taxRecord->getItemId()] = $taxRecord->getCalculatedTax();
+						}
                                         }
-
                                         $taxTotal += $taxRecord->getCalculatedTax();
                                 }
                         }
@@ -471,7 +470,12 @@ class Radial_Tax_Model_Observer
                         {
                                 if( $taxDuty->getAddressId() == $quoteAddressId )
                                 {
-                                        $itemTaxTotal[$taxDuty->getItemId()] += $itemTaxTotal[$taxDuty->getItemId()] + $taxDuty->getAmount();
+					if( array_key_exists( $taxDuty->getItemId(), $itemTaxTotal))
+					{
+                                        	$itemTaxTotal[$taxDuty->getItemId()] += $taxDuty->getAmount();
+					} else {
+						$itemTaxTotal[$taxDuty->getItemId()] = $taxDuty->getAmount();
+					}
                                         $taxTotal += $taxDuty->getAmount();
                                 }
                         }
@@ -480,18 +484,26 @@ class Radial_Tax_Model_Observer
                         {
                                 if( $taxFee->getAddressId() == $quoteAddressId )
                                 {
-                                        $itemTaxTotal[$taxDuty->getItemId()] += $itemTaxTotal[$taxFee->getItemId()] + $taxFee->getAmount();
+					if( array_key_exists( $taxFee->getItemId(), $itemTaxTotal))
+					{
+                                        	$itemTaxTotal[$taxDuty->getItemId()] += $taxFee->getAmount();
+					} else {
+						$itemTaxTotal[$taxDuty->getItemId()] = $taxFee->getAmount();
+					}
                                         $taxTotal += $taxFee->getAmount();
                                 }
-                        }
-                }
-         }
+			}
 
-         foreach( $order->getAllItems() as $orderItem )
-         {
-                $orderItem->setData('tax_amount', $itemTaxTotal[$orderItem->getQuoteItemId()]);
-                $orderItem->setData('base_tax_amount', $itemTaxTotal[$orderItem->getQuoteItemId()]);
-                $orderItem->save();
+			foreach( $order->getAllItems() as $orderItem )
+		        {
+				if( array_key_exists( $orderItem->getQuoteItemId(), $itemTaxTotal))
+				{
+                			$orderItem->setData('tax_amount', $itemTaxTotal[$orderItem->getQuoteItemId()]);
+                			$orderItem->setData('base_tax_amount', $itemTaxTotal[$orderItem->getQuoteItemId()]);
+                			$orderItem->save();
+				}
+        	 	}
+		}
          }
 
          $order->setTaxAmount($taxTotal);
