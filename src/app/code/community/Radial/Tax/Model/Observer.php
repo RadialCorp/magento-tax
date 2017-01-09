@@ -121,13 +121,17 @@ class Radial_Tax_Model_Observer
         $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $quote->getStoreId());
         $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
-        if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+	$dtEffectiveFrom = new DateTime($effectiveFrom);
+        $dtEffectiveTo = new DateTime($effectiveTo);
+        $dtCurrentTime = new DateTime($currentTime);
+
+        if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime ) 
         {
 		  $this->logger->debug('Tax Calculation Occured Before the Radial Tax Effective From Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
                   return $this;
         }
 
-        if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime )
         {
 		  $this->logger->debug('Tax Calculation Occured After the Radial Tax Effective To Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
                   return $this;
@@ -207,13 +211,17 @@ class Radial_Tax_Model_Observer
         $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
         $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
-        if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+	$dtEffectiveFrom = new DateTime($effectiveFrom);
+	$dtEffectiveTo = new DateTime($effectiveTo);
+	$dtCurrentTime = new DateTime($currentTime);
+
+        if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime)
         {
                   $this->logger->debug('Tax Invoice Calculation Occured Before the Radial Tax Effective From Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
                   return $this;
         }
 
-        if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime)
         {
                   $this->logger->debug('Tax Invoice Calculation Occured After the Radial Tax Effective To Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
                   return $this;
@@ -279,13 +287,17 @@ class Radial_Tax_Model_Observer
         $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
         $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
-        if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+	$dtEffectiveFrom = new DateTime($effectiveFrom);
+        $dtEffectiveTo = new DateTime($effectiveTo);
+        $dtCurrentTime = new DateTime($currentTime);
+
+        if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime)
         {
                   $this->logger->debug('Tax Invoice Creditmemo - Calculation Occured Before the Radial Tax Effective From Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
                   return $this;
         }
 
-        if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+        if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime)
         {
                   $this->logger->debug('Tax Invoice Creditmemo - Calculation Occured After the Radial Tax Effective To Date, Please Check System Configuration', $this->logContext->getMetaData(__CLASS__));
                   return $this;

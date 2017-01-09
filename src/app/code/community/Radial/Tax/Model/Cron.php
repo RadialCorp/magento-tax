@@ -115,17 +115,21 @@ class Radial_Tax_Model_Cron
 			$effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
 			$currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
+			$dtEffectiveFrom = new DateTime($effectiveFrom);
+        		$dtEffectiveTo = new DateTime($effectiveTo);
+        		$dtCurrentTime = new DateTime($currentTime);
+
 			if( !$enabled)
 			{
 				continue;
 			}
 
-			if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+			if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime )
 			{
 				continue;
 			}
 
-			if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+			if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime )
 			{
 				continue;
 			}
@@ -395,17 +399,21 @@ class Radial_Tax_Model_Cron
                         $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
                         $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
+			$dtEffectiveFrom = new DateTime($effectiveFrom);
+                        $dtEffectiveTo = new DateTime($effectiveTo);
+                        $dtCurrentTime = new DateTime($currentTime);
+
                         if( !$enabled)
                         {
                                 continue;
                         }
 
-                        if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+                        if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime )
                         {
                                 continue;
                         }
 
-                        if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+                        if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime )
                         {
                                 continue;
                         }
@@ -573,17 +581,21 @@ class Radial_Tax_Model_Cron
                         $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
                         $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
+			$dtEffectiveFrom = new DateTime($effectiveFrom);
+                        $dtEffectiveTo = new DateTime($effectiveTo);
+                        $dtCurrentTime = new DateTime($currentTime);
+
                         if( !$enabled)
                         {
                                 continue;
                         }
 
-                        if( $effectiveFrom && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveFrom) > DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+                        if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime )
                         {
                                 continue;
                         }
 
-                        if( $effectiveTo && DateTime::createFromFormat('Y-m-d H:i:s', $effectiveTo) < DateTime::createFromFormat('Y-m-d H:i:s', $currentTime))
+                        if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime )
                         {
                                 continue;
                         }
