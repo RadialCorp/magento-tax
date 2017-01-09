@@ -419,21 +419,30 @@ class Radial_Tax_Model_Observer
 	$taxDuties = unserialize($order->getRadialTaxDuties());
 	
 	$addressArray = array();
-	
-	// Build a list of Quote Addresses
-	foreach( $taxRecords as $taxRecord ) 
-	{
-		$addressArray[] = $taxRecord->getAddressId();
+
+	if( $taxRecords )
+	{	
+		// Build a list of Quote Addresses
+		foreach( $taxRecords as $taxRecord ) 
+		{
+			$addressArray[] = $taxRecord->getAddressId();
+		}
 	}
 
-	foreach( $taxFees as $taxFee )
+	if( $taxFees )
 	{
-		$addressArray[] = $taxFee->getAddressId();
+		foreach( $taxFees as $taxFee )
+		{
+			$addressArray[] = $taxFee->getAddressId();
+		}
 	}
 
-	foreach( $taxDuties as $taxDuty )
+	if( $taxDuties )
 	{
-		$addressArray[] = $taxDuty->getAddressId();
+		foreach( $taxDuties as $taxDuty )
+		{
+			$addressArray[] = $taxDuty->getAddressId();
+		}
 	}
 
 	$addressArray = array_values(array_unique($addressArray));
