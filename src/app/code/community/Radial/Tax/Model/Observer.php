@@ -486,9 +486,9 @@ class Radial_Tax_Model_Observer
                                 {
 					if( array_key_exists( $taxFee->getItemId(), $itemTaxTotal))
 					{
-                                        	$itemTaxTotal[$taxDuty->getItemId()] += $taxFee->getAmount();
+                                        	$itemTaxTotal[$taxFee->getItemId()] += $taxFee->getAmount();
 					} else {
-						$itemTaxTotal[$taxDuty->getItemId()] = $taxFee->getAmount();
+						$itemTaxTotal[$taxFee->getItemId()] = $taxFee->getAmount();
 					}
                                         $taxTotal += $taxFee->getAmount();
                                 }
