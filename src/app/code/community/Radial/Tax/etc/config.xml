@@ -270,6 +270,7 @@ http://opensource.org/licenses/osl-3.0.php
 			<printedcardtaxclass>18451</printedcardtaxclass>
 			<displayfees>0</displayfees>
 			<displayduties>0</displayduties>
+			<notaxcalcerror>Please Note: Taxes were not calculated at the time of checkout and tax will be added to the order at a later date.</notaxcalcerror>
                 </radial_tax_core>
         </radial_core>
     </default>

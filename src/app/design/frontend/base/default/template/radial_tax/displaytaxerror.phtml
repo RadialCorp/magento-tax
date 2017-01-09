@@ -1,0 +1,28 @@
+<ul id="display_radial_tax_error" style="display:none">
+    <li>
+    <?php $enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod');
+        $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom');
+        $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto');
+        $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
+
+        $dtEffectiveFrom = new DateTime($effectiveFrom);
+        $dtEffictiveTo = new DateTime($effectiveTo);
+        $dtCurrentTime = new DateTime($currentTime);
+
+        if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime)
+        {
+        	echo $this->__(Mage::getStoreConfig('radial_core/radial_tax_core/notaxcalcerror'));
+        }
+
+        if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime)
+        {
+        	echo $this->__(Mage::getStoreConfig('radial_core/radial_tax_core/notaxcalcerror'));
+	}
+
+        if( !$enabled )
+        {
+        	echo $this->__(Mage::getStoreConfig('radial_core/radial_tax_core/notaxcalcerror'));
+	}
+    ?>
+    </li>
+</ul>
