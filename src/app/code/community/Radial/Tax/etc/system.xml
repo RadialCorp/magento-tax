@@ -243,6 +243,14 @@ http://opensource.org/licenses/osl-3.0.php
 			    <show_in_website>1</show_in_website>
 			    <show_in_store>1</show_in_store>
 			</notaxcalcerror>
+			<acceptnotax>
+			    <label>Accept Orders W/O Tax</label>
+			    <sort_order>18</sort_order>
+			    <frontend_type>adminhtml/system_config_source_yesno</source_model>
+			    <show_in_default>1</show_in_default>
+			    <show_in_website>1</show_in_website>
+			    <show_in_store>1</show_in_store>
+			</acceptnotax>
 		    </fields>
 		</radial_tax_core>
             </groups>

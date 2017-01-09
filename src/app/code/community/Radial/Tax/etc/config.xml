@@ -159,7 +159,15 @@ http://opensource.org/licenses/osl-3.0.php
 		    </radial_tax_copy_to_order>
 		</observers>
             </checkout_submit_all_after>
-        </events>
+            <checkout_controller_onepage_save_shipping_method>
+                <observers>
+                    <radial_tax_block_order>
+                    	<class>radial_tax/observer</class>
+                    	<method>blockOrderNoTax</class>
+                    </radial_tax_block_order>
+                </observers>
+            </checkout_controller_onepage_save_shipping_method>
+	</events>
         <blocks>
             <tax>
                 <rewrite>
@@ -271,6 +279,7 @@ http://opensource.org/licenses/osl-3.0.php
 			<displayfees>0</displayfees>
 			<displayduties>0</displayduties>
 			<notaxcalcerror>Please Note: Taxes were not calculated at the time of checkout and tax will be added to the order at a later date.</notaxcalcerror>
+			<acceptnotax>1</acceptnotax>
                 </radial_tax_core>
         </radial_core>
     </default>

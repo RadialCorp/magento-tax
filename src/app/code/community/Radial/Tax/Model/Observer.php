@@ -577,4 +577,50 @@ class Radial_Tax_Model_Observer
 
         return $this;
     } 
+
+    public function blockOrderNoTax(Varien_Event_Observer $observer)
+    {
+	$quote = $observer->getEvent()->getQuote();
+	$acceptnotax = Mage::getStoreConfig('radial_core/radial_tax_core/acceptnotax', $quote->getStoreId());
+
+	if( !$acceptnotax )
+	{
+		$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $quote->getStoreId());
+        	$effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', $quote->getStoreId());
+        	$effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $quote->getStoreId());
+		$taxErrorMessage = Mage::getStoreConfig('radial_core/radial_tax_core/notaxcalcerror', $quote->getStoreId());
+        	$currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
+        	$dtEffectiveFrom = new DateTime($effectiveFrom);
+        	$dtEffectiveTo = new DateTime($effectiveTo);
+        	$dtCurrentTime = new DateTime($currentTime);
+
+		if( !$enabled )
+		{
+			Mage::getSingleton('checkout/session')->setGotoSection('billing');
+			Mage::getSingleton('checkout/session')->addError($taxErrorMessage);
+		}
+
+        	if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime)
+        	{
+        		Mage::getSingleton('checkout/session')->setGotoSection('billing');
+                        Mage::getSingleton('checkout/session')->addError($taxErrorMessage);
+		}
+
+        	if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime)
+        	{
+        		Mage::getSingleton('checkout/session')->setGotoSection('billing');
+                        Mage::getSingleton('checkout/session')->addError($taxErrorMessage);
+		}
+
+		$taxRecords = unserialize($quote->getData('radial_tax_taxrecords'));
+	
+		if( !$taxRecords )
+		{
+			Mage::getSingleton('checkout/session')->setGotoSection('billing');
+                        Mage::getSingleton('checkout/session')->addError($taxErrorMessage);
+		}
+	}
+
+	return $this;
+    }
 }
