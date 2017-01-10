@@ -163,7 +163,7 @@ http://opensource.org/licenses/osl-3.0.php
                 <observers>
                     <radial_tax_block_order>
                     	<class>radial_tax/observer</class>
-                    	<method>blockOrderNoTax</class>
+                    	<method>blockOrderNoTax</method>
                     </radial_tax_block_order>
                 </observers>
             </checkout_controller_onepage_save_shipping_method>
