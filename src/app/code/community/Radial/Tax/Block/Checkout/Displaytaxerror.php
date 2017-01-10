@@ -14,7 +14,7 @@ class Radial_Tax_Block_Checkout_Displaytaxerror extends Mage_Core_Block_Template
         $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
         $dtEffectiveFrom = new DateTime($effectiveFrom);
-        $dtEffictiveTo = new DateTime($effectiveTo);
+        $dtEffectiveTo = new DateTime($effectiveTo);
         $dtCurrentTime = new DateTime($currentTime);
 
 	$quote = Mage::getSingleton('checkout/session')->getQuote();

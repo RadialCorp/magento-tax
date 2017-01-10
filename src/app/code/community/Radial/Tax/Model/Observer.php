@@ -623,4 +623,68 @@ class Radial_Tax_Model_Observer
 
         return $this;
     }
+
+    public function getSalesOrderViewInfo(Varien_Event_Observer $observer) {
+        $block = $observer->getBlock();
+        if (($block->getNameInLayout() == 'order_info') && ($child = $block->getChild('radial.tax.order.info.displaytaxerror'))) {
+            $transport = $observer->getTransport();
+            if ($transport) {
+		$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', Mage::app()->getStore()->getStoreId());
+	        $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', Mage::app()->getStore()->getStoreId());
+	        $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', Mage::app()->getStore()->getStoreId());
+	        $orderCreateTime = $order->getCreatedAt();
+
+        	$dtEffectiveFrom = new DateTime($effectiveFrom);
+        	$dtEffictiveTo = new DateTime($effectiveTo);
+        	$dtOrderCreateTime = new DateTime($orderCreateTime);
+
+        	$order = false;
+        	$orderTransmit = false;
+
+       		$orderId = $this->getRequest()->getParam('order_id');
+        	$order = Mage::getModel('sales/order')->load($orderId);
+        	$orderTransmit = $order->getData('radial_tax_transmit');
+
+        	if( $orderTransmit && $orderTransmit != -1 )
+        	{
+                	$taxRecords = unserialize($order->getData('radial_tax_taxrecords'));
+
+                	if( $effectiveFrom && $dtEffectiveFrom > $dtOrderCreateTime)
+                	{
+                		$html = $transport->getHtml();
+                		$html .= $child->toHtml();
+                		$transport->setHtml($html);
+			}
+
+                	if( $effectiveTo && $dtEffectiveTo < $dtOrderCreateTime)
+                	{
+                		$html = $transport->getHtml();
+                		$html .= $child->toHtml();
+                		$transport->setHtml($html);
+			}
+	
+	                if( !$enabled )
+	                {
+        	        	$html = $transport->getHtml();
+                		$html .= $child->toHtml();
+                		$transport->setHtml($html);
+			}
+	
+        	        if( !$taxRecords )
+        	        {
+        	        	$html = $transport->getHtml();
+                		$html .= $child->toHtml();
+                		$transport->setHtml($html);
+			}
+        	}
+
+        	if( !$orderTransmit )
+        	{
+        		$html = $transport->getHtml();
+                	$html .= $child->toHtml();
+                	$transport->setHtml($html);
+		}
+            }
+        }
+    }
 }

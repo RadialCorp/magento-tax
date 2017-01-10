@@ -11,11 +11,11 @@ class Radial_Tax_Block_Checkout_Displaytaxerrororder extends Mage_Core_Block_Tem
 	$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', Mage::app()->getStore()->getStoreId());
 	$effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', Mage::app()->getStore()->getStoreId());
         $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', Mage::app()->getStore()->getStoreId());
-        $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
+	$orderCreateTime = $order->getCreatedAt();
 
         $dtEffectiveFrom = new DateTime($effectiveFrom);
-        $dtEffictiveTo = new DateTime($effectiveTo);
-        $dtCurrentTime = new DateTime($currentTime);
+        $dtEffectiveTo = new DateTime($effectiveTo);
+        $dtOrderCreateTime = new DateTime($orderCreateTime);
 
 	$order = false;	
 	$orderTransmit = false;
@@ -33,12 +33,12 @@ class Radial_Tax_Block_Checkout_Displaytaxerrororder extends Mage_Core_Block_Tem
 	{
 		$taxRecords = unserialize($order->getData('radial_tax_taxrecords'));
 
-		if( $effectiveFrom && $dtEffectiveFrom > $dtCurrentTime)
+		if( $effectiveFrom && $dtEffectiveFrom > $dtOrderCreateTime)
         	{
                 	return parent::_toHtml();
         	}
 
-        	if( $effectiveTo && $dtEffectiveTo < $dtCurrentTime)
+        	if( $effectiveTo && $dtEffectiveTo < $dtOrderCreateTime)
         	{
                 	return parent::_toHtml();
         	}
