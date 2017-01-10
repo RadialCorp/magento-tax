@@ -18,7 +18,7 @@ class Radial_Tax_Block_Checkout_Displaytaxerrororder extends Mage_Core_Block_Tem
 	$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
         $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', $order->getStoreId());
         $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
-        $orderCreateTime = $order->getCreatedAt();
+        $orderCreateTime = $order->getCreatedAtStoreDate();
 
         $dtEffectiveFrom = new DateTime($effectiveFrom);
         $dtEffectiveTo = new DateTime($effectiveTo);

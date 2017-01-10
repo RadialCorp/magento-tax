@@ -638,7 +638,7 @@ class Radial_Tax_Model_Observer
 		$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
                 $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', $order->getStoreId());
                 $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
-                $orderCreateTime = $order->getCreatedAt();
+                $orderCreateTime = $order->getCreatedAtStoreDate();
 
                 $dtEffectiveFrom = new DateTime($effectiveFrom);
                 $dtEffictiveTo = new DateTime($effectiveTo);
