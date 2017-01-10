@@ -8,8 +8,9 @@ class Radial_Tax_Block_Checkout_Displaytaxerror extends Mage_Core_Block_Template
 
     protected function _toHtml()
     {
-	$effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom');
-        $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto');
+	$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', Mage::app()->getStore()->getStoreId());
+	$effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', Mage::app()->getStore()->getStoreId());
+        $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', Mage::app()->getStore()->getStoreId());
         $currentTime = Mage::getModel('core/date')->date('Y-m-d H:i:s');
 
         $dtEffectiveFrom = new DateTime($effectiveFrom);
