@@ -5,3 +5,4 @@ src/app/etc/modules/*.xml app/etc/modules/
 src/app/locale/en_US/Radial_Tax.csv app/locale/en_US/Radial_Tax.csv
 src/app/locale/en_US/template/email/tax_exception_template.html app/locale/en_US/template/email/tax_exception_template.html
 src/app/design/frontend/base/default/layout/radial_tax.xml app/design/frontend/base/default/layout/radial_tax.xml
+src/app/design/frontend/base/default/template/radial_tax/displaytaxerror.phtml app/design/frontend/base/default/template/radial_tax/displaytaxerror.phtml
