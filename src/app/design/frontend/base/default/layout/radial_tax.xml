@@ -18,4 +18,9 @@
         	<block type="radial_tax/checkout_displaytaxerror" name="checkout.onepage.radial.tax.displaytaxerror" template="radial_tax/displaytaxerror.phtml"/>
 	</reference>
     </checkout_multishipping_overview>    
+    <sales_order_view>
+        <reference name ="content">
+                 <block type="radial_tax/checkout_displaytaxerrororder" name="checkout.onepage.radial.tax.displaytaxerror" template="radial_tax/displaytaxerror.phtml"/>
+        </reference>
+    </sales_order_view>
 </layout>
