@@ -10,7 +10,7 @@
     </sales_email_order_items>
     <checkout_onepage_review>
     	<reference name="checkout.onepage.review.info.items.after">
-    		<block type="core/template" template="radial_tax/displaytaxerror.phtml"/>
+    		<block type="radial_tax/checkout_displaytaxerror" template="radial_tax/displaytaxerror.phtml"/>
     	</reference>
     </checkout_onepage_review>
 </layout>
