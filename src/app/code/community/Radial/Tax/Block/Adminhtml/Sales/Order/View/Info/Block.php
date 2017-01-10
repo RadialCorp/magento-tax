@@ -1,5 +1,5 @@
 <?php
-class Radial_Tax_Block_Adminhtml_Sales_Order_View_Info_Block extends Mage_Core_Block_Template {
+class Radial_Tax_Block_Adminhtml_Sales_Order_View_Info_Block extends Mage_Core_Block_Template
 {    
     protected $order;
     
@@ -21,6 +21,6 @@ class Radial_Tax_Block_Adminhtml_Sales_Order_View_Info_Block extends Mage_Core_B
 
     public function getNoTaxErrorMessage()
     {
-        return Mage::getStoreConfig('radial_core/radial_tax_core/notaxcalcerror', Mage::app()->getStore()->getStoreId());
+        return Mage::getStoreConfig('radial_core/radial_tax_core/notaxcalcerror', $this->order->getStoreId());
     }
 }

@@ -629,21 +629,20 @@ class Radial_Tax_Model_Observer
         if (($block->getNameInLayout() == 'order_info') && ($child = $block->getChild('radial.tax.order.info.displaytaxerror'))) {
             $transport = $observer->getTransport();
             if ($transport) {
-		$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', Mage::app()->getStore()->getStoreId());
-	        $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', Mage::app()->getStore()->getStoreId());
-	        $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', Mage::app()->getStore()->getStoreId());
-	        $orderCreateTime = $order->getCreatedAt();
-
-        	$dtEffectiveFrom = new DateTime($effectiveFrom);
-        	$dtEffictiveTo = new DateTime($effectiveTo);
-        	$dtOrderCreateTime = new DateTime($orderCreateTime);
-
         	$order = false;
         	$orderTransmit = false;
 
-       		$orderId = $this->getRequest()->getParam('order_id');
-        	$order = Mage::getModel('sales/order')->load($orderId);
+        	$order = $observer->getEvent()->getBlock()->getOrder();
         	$orderTransmit = $order->getData('radial_tax_transmit');
+
+		$enabled = Mage::getStoreConfig('radial_core/radial_tax_core/enabledmod', $order->getStoreId());
+                $effectiveFrom = Mage::getStoreConfig('radial_core/radial_tax_core/effectivefrom', $order->getStoreId());
+                $effectiveTo = Mage::getStoreConfig('radial_core/radial_tax_core/effectiveto', $order->getStoreId());
+                $orderCreateTime = $order->getCreatedAt();
+
+                $dtEffectiveFrom = new DateTime($effectiveFrom);
+                $dtEffictiveTo = new DateTime($effectiveTo);
+                $dtOrderCreateTime = new DateTime($orderCreateTime);
 
         	if( $orderTransmit && $orderTransmit != -1 )
         	{
