@@ -575,17 +575,6 @@ class Radial_Tax_Model_Observer
 
                 $_invoice->getResource()->saveAttribute($_invoice, 'subtotal_incl_tax');
                 $_invoice->getResource()->saveAttribute($_invoice, 'base_subtotal_incl_tax');
-
-		if(!$_invoice->isLast())
-		{
-			$newGrandTotal = false;
-			$newBaseGrandTotal = false;
-			$newGrandTotal = $taxTotal + $_invoice->getData('shipping_incl_tax') + $_invoice->getData('gift_cards_amount') + $_invoice->getData('hidden_tax_amount') + $_invoice->getData('gw_price') + $_invoice->getData('gw_items_price') + $_invoice->getData('gw_card_price');
-			$newBaseGrandTotal = $baseTaxTotal + $_invoice->getData('base_shipping_incl_tax') + $_invoice->getData('base_gift_cards_amount') + $_invoice->getData('base_hidden_tax_amount') + $_invoice->getData('base_gw_price') + $_invoice->getData('base_gw_items_price') + $_invoice->getData('base_gw_card_price');
-
-			$_invoice->getResource()->saveAttribute($_invoice, 'grand_total', $newGrandTotal);
-			$_invoice->getResource()->saveAttribute($_invoice, 'base_grand_total', $newBaseGrandTotal);
-		}
         }
 
         return $this;
