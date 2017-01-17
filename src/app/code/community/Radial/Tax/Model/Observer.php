@@ -529,11 +529,26 @@ class Radial_Tax_Model_Observer
 
          $order->setTaxAmount($taxTotal);
 	 $order->setBaseTaxAmount($taxTotal);
+
+	 $orderSubtotalTax = false;
+	 $baseOrderSubtotalTax = false;
+
+	 foreach( $order->getAllItems() as $orderItem )
+         {
+                        $orderSubtotalTax += $orderItem->getRowTotalInclTax();
+                        $baseOrderSubtotalTax += $orderItem->getBaseRowTotalInclTax();
+         }
+
+	 $order->setBaseSubtotalInclTax($baseOrderSubtotalTax);
+	 $order->setSubtotalInclTax($orderSubtotalTax);
+
 	 $order->setData('radial_gw_printed_card_tax_class', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass'));
          $order->setData('radial_gw_printed_card_sku', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku'));
 
 	 $order->getResource()->saveAttribute($order, "tax_amount");
 	 $order->getResource()->saveAttribute($order, "base_tax_amount");
+	 $order->getResource()->saveAttribute($order, "subtotal_incl_tax");
+	 $order->getResource()->saveAttribute($order, "base_subtotal_incl_tax");
 
 	 /* MPTF-281 - Set GW Card Sku / Tax Class to Order Table */
 	 $order->getResource()->saveAttribute($order, 'radial_gw_printed_card_tax_class');
@@ -575,6 +590,18 @@ class Radial_Tax_Model_Observer
 
                 $_invoice->getResource()->saveAttribute($_invoice, 'subtotal_incl_tax');
                 $_invoice->getResource()->saveAttribute($_invoice, 'base_subtotal_incl_tax');
+
+		if(!$_invoice->isLast())
+		{
+			$grandTotalInclTax = $_invoice->getSubtotal() + $_invoice->getTaxAmount() + $_invoice->getShippingInclTax() + $_invoice->getHiddenTaxAmount() + $_invoice->getShippingHiddenTaxAmount() + $_invoice->getGwPrice() + $_invoice->getGwCardPrice() + $_invoice->getGwItemsPrice();
+			$baseGrandTotalInclTax = $_invoice->getBaseSubtotal() + $_invoice->getBaseTaxAmount() + $_invoice->getBaseShippingInclTax() + $_invoice->getBaseHiddenTaxAmount() + $_invoice->getBaseShippingHiddenTaxAmount() + $_invoice->getGwBasePrice() + $_invoice->getGwCardBasePrice() + $_invoice->getGwItemsBasePrice();
+
+			$_invoice->setGrandTotal($grandTotalInclTax);
+			$_invoice->setBaseGrandTotal($baseGrandTotalInclTax);
+
+			$_invoice->getResource()->saveAttribute($_invoice, 'grand_total');
+			$_invoice->getResource()->saveAttribute($_invoice, 'base_grand_total');
+		}
         }
 
         return $this;
