@@ -572,17 +572,38 @@ class Radial_Tax_Model_Observer
 
     public function transferRemainingGwPrices(Varien_Event_Observer $observer)
     {
-        $_invoice = $observer->getEvent()->getInvoice();
+	$_invoice = $observer->getEvent()->getInvoice();
         $_order = $_invoice->getOrder();
+
         if ($_invoice->getUpdatedAt() == $_invoice->getCreatedAt() )
         {
                 $taxTotal = false;
 		$baseTaxTotal = false;
+		$gwItemsPrice = false;
+		$gwItemsBasePrice = false;
+		$gwItemsTaxAmount = false;
+		$gwItemsBaseTaxAmount = false;
 
                 foreach( $_invoice->getAllItems() as $invoiceItem )
                 {
                         $taxTotal += $invoiceItem->getRowTotalInclTax();
 			$baseTaxTotal += $invoiceItem->getBaseRowTotalInclTax();
+
+			$itemC = Mage::getModel('sales/order_item')->getCollection()
+                                        ->addFieldToFilter('item_id', array('eq' => $invoiceItem->getOrderItemId()))
+                                        ->addFieldToFilter('order_id', array('eq' => $_order->getId()))
+					->getFirstItem();
+
+			if( $itemC )
+			{
+				if( $itemC->getGwId())
+				{
+					$gwItemsPrice += $itemC->getGwPrice() * $invoiceItem->getQty();
+					$gwItemsBasePrice += $itemC->getGwBasePrice() * $invoiceItem->getQty();
+					$gwItemsTaxAmount += $itemC->getGwTaxAmount() * $invoiceItem->getQty();
+					$gwItemsBaseTaxAmount += $itemC->getGwBaseTaxAmount() * $invoiceItem->getQty();
+				}
+			}
                 }
 
                 $_invoice->setData('subtotal_incl_tax', $taxTotal);
@@ -591,7 +612,31 @@ class Radial_Tax_Model_Observer
                 $_invoice->getResource()->saveAttribute($_invoice, 'subtotal_incl_tax');
                 $_invoice->getResource()->saveAttribute($_invoice, 'base_subtotal_incl_tax');
 
-		if(!$_invoice->isLast())
+		if( $_order->getGwItemsPriceInvoiced() != $_order->getGwItemsPrice() && $gwItemsPrice )
+                {
+			$_invoice->setData('gw_items_price', $gwItemsPrice);
+			$_invoice->setData('gw_items_tax_amount', $gwItemsTaxAmount);
+			$_invoice->getResource()->saveAttribute($_invoice, 'gw_items_price');
+			$_invoice->getResource()->saveAttribute($_invoice, 'gw_items_tax_amount');
+
+			$newGrandTotal = $_invoice->getGrandTotal() + $gwItemsPrice;
+			$_invoice->setGrandTotal($newGrandTotal);
+			$_invoice->getResource()->saveAttribute($_invoice, 'grand_total');
+                }
+
+		if( $_order->getGwItemsBasePriceInvoiced() != $_order->getGwItemsBasePrice() && $gwItemsBasePrice )
+		{
+			$_invoice->setData('gw_items_base_price', $gwItemsBasePrice);
+			$_invoice->setData('gw_items_base_tax_amount', $gwItemsBaseTaxAmount);
+                        $_invoice->getResource()->saveAttribute($_invoice, 'gw_items_base_price');
+			$_invoice->getResource()->saveAttribute($_invoice, 'gw_items_base_tax_amount');
+
+			$newBaseGrandTotal = $_invoice->getBaseGrandTotal() + $gwItemsBasePrice;
+                        $_invoice->setBaseGrandTotal($newGrandTotal);
+                        $_invoice->getResource()->saveAttribute($_invoice, 'base_grand_total');
+		}
+
+		if($_invoice->isLast())
 		{
 			$grandTotalInclTax = $_invoice->getSubtotal() + $_invoice->getTaxAmount() + $_invoice->getShippingInclTax() + $_invoice->getHiddenTaxAmount() + $_invoice->getShippingHiddenTaxAmount() + $_invoice->getGwPrice() + $_invoice->getGwCardPrice() + $_invoice->getGwItemsPrice();
 			$baseGrandTotalInclTax = $_invoice->getBaseSubtotal() + $_invoice->getBaseTaxAmount() + $_invoice->getBaseShippingInclTax() + $_invoice->getBaseHiddenTaxAmount() + $_invoice->getBaseShippingHiddenTaxAmount() + $_invoice->getGwBasePrice() + $_invoice->getGwCardBasePrice() + $_invoice->getGwItemsBasePrice();

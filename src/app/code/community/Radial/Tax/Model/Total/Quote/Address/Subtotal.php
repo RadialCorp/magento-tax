@@ -152,15 +152,42 @@ class Radial_Tax_Model_Total_Quote_Address_Subtotal extends Mage_Tax_Model_Sales
         $baseSubtotal = $baseTaxSubtotal = $this->_calculator->round($item->getBaseRowTotal());
 
         $taxRecords = $this->_taxCollector->getTaxRecordsByAddressId($address->getId());
+	$taxDuties = $this->_taxCollector->getTaxDutiesByAddressId($address->getId());
+	$taxFees = $this->_taxCollector->getTaxFeesByAddressId($address->getId());
 	$merchItemTaxTotal = false;
 
-        foreach( $taxRecords as $taxRecord )
-        {
-        	if (($taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT) && $taxRecord->getItemId() == $item->getItemId() )
-                {
-                	$merchItemTaxTotal += ($taxRecord->getCalculatedTax() / $item->getQty());
-                } 
-        }
+	if( $taxRecords )
+	{
+        	foreach( $taxRecords as $taxRecord )
+        	{
+        		if (($taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT) && $taxRecord->getItemId() == $item->getItemId() )
+        	        {
+        	        	$merchItemTaxTotal += ($taxRecord->getCalculatedTax() / $item->getQty());
+        	        } 
+        	}
+	}
+
+	if( $taxDuties )
+	{
+		foreach( $taxDuties as $taxDuty )
+		{
+			if( $taxDuty->getItemId() == $item->getItemId())
+			{
+				$merchItemTaxTotal += ($taxDuty->getAmount() / $item->getQty());
+			}
+		}
+	}
+
+	if( $taxFees )
+	{
+		foreach( $taxFees as $taxFee )
+        	{
+        	        if( $taxFee->getItemId() == $item->getItemId())
+        	        {
+        	                $merchItemTaxTotal += ($taxFee->getAmount() / $item->getQty());
+        	        }
+        	}
+	}
 
         if ($item->hasCustomPrice()) {
         	/**
