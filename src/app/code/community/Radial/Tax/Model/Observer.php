@@ -638,8 +638,8 @@ class Radial_Tax_Model_Observer
 
 		if($_invoice->isLast())
 		{
-			$grandTotalInclTax = $_invoice->getSubtotal() + $_invoice->getTaxAmount() + $_invoice->getShippingInclTax() + $_invoice->getHiddenTaxAmount() + $_invoice->getShippingHiddenTaxAmount() + $_invoice->getGwPrice() + $_invoice->getGwCardPrice() + $_invoice->getGwItemsPrice();
-			$baseGrandTotalInclTax = $_invoice->getBaseSubtotal() + $_invoice->getBaseTaxAmount() + $_invoice->getBaseShippingInclTax() + $_invoice->getBaseHiddenTaxAmount() + $_invoice->getBaseShippingHiddenTaxAmount() + $_invoice->getGwBasePrice() + $_invoice->getGwCardBasePrice() + $_invoice->getGwItemsBasePrice();
+			$grandTotalInclTax = $_invoice->getSubtotal() + $_invoice->getTaxAmount() + $_invoice->getShippingAmount() + $_invoice->getGwPrice() + $_invoice->getGwCardPrice() + $_invoice->getGwItemsPrice();
+			$baseGrandTotalInclTax = $_invoice->getBaseSubtotal() + $_invoice->getBaseTaxAmount() + $_invoice->getBaseShippingAmount() + $_invoice->getGwBasePrice() + $_invoice->getGwCardBasePrice() + $_invoice->getGwItemsBasePrice();
 
 			$_invoice->setGrandTotal($grandTotalInclTax);
 			$_invoice->setBaseGrandTotal($baseGrandTotalInclTax);
