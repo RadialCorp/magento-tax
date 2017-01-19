@@ -265,7 +265,7 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
 				{
 			        	foreach( $taxRecords as $taxRecord )
 			        	{
-			       	        	if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT && $taxRecord->getItemId() == $child->getItemId() )
+			       	        	if (($taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT) && $taxRecord->getItemId() == $child->getItemId() )
                 				{
                         				$merchItemTaxTotal += $taxRecord->getCalculatedTax();
                 				}
@@ -309,7 +309,7 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
 		       {
 				foreach( $taxRecords as $taxRecord )
                        		{
-	                	       if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT && $taxRecord->getItemId() == $item->getItemId() )
+	                	       if (($taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT) && $taxRecord->getItemId() == $item->getItemId() )
                         	       {
                         	       		$merchItemTaxTotal += $taxRecord->getCalculatedTax();
                                        }
