@@ -132,6 +132,7 @@ class Radial_Tax_Model_Total_Quote_Address_Subtotal extends Mage_Tax_Model_Sales
 
 	    $this->_addSubtotalAmountRadial($address, $item);
         }
+
         return $this;
     }
 

@@ -142,23 +142,6 @@ http://opensource.org/licenses/osl-3.0.php
                     </radial_tax_creditmemo_tax>
                 </observers>
             </sales_order_creditmemo_refund>
-            <sales_order_invoice_save_after>
-                <observers>
-                    <radial_tax_invoice_transfer_gw>
-                        <type>model</type>
-                        <class>radial_tax/observer</class>
-                        <method>transferRemainingGwPrices</method>
-                    </radial_tax_invoice_transfer_gw>
-                </observers>
-            </sales_order_invoice_save_after>
-	    <checkout_submit_all_after>
-                <observers>
-                    <radial_tax_copy_to_order>
-		    	<class>radial_tax/observer</class>
-			<method>copyTaxAmount</method>
-		    </radial_tax_copy_to_order>
-		</observers>
-            </checkout_submit_all_after>
             <checkout_controller_onepage_save_shipping_method>
                 <observers>
                     <radial_tax_block_order>
@@ -167,25 +150,21 @@ http://opensource.org/licenses/osl-3.0.php
                     </radial_tax_block_order>
                 </observers>
             </checkout_controller_onepage_save_shipping_method>
+            <checkout_submit_all_after>
+                <observers>
+                    <radial_tax_copy_to_order>
+                        <class>radial_tax/observer</class>
+                        <method>copyTaxAmount</method>
+                    </radial_tax_copy_to_order>
+                </observers>
+            </checkout_submit_all_after>
 	</events>
-        <blocks>
-            <tax>
-                <rewrite>
-                    <checkout_grandtotal>Radial_Tax_Block_Tax_Checkout_Grandtotal</checkout_grandtotal>
-                </rewrite>
-            </tax>
-            <adminhtml>
-                <rewrite>
-                    <sales_order_create_totals_grandtotal>Radial_Tax_Block_Adminhtml_Sales_Order_Create_Totals_Grandtotal</sales_order_create_totals_grandtotal>
-                </rewrite>
-            </adminhtml>
-        </blocks>
         <sales>
             <quote>
                 <totals>
-		    <tax>
-			<class>radial_tax/total_quote_address_magentotax</class>
-		    </tax>
+                    <tax>
+                   	<class>radial_tax/total_quote_address_magentotax</class>
+                    </tax>
 		    <tax_subtotal>
                         <class>radial_tax/total_quote_address_subtotal</class>
                     </tax_subtotal>
@@ -196,7 +175,7 @@ http://opensource.org/licenses/osl-3.0.php
                         <class>radial_tax/total_quote_address_giftwrapping</class>
                     </tax_giftwrapping>
                     <radial_tax>
-                        <after>subtotal,shipping</after>
+                        <after>subtotal,shipping,tax</after>
                         <before>grand_total</before>
                         <class>radial_tax/total_quote_address_tax</class>
                     </radial_tax>
@@ -226,6 +205,19 @@ http://opensource.org/licenses/osl-3.0.php
                     </product_attributes>
                 </item>
             </quote>
+            <order_invoice>
+                <totals>
+                      <giftwrapping>
+                          <class>enterprise_giftwrapping/total_invoice_giftwrapping</class>
+                          <after>subtotal</after>
+                      </giftwrapping>
+                      <tax_giftwrapping>
+                          <class>radial_tax/total_invoice_tax_giftwrapping</class>
+                          <after>tax</after>
+                          <before>grand_total</before>
+                      </tax_giftwrapping>
+                </totals>
+            </order_invoice>
         </sales>
     </global>
     <frontend>

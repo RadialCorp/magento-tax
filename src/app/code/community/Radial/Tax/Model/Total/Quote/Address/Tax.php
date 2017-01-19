@@ -36,6 +36,8 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
     protected $_logContext;
     /** @var Mage_Tax_Model_Config */
     protected $_config;
+    /** @var Enterprise_GiftWrapping_Helper_Data */
+    protected $_enterpriseGwHelper;
 
     /**
      * @param array $args May contain key/value for:
@@ -44,6 +46,7 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
      *                         - logger => EbayEnterprise_MageLog_Helper_Data
      *                         - log_context => EbayEnterprise_MageLog_Helper_Context
      *                         - config => Mage_Tax_Model_Config
+     *			       - enterprise_gw_helper => Enterprise_GiftWrapping_Helper_Data
      */
     public function __construct(array $args = [])
     {
@@ -52,13 +55,15 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
             $this->_taxCollector,
             $this->_logger,
             $this->_logContext,
-	    $this->_config
+	    $this->_config,
+	    $this->_enterpriseGwHelper
         ) = $this->_checkTypes(
             $this->_nullCoalesce($args, 'helper', Mage::helper('radial_tax')),
             $this->_nullCoalesce($args, 'tax_collector', Mage::getModel('radial_tax/collector')),
             $this->_nullCoalesce($args, 'logger', Mage::helper('ebayenterprise_magelog')),
             $this->_nullCoalesce($args, 'log_context', Mage::helper('ebayenterprise_magelog/context')),
-	    $this->_nullCoalesce($args, 'config', Mage::getSingleton('tax/config'))
+	    $this->_nullCoalesce($args, 'config', Mage::getSingleton('tax/config')),
+	    $this->_nullCoalesce($args, 'enterprise_gw_helper', Mage::helper('enterprise_giftwrapping'))
         );
     }
     /**
@@ -69,6 +74,7 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
      * @param EbayEnterprise_MageLog_Helper_Data
      * @param EbayEnterprise_MageLog_Helper_Context
      * @param Mage_Tax_Model_Config
+     * @param Enterprise_GiftWrapping_Helper_Data
      * @return array
      */
     protected function _checkTypes(
@@ -76,14 +82,16 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
         Radial_Tax_Model_Collector $taxCollector,
         EbayEnterprise_MageLog_Helper_Data $logger,
         EbayEnterprise_MageLog_Helper_Context $logContext,
-	Mage_Tax_Model_Config $config
+	Mage_Tax_Model_Config $config,
+	Enterprise_GiftWrapping_Helper_Data $enterpriseGiftwrappingHelper
     ) {
         return [
             $_helper,
             $taxCollector,
             $logger,
             $logContext,
-	    $config
+	    $config,
+            $enterpriseGiftwrappingHelper
         ];
     }
     /**
@@ -240,7 +248,8 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
 
         	$store = $address->getQuote()->getStore();
 
-        	foreach ($items as $item) {
+        	foreach ($items as $item) 
+		{
         	    if ($item->getParentItem()) {
         	        continue;
         	    }
@@ -248,13 +257,40 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
 	            if ($item->getHasChildren() && $item->isChildrenCalculated()) {
         	        foreach ($item->getChildren() as $child) {
         	        	$taxRecords = $this->_taxCollector->getTaxRecordsByAddressId($address->getId());
+				$taxDuties = $this->_taxCollector->getTaxDutiesByAddressId($address->getId());
+        			$taxFees = $this->_taxCollector->getTaxFeesByAddressId($address->getId());
 			        $merchItemTaxTotal = false;
 
-			        foreach( $taxRecords as $taxRecord )
-			        {
-			                if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT && $taxRecord->getItemId() == $child->getItemId() )
+				if( $taxRecords )
+				{
+			        	foreach( $taxRecords as $taxRecord )
+			        	{
+			       	        	if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT && $taxRecord->getItemId() == $child->getItemId() )
+                				{
+                        				$merchItemTaxTotal += $taxRecord->getCalculatedTax();
+                				}
+        				}
+				}
+
+				if( $taxDuties )
+        			{
+                			foreach( $taxDuties as $taxDuty )
                 			{
-                        			$merchItemTaxTotal += $taxRecord->getCalculatedTax();
+                        			if( $taxDuty->getItemId() == $child->getItemId())
+                        			{
+                        			        $merchItemTaxTotal += $taxDuty->getAmount();
+                        			}
+                			}
+        			}
+
+        			if( $taxFees )
+        			{
+                			foreach( $taxFees as $taxFee )
+                			{
+                        			if( $taxFee->getItemId() == $child->getItemId())
+                        			{
+                        			        $merchItemTaxTotal += $taxFee->getAmount();
+                        			}
                 			}
         			}
 			}
@@ -265,15 +301,42 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
         	        $this->_recalculateParent($item);
         	    } else {
                        $taxRecords = $this->_taxCollector->getTaxRecordsByAddressId($address->getId());
+		       $taxDuties = $this->_taxCollector->getTaxDutiesByAddressId($address->getId());
+                       $taxFees = $this->_taxCollector->getTaxFeesByAddressId($address->getId());
                        $merchItemTaxTotal = false;
 
-                       foreach( $taxRecords as $taxRecord )
-                       {
-	                       if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT && $taxRecord->getItemId() == $item->getItemId() )
-                               {
-                               		$merchItemTaxTotal += $taxRecord->getCalculatedTax();
-                               }
-                        } 
+		       if( $taxRecords )
+		       {
+				foreach( $taxRecords as $taxRecord )
+                       		{
+	                	       if ( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT && $taxRecord->getItemId() == $item->getItemId() )
+                        	       {
+                        	       		$merchItemTaxTotal += $taxRecord->getCalculatedTax();
+                                       }
+                        	}
+			} 
+
+			if( $taxDuties )
+                        {
+                        	foreach( $taxDuties as $taxDuty )
+                                {
+                                	if( $taxDuty->getItemId() == $item->getItemId())
+                                        {
+                                        	$merchItemTaxTotal += $taxDuty->getAmount();
+                                        }
+                                }
+                        }
+
+                        if( $taxFees )
+                        {
+                        	foreach( $taxFees as $taxFee )
+                                {
+                                	if( $taxFee->getItemId() == $item->getItemId())
+                                        {
+                                        	$merchItemTaxTotal += $taxFee->getAmount();
+                                        }
+                                } 
+                        }
 
                         $item->setTaxAmount($merchItemTaxTotal);
                         $item->setBaseTaxAmount($merchItemTaxTotal);
@@ -281,12 +344,12 @@ class Radial_Tax_Model_Total_Quote_Address_Tax extends Mage_Sales_Model_Quote_Ad
             	}
 
 		$address->setTaxAmount($total);
-		$address->setBaseTaxAmount($total);
+                $address->setBaseTaxAmount($total);
 
-        	// Always overwrite amounts for this total. The total calculated from
-        	// the collector's tax records will be the complete tax amount for
-        	// the address.
-        	$this->_setAmount($total)->_setBaseAmount($total);
+                // Always overwrite amounts for this total. The total calculated from
+                // the collector's tax records will be the complete tax amount for
+                // the address.
+                $this->_setAmount($total)->_setBaseAmount($total);
 	}
         return $this;
     }
