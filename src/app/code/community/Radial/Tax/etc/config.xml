@@ -208,7 +208,7 @@ http://opensource.org/licenses/osl-3.0.php
             <order_invoice>
                 <totals>
                       <giftwrapping>
-                          <class>enterprise_giftwrapping/total_invoice_giftwrapping</class>
+                          <class>radial_tax/total_invoice_giftwrapping</class>
                           <after>subtotal</after>
                       </giftwrapping>
                       <tax_giftwrapping>
