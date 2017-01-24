@@ -51,6 +51,23 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
         $baseInvoiced = 0;
 	$singleInv = 0;
 	$baseSingleInv = 0;
+	$qtySingle = false;
+	$multiGwItem = false;
+	$count = 0;
+
+	foreach( $order->getAllItems() as $orderItem )
+	{
+		if ($orderItem->getGwId() && $orderItem->getGwBaseTaxAmount()) 
+		{
+			$count += 1;
+		}
+	}
+
+	if( $count > 1 )
+	{
+		$multiGwItem = true;
+	}		
+
         foreach ($invoice->getAllItems() as $invoiceItem) {
 	    Mage::Log("Invoice Item: ". print_r($invoiceItem->debug(), true));
 
@@ -79,6 +96,11 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
 
 		$singleInv += $orderItem->getGwTaxAmount();
 		$baseSingleInv += $orderItem->getGwBaseTaxAmount();
+
+		if( $invoiceItem->getQty() == 1 )
+		{
+			$qtySingle = true;
+		}
             }
         }
         if ($invoiced > 0 || $baseInvoiced > 0) {
@@ -124,7 +146,7 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
             $invoice->setGwCardTaxAmount($order->getGwCardTaxAmount());
         }
 
-        if (!$invoice->isLast()) {
+        if (!$invoice->isLast() || $qtySingle || $multiGwItem ) {
 	    Mage::Log("Invoice has Item Not In Last");
 
 	    $baseTaxAmount = $invoice->getGwItemsBaseTaxAmount();
