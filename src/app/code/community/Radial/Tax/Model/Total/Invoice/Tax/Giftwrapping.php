@@ -41,87 +41,87 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
     {
         $order = $invoice->getOrder();
 
-	Mage::Log("Collecting Tax Totals For Invoice:");
-	Mage::Log("Invoice OBJ: ". print_r($invoice->debug(), true));
+		Mage::Log("Collecting Tax Totals For Invoice:");
+		Mage::Log("Invoice OBJ: ". print_r($invoice->debug(), true));
 
         /**
          * Wrapping for items
          */
         $invoiced = 0;
         $baseInvoiced = 0;
-	$singleInv = 0;
-	$baseSingleInv = 0;
-	$qtySingle = false;
-	$multiGwItem = false;
-	$count = 0;
-
-	foreach( $order->getAllItems() as $orderItem )
-	{
-		if ($orderItem->getGwId() && $orderItem->getGwBaseTaxAmount()) 
+		$singleInv = 0;
+		$baseSingleInv = 0;
+		$qtySingle = false;
+		$multiGwItem = false;
+		$count = 0;
+	
+		foreach( $order->getAllItems() as $orderItem )
 		{
-			$count += 1;
+			if ($orderItem->getGwId() && $orderItem->getGwBaseTaxAmount()) 
+			{
+				$count += 1;
+			}
 		}
-	}
-
-	if( $count > 1 )
-	{
-		$multiGwItem = true;
-	}		
+	
+		if( $count > 1 )
+		{
+			$multiGwItem = true;
+		}		
 
         foreach ($invoice->getAllItems() as $invoiceItem) {
-	    Mage::Log("Invoice Item: ". print_r($invoiceItem->debug(), true));
-
+		    Mage::Log("Invoice Item: ". print_r($invoiceItem->debug(), true));
+	
             if (!$invoiceItem->getQty() || $invoiceItem->getQty() == 0) {
                 continue;
             }
             $orderItem = $invoiceItem->getOrderItem();
+		
+		    Mage::Log("Order Item Info:");
+		    Mage::Log("Gw Id: ". $orderItem->getGwId());
+		    Mage::Log("Gw Base Tax Amount: ". $orderItem->getGwBaseTaxAmount());
+		    Mage::Log("Order Item Gw Base Tax Amount Invoiced: ". $orderItem->getGwBaseTaxAmountInvoiced());
 	
-	    Mage::Log("Order Item Info:");
-	    Mage::Log("Gw Id: ". $orderItem->getGwId());
-	    Mage::Log("Gw Base Tax Amount: ". $orderItem->getGwBaseTaxAmount());
-	    Mage::Log("Order Item Gw Base Tax Amount Invoiced: ". $orderItem->getGwBaseTaxAmountInvoiced());
-
             if ($orderItem->getGwId() && $orderItem->getGwBaseTaxAmount()) {
-		Mage::Log("Set GW Base Tax Amount Invoiced - ORDER ITEM: ". $orderItem->getGwBaseTaxAmount());
+				Mage::Log("Set GW Base Tax Amount Invoiced - ORDER ITEM: ". $orderItem->getGwBaseTaxAmount());
                 $orderItem->setGwBaseTaxAmountInvoiced($orderItem->getGwBaseTaxAmount());
-
-		Mage::Log("Set GW Tax Amount Invoiced - ORDER ITEM: ". $orderItem->getGwTaxAmount());
+	
+				Mage::Log("Set GW Tax Amount Invoiced - ORDER ITEM: ". $orderItem->getGwTaxAmount());
                 $orderItem->setGwTaxAmountInvoiced($orderItem->getGwTaxAmount());
-
+	
                 $baseInvoiced += $orderItem->getGwBaseTaxAmount() * $invoiceItem->getQty();
-		Mage::Log("Base Invoiced: ". $baseInvoiced);
-
+				Mage::Log("Base Invoiced: ". $baseInvoiced);
+	
                 $invoiced += $orderItem->getGwTaxAmount() * $invoiceItem->getQty();
-		Mage::Log("Invoiced: ". $invoiced);
-
-		$singleInv += $orderItem->getGwTaxAmount();
-		$baseSingleInv += $orderItem->getGwBaseTaxAmount();
-
-		if( $invoiceItem->getQty() == 1 )
-		{
-			$qtySingle = true;
-		}
+				Mage::Log("Invoiced: ". $invoiced);
+	
+				$singleInv += $orderItem->getGwTaxAmount();
+				$baseSingleInv += $orderItem->getGwBaseTaxAmount();
+	
+				if( $invoiceItem->getQty() == 1 )
+				{
+					$qtySingle = true;
+				}
             }
         }
         if ($invoiced > 0 || $baseInvoiced > 0) {
-	    $order->setTaxInvoiced($order->getTaxInvoiced() + $singleInv);
-	    $order->setBaseTaxInvoiced($order->getBaseTaxInvoiced() + $baseSingleInv);
-
-	    $newGwItemsBaseInvoice = $order->getGwItemsBaseTaxInvoiced() + $baseInvoiced;
-
-	    Mage::Log("Order - Set Gw Items Base Tax Invoiced: ". $newGwItemsBaseInvoice);
-            $order->setGwItemsBaseTaxInvoiced($order->getGwItemsBaseTaxInvoiced() + $baseInvoiced);
-
-	    $gwItemsInvoice = $order->getGwItemsTaxInvoiced() + $invoiced;
-
-	    Mage::Log("Order - Set Gw Items Tax Invoiced: ". $gwItemsInvoice);
-            $order->setGwItemsTaxInvoiced($order->getGwItemsTaxInvoiced() + $invoiced);
-
-	    Mage::Log("Set Gw Items Base Tax Amount: ". $baseInvoiced);
-            $invoice->setGwItemsBaseTaxAmount($baseInvoiced);
-
-	    Mage::Log("Set Gw Items Tax Amount: ". $invoiced);
-            $invoice->setGwItemsTaxAmount($invoiced);
+		    $order->setTaxInvoiced($order->getTaxInvoiced() + $singleInv);
+		    $order->setBaseTaxInvoiced($order->getBaseTaxInvoiced() + $baseSingleInv);
+	
+		    $newGwItemsBaseInvoice = $order->getGwItemsBaseTaxInvoiced() + $baseInvoiced;
+	
+		    Mage::Log("Order - Set Gw Items Base Tax Invoiced: ". $newGwItemsBaseInvoice);
+	        $order->setGwItemsBaseTaxInvoiced($order->getGwItemsBaseTaxInvoiced() + $baseInvoiced);
+	
+		    $gwItemsInvoice = $order->getGwItemsTaxInvoiced() + $invoiced;
+	
+		    Mage::Log("Order - Set Gw Items Tax Invoiced: ". $gwItemsInvoice);
+	        $order->setGwItemsTaxInvoiced($order->getGwItemsTaxInvoiced() + $invoiced);
+	
+		    Mage::Log("Set Gw Items Base Tax Amount: ". $baseInvoiced);
+	        $invoice->setGwItemsBaseTaxAmount($baseInvoiced);
+	
+		    Mage::Log("Set Gw Items Tax Amount: ". $invoiced);
+	        $invoice->setGwItemsTaxAmount($invoiced);
         }
 
         /**
@@ -146,25 +146,25 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
             $invoice->setGwCardTaxAmount($order->getGwCardTaxAmount());
         }
 
-        if (!$invoice->isLast() || $qtySingle || $multiGwItem ) {
-	    Mage::Log("Invoice has Item Not In Last");
+        if (!$invoice->isLast() || $qtySingle || $multiGwItem) {
+		    Mage::Log("Invoice has Item Not In Last");
 
-	    $baseTaxAmount = $invoice->getGwItemsBaseTaxAmount();
+		    $baseTaxAmount = $invoice->getGwItemsBaseTaxAmount();
             $taxAmount = $invoice->getGwItemsTaxAmount();
 
-	    Mage::Log("Gw Items Base Tax Amount - INVOICE: ". $invoice->getGwItemsBaseTaxAmount());
+		    Mage::Log("Gw Items Base Tax Amount - INVOICE: ". $invoice->getGwItemsBaseTaxAmount());
             $baseTaxAmount = $baseTaxAmount
-                + $invoice->getGwBaseTaxAmount()
-                + $invoice->getGwCardBaseTaxAmount();
-	    Mage::Log("Gw Items + Gw Order + Gw Card Base Tax Amount Total for Last Invoice: ". $baseTaxAmount);
+                + $invoice->getGwBaseTaxAmount();
+//                + $invoice->getGwCardBaseTaxAmount();
+		    Mage::Log("Gw Items + Gw Order + Gw Card Base Tax Amount Total for Last Invoice: ". $baseTaxAmount);
 
-	    Mage::Log("Gw Items Tax Amount - INVOICE: ". $invoice->getGwItemsTaxAmount());
+		    Mage::Log("Gw Items Tax Amount - INVOICE: ". $invoice->getGwItemsTaxAmount());
             $taxAmount = $taxAmount
-                + $invoice->getGwTaxAmount()
-                + $invoice->getGwCardTaxAmount();
-	    Mage::Log("Gw Items + Gw Order + Gw Card Tax Amount Total for Last Invoice: ". $taxAmount);
+                + $invoice->getGwTaxAmount();
+//                + $invoice->getGwCardTaxAmount();
+		    Mage::Log("Gw Items + Gw Order + Gw Card Tax Amount Total for Last Invoice: ". $taxAmount);
 
-	    $newBaseTotal = $invoice->getBaseTaxAmount() + $baseTaxAmount;
+		    $newBaseTotal = $invoice->getBaseTaxAmount() + $baseTaxAmount;
 
             Mage::Log("Set Base Tax Amount - INVOICE: ". $newBaseTotal);
             $invoice->setBaseTaxAmount($invoice->getBaseTaxAmount() + $baseTaxAmount);
