@@ -54,20 +54,18 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
 		$qtySingle = false;
 		$multiGwItem = false;
 		$count = 0;
+		$orderGwTax = 0;
 	
-		foreach( $order->getAllItems() as $orderItem )
-		{
-			if ($orderItem->getGwId() && $orderItem->getGwBaseTaxAmount()) 
-			{
+		foreach ( $order->getAllItems() as $orderItem ) {
+			if ($orderItem->getGwId() && $orderItem->getGwBaseTaxAmount()) {
 				$count += 1;
 			}
 		}
-	
-		if( $count > 1 )
-		{
-			$multiGwItem = true;
-		}		
-
+		if ( $count > 1 ) {
+			//$multiGwItem = true;
+		}
+			
+		Mage::Log("Order Gw Id: ".print_r($order->getGiftMessageId(), true));
         foreach ($invoice->getAllItems() as $invoiceItem) {
 		    Mage::Log("Invoice Item: ". print_r($invoiceItem->debug(), true));
 	
@@ -80,7 +78,7 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
 		    Mage::Log("Gw Id: ". $orderItem->getGwId());
 		    Mage::Log("Gw Base Tax Amount: ". $orderItem->getGwBaseTaxAmount());
 		    Mage::Log("Order Item Gw Base Tax Amount Invoiced: ". $orderItem->getGwBaseTaxAmountInvoiced());
-	
+			
             if ($orderItem->getGwId() && $orderItem->getGwBaseTaxAmount()) {
 				Mage::Log("Set GW Base Tax Amount Invoiced - ORDER ITEM: ". $orderItem->getGwBaseTaxAmount());
                 $orderItem->setGwBaseTaxAmountInvoiced($orderItem->getGwBaseTaxAmount());
@@ -97,15 +95,21 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
 				$singleInv += $orderItem->getGwTaxAmount();
 				$baseSingleInv += $orderItem->getGwBaseTaxAmount();
 	
-				if( $invoiceItem->getQty() == 1 )
-				{
-					$qtySingle = true;
+				if ($invoiceItem->getQty() == 1) {
+					//$qtySingle = true;
+				} elseif (count($invoice->getAllItems()) == 1) {
+					$order->setGwBaseTaxAmountInvoiced($order->getGwBaseTaxAmount());
+					$order->setGwTaxAmountInvoiced($order->getGwTaxAmount());
+					$invoice->setGwBaseTaxAmount($order->getGwBaseTaxAmount());
+					$invoice->setGwTaxAmount($order->getGwTaxAmount());
+					
+					//$qtySingle = true;
 				}
-            }
+	    	}
         }
         if ($invoiced > 0 || $baseInvoiced > 0) {
-		    $order->setTaxInvoiced($order->getTaxInvoiced() + $singleInv);
-		    $order->setBaseTaxInvoiced($order->getBaseTaxInvoiced() + $baseSingleInv);
+		    //$order->setTaxInvoiced($order->getTaxInvoiced() + $singleInv);
+		    //$order->setBaseTaxInvoiced($order->getBaseTaxInvoiced() + $baseSingleInv);
 	
 		    $newGwItemsBaseInvoice = $order->getGwItemsBaseTaxInvoiced() + $baseInvoiced;
 	
@@ -129,6 +133,7 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
          */
         if ($order->getGwId() && $order->getGwBaseTaxAmount()
             && $order->getGwBaseTaxAmount() != $order->getGwBaseTaxAmountInvoiced()) {
+			Mage::Log("Wrapping for order");
             $order->setGwBaseTaxAmountInvoiced($order->getGwBaseTaxAmount());
             $order->setGwTaxAmountInvoiced($order->getGwTaxAmount());
             $invoice->setGwBaseTaxAmount($order->getGwBaseTaxAmount());
@@ -140,6 +145,7 @@ class Radial_Tax_Model_Total_Invoice_Tax_Giftwrapping extends Mage_Sales_Model_O
          */
         if ($order->getGwAddCard() && $order->getGwCardBaseTaxAmount()
             && $order->getGwCardBaseTaxAmount() != $order->getGwCardBaseTaxInvoiced()) {
+			Mage::Log("Printed card");
             $order->setGwCardBaseTaxInvoiced($order->getGwCardBaseTaxAmount());
             $order->setGwCardTaxInvoiced($order->getGwCardTaxAmount());
             $invoice->setGwCardBaseTaxAmount($order->getGwCardBaseTaxAmount());
