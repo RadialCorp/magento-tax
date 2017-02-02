@@ -106,13 +106,15 @@ class Radial_Tax_Helper_Data extends Mage_Core_Helper_Abstract implements Radial
      */
     public function getProductHtsCodeByCountry(Mage_Catalog_Model_Product $product, $countryCode)
     {
-        $htsCodes = unserialize($product->getHtsCodes());
-        if (is_array($htsCodes)) {
-            foreach ($htsCodes as $htsCode) {
-                if ($countryCode === $htsCode['destination_country']) {
-                    return $htsCode['hts_code'];
-                }
-            }
+	    if ($product) {
+	        $htsCodes = unserialize($product->getHtsCodes());
+	        if (is_array($htsCodes)) {
+	            foreach ($htsCodes as $htsCode) {
+	                if ($countryCode === $htsCode['destination_country']) {
+	                    return $htsCode['hts_code'];
+	                }
+	            }
+	        }
         }
 
         return null;

@@ -424,15 +424,22 @@ class Radial_Tax_Model_Observer
 
     public function copyTaxAmount( Varien_Event_Observer $observer )
     {
-	 $order = $observer->getEvent()->getOrder();
-	 $order->setData('radial_gw_printed_card_tax_class', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass'));
-         $order->setData('radial_gw_printed_card_sku', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku'));
-
-	 /* MPTF-281 - Set GW Card Sku / Tax Class to Order Table */
-	 $order->getResource()->saveAttribute($order, 'radial_gw_printed_card_tax_class');
-	 $order->getResource()->saveAttribute($order, 'radial_gw_printed_card_sku');
-
-         return $this;
+		$order = $observer->getEvent()->getOrder();
+		if ($order) {
+			$cardTaxClass = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass');
+			$cardSku = Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku');
+			if ($cardTaxClass) {
+				$order->setData('radial_gw_printed_card_tax_class', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardtaxclass'));
+			}
+			if ($cardSku) {
+				$order->setData('radial_gw_printed_card_sku', Mage::getStoreConfig('radial_core/radial_tax_core/printedcardsku'));
+			}
+			
+			/* MPTF-281 - Set GW Card Sku / Tax Class to Order Table */
+			$order->getResource()->saveAttribute($order, 'radial_gw_printed_card_tax_class');
+			$order->getResource()->saveAttribute($order, 'radial_gw_printed_card_sku');
+		}
+		return $this;
     }
 
     protected function serializeAddress(Mage_Customer_Model_Address_Abstract $address)  {  
