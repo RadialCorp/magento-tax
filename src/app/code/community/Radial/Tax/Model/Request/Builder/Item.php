@@ -184,6 +184,10 @@ class Radial_Tax_Model_Request_Builder_Item
      */
     protected function _injectItemData()
     {
+	$htsCode = false;
+	$mCountryCode = false;
+	$screenSize = false;
+
         $this->_orderItem
             ->setItemId($this->_item->getSku())
             ->setQuantity((int) $this->_item->getTotalQty())
@@ -225,21 +229,30 @@ class Radial_Tax_Model_Request_Builder_Item
                 {
                 	if( !$itemC->getFirstItem()->getRadialHtsCode())
                         {
-                                $htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
+				if( $this->_itemProduct )
+				{
+                                	$htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
+				}
                         } else {
                                 $htsCode = $itemC->getFirstItem()->getRadialHtsCode();
                         }
 
 			if( !$itemC->getFirstItem()->getRadialManufacturingCountryCode())
                 	{
-                	        $mCountryCode = $this->_itemProduct->getCountryOfManufacture();
+				if( $this->_itemProduct )
+				{
+                	        	$mCountryCode = $this->_itemProduct->getCountryOfManufacture();
+				}
                 	} else {
                 	        $mCountryCode = $itemC->getFirstItem()->getRadialManufacturingCountryCode();
                 	}       
 
                 	if( !$itemC->getFirstItem()->getRadialScreenSize() )
                 	{
-                	        $screenSize = $this->_itemProduct->getScreenSize();
+				if( $this->_itemProduct )
+				{
+                	        	$screenSize = $this->_itemProduct->getScreenSize();
+				}
                 	} else {
                 	        $screenSize = $itemC->getFirstItem()->getRadialScreenSize();
                 	}
@@ -251,21 +264,30 @@ class Radial_Tax_Model_Request_Builder_Item
 	} else {
 		if( !$this->_item->getRadialHtsCode())
 		{
-			$htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
+			if( $this->_itemProduct )
+			{
+				$htsCode = $this->_taxHelper->getProductHtsCodeByCountry($this->_itemProduct, $this->_address->getCountryId());
+			}
 		} else {
 			$htsCode = $this->_item->getRadialHtsCode();
 		}
 
 		if( !$this->_item->getRadialManufacturingCountryCode())
 		{
-			$mCountryCode = $this->_itemProduct->getCountryOfManufacture();
+			if( $this->_itemProduct )
+			{
+				$mCountryCode = $this->_itemProduct->getCountryOfManufacture();
+			}
 		} else {
 			$mCountryCode = $this->_item->getRadialManufacturingCountryCode();
 		}
 
 		if( !$this->_item->getRadialScreenSize() )
 		{
-			$screenSize = $this->_itemProduct->getScreenSize();
+			if( $this->_itemProduct )
+			{
+				$screenSize = $this->_itemProduct->getScreenSize();
+			}
 		} else {
 			$screenSize = $this->_item->getRadialScreenSize();
 		}
@@ -706,11 +728,16 @@ class Radial_Tax_Model_Request_Builder_Item
     {
 	$product = Mage::getModel('catalog/product')->loadByAttribute('sku', $item->getSku());
 
-        return !(
-            // only the parent item will have the bundle product type
-            $product->getProductType() === Mage_Catalog_Model_Product_Type::TYPE_BUNDLE
-            && $item->isChildrenCalculated()
-        );
+	if( $product )
+	{
+        	return !(
+        	    // only the parent item will have the bundle product type
+        	    $product->getProductType() === Mage_Catalog_Model_Product_Type::TYPE_BUNDLE
+        	    && $item->isChildrenCalculated()
+        	);
+	} else {
+		return false;
+	}
     }
 
     /**
