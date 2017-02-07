@@ -161,7 +161,7 @@ class Radial_Tax_Model_Total_Quote_Address_Subtotal extends Mage_Tax_Model_Sales
 	{
         	foreach( $taxRecords as $taxRecord )
         	{
-        		if (($taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT) && $taxRecord->getItemId() == $item->getItemId() )
+        		if (($taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE || $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_MERCHANDISE_DISCOUNT) && $taxRecord->getItemId() == $item->getId() )
         	        {
         	        	$merchItemTaxTotal += ($taxRecord->getCalculatedTax() / $item->getQty());
         	        } 
@@ -172,7 +172,7 @@ class Radial_Tax_Model_Total_Quote_Address_Subtotal extends Mage_Tax_Model_Sales
 	{
 		foreach( $taxDuties as $taxDuty )
 		{
-			if( $taxDuty->getItemId() == $item->getItemId())
+			if( $taxDuty->getItemId() == $item->getId())
 			{
 				$merchItemTaxTotal += ($taxDuty->getAmount() / $item->getQty());
 			}
@@ -183,7 +183,7 @@ class Radial_Tax_Model_Total_Quote_Address_Subtotal extends Mage_Tax_Model_Sales
 	{
 		foreach( $taxFees as $taxFee )
         	{
-        	        if( $taxFee->getItemId() == $item->getItemId())
+        	        if( $taxFee->getItemId() == $item->getId())
         	        {
         	                $merchItemTaxTotal += ($taxFee->getAmount() / $item->getQty());
         	        }

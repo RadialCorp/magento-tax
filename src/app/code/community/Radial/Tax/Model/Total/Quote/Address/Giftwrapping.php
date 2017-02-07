@@ -239,7 +239,7 @@ class Radial_Tax_Model_Total_Quote_Address_Giftwrapping extends Enterprise_GiftW
 
 	    foreach( $taxRecords as $taxRecord ) 
 	    {
-		if( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING && $taxRecord->getItemId() == $item->getItemId() )
+		if( $taxRecord['tax_source'] === Radial_Tax_Model_Record::SOURCE_ITEM_GIFTING && $taxRecord->getItemId() == $item->getId() )
 		{
                 	$itemGwTotal += ($taxRecord->getCalculatedTax() / $item->getQty());
 		}
