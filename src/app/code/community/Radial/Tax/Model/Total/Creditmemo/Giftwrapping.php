@@ -69,8 +69,8 @@ class Radial_Tax_Model_Total_Creditmemo_Giftwrapping extends Mage_Sales_Model_Or
         /**
          * Wrapping for order
          */
-        if ($order->getGwId() && $order->getGwBasePriceInvoiced()
-            && $order->getGwBasePriceInvoiced() != $order->getGwBasePriceRefunded()) {
+        if ($order->getGwId() && $order->getGwBasePriceInvoiced())
+	{
             $order->setGwBasePriceRefunded($order->getGwBasePriceInvoiced());
             $order->setGwPriceRefunded($order->getGwPriceInvoiced());
             $creditmemo->setGwBasePrice($order->getGwBasePriceInvoiced());
@@ -80,8 +80,8 @@ class Radial_Tax_Model_Total_Creditmemo_Giftwrapping extends Mage_Sales_Model_Or
         /**
          * Printed card
          */
-        if ($order->getGwAddCard() && $order->getGwCardBasePriceInvoiced()
-            && $order->getGwCardBasePriceInvoiced() != $order->getGwCardBasePriceRefunded()) {
+        if ($order->getGwAddCard() && $order->getGwCardBasePriceInvoiced())
+	{
             $order->setGwCardBasePriceRefunded($order->getGwCardBasePriceInvoiced());
             $order->setGwCardPriceRefunded($order->getGwCardPriceInvoiced());
             $creditmemo->setGwCardBasePrice($order->getGwCardBasePriceInvoiced());
