@@ -218,6 +218,19 @@ http://opensource.org/licenses/osl-3.0.php
                       </tax_giftwrapping>
                 </totals>
             </order_invoice>
+            <order_creditmemo>
+            	<totals>
+            		<giftwrapping>
+            	            <class>radial_tax/total_creditmemo_giftwrapping</class>
+            	            <after>subtotal</after>
+            	        </giftwrapping>
+            	        <tax_giftwrapping>
+            	            <class>radial_tax/total_creditmemo_tax_giftwrapping</class>
+            	            <after>tax</after>
+            	            <before>grand_total</before>
+            	        </tax_giftwrapping>
+            	 </totals>
+            </order_creditmemo>
         </sales>
     </global>
     <frontend>
